@@ -41,20 +41,26 @@ Now it will create few question in mind which are given below.
 
 1. Create Contract
    Governor Contract with ERC712 Support
+   -- Remove Transfer Function
+   -- Mint Function
+   -- Verfiy User Call
+2. User Id Verfication call
+
    ERC712 Contract with (no Transfer and Verfication Feature)
    Voting Contract
    Proxy Contract
-2. Create Test Case For Contract's
-3. Set Hypereledger Fabric
+
+3. Create Test Case For Contract's
+4. Set Hypereledger Fabric
    Contract
    Network
    API
-4. Connector for Ethereum and Hyperledger
-5. Interface with NextJS
+5. Connector for Ethereum and Hyperledger
+6. Interface with NextJS
    Design
    SubGraph Connection
    Alchmey Connection
-6. Setup Subgrph
+7. Setup Subgrph
 
 ## Architecture
 
