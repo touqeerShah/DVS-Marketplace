@@ -1,6 +1,7 @@
 import React from "react";
 import { createPopper } from "@popperjs/core";
-
+import { faBars, faWallet, faBell } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 const NotificationDropdown = () => {
   // dropdown props
   const [dropdownPopoverShow, setDropdownPopoverShow] = React.useState(false);
@@ -21,6 +22,7 @@ const NotificationDropdown = () => {
         className="text-blueGray-500 block py-1 px-3"
         href="#pablo"
         ref={btnDropdownRef}
+        aria-label="Open Drop Down"
         onClick={(e) => {
           e.preventDefault();
           dropdownPopoverShow ? closeDropdownPopover() : openDropdownPopover();

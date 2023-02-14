@@ -1,7 +1,7 @@
 import React from "react";
-
-import UserDropdown from "@/components/Dropdowns/UserDropdown.jsx";
-
+import UserDropdown from "@/components/Dropdowns/UserDropdown";
+import { faBars, faWallet, faBell } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 export default function Navbar() {
   return (
     <>

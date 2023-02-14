@@ -1,6 +1,8 @@
 import Image from 'next/image'
 import { Inter } from '@next/font/google'
 import Link from "next/link";
+import { faBars, faWallet, faBell } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import IndexNavbar from "../components/Navbars/IndexNavbar";
 import Footer from "../components/Footers/Footer";
@@ -10,7 +12,7 @@ export default function Home() {
   return (
     <>
     <IndexNavbar fixed />
-    <section className="header relative pt-16 items-center flex h-screen max-h-860-px">
+    <section className="header relative pt-16 bg-black items-center flex h-screen max-h-860-px">
       <div className="container mx-auto items-center flex flex-wrap">
         <div className="w-full md:w-8/12 lg:w-6/12 xl:w-6/12 px-4">
           <div className="pt-32 sm:pt-0">
@@ -35,6 +37,7 @@ export default function Home() {
               <a
                 href="https://www.creative-tim.com/learning-lab/tailwind/nextjs/overview/notus?ref=nnjs-index"
                 target="_blank"
+                rel="noreferrer"
                 className="get-started text-white font-bold px-6 py-4 rounded outline-none focus:outline-none mr-1 mb-1 bg-blueGray-400 active:bg-blueGray-500 uppercase text-sm shadow hover:shadow-lg ease-linear transition-all duration-150"
               >
                 Get started
@@ -43,6 +46,7 @@ export default function Home() {
                 href="https://github.com/creativetimofficial/notus-nextjs?ref=nnjs-index"
                 className="github-star ml-1 text-white font-bold px-6 py-4 rounded outline-none focus:outline-none mr-1 mb-1 bg-blueGray-700 active:bg-blueGray-600 uppercase text-sm shadow hover:shadow-lg"
                 target="_blank"
+                rel="noreferrer"
               >
                 Github Star
               </a>
@@ -50,9 +54,10 @@ export default function Home() {
           </div>
         </div>
       </div>
+      {/* <Image src="/baner.png" width={100} height={22} className="absolute top-0 b-auto right-0 pt-16 sm:w-6/12 -mt-48 sm:mt-0 w-10/12 max-h-860-px" alt={''}/> */}
       <img
         className="absolute top-0 b-auto right-0 pt-16 sm:w-6/12 -mt-48 sm:mt-0 w-10/12 max-h-860-px"
-        src="/img/pattern_nextjs.png"
+        src="/baner.png"
         alt="..."
       />
     </section>
@@ -219,6 +224,7 @@ export default function Home() {
             <a
               href="https://www.creative-tim.com/learning-lab/tailwind/nextjs/alerts/notus?ref=nnjs-index"
               target="_blank"
+              rel="noreferrer"
               className="font-bold text-blueGray-700 hover:text-blueGray-500 ease-linear transition-all duration-150"
             >
               View All{" "}
@@ -267,6 +273,7 @@ export default function Home() {
             <div className="justify-center flex flex-wrap relative">
               <div className="my-4 w-full lg:w-6/12 px-4">
                 <a
+                rel="noreferrer"
                   href="https://www.creative-tim.com/learning-lab/tailwind/svelte/alerts/notus?ref=vtw-index"
                   target="_blank"
                 >
@@ -282,6 +289,7 @@ export default function Home() {
                   </div>
                 </a>
                 <a
+                rel="noreferrer"
                   href="https://www.creative-tim.com/learning-lab/tailwind/react/alerts/notus?ref=vtw-index"
                   target="_blank"
                 >
@@ -297,6 +305,7 @@ export default function Home() {
                   </div>
                 </a>
                 <a
+                    rel="noreferrer"  
                   href="https://www.creative-tim.com/learning-lab/tailwind/nextjs/alerts/notus?ref=vtw-index"
                   target="_blank"
                 >
@@ -314,6 +323,7 @@ export default function Home() {
               </div>
               <div className="my-4 w-full lg:w-6/12 px-4 lg:mt-16">
                 <a
+                rel="noreferrer"
                   href="https://www.creative-tim.com/learning-lab/tailwind/js/alerts/notus?ref=vtw-index"
                   target="_blank"
                 >
@@ -329,6 +339,7 @@ export default function Home() {
                   </div>
                 </a>
                 <a
+                rel="noreferrer"
                   href="https://www.creative-tim.com/learning-lab/tailwind/angular/alerts/notus?ref=vtw-index"
                   target="_blank"
                 >
@@ -344,6 +355,7 @@ export default function Home() {
                   </div>
                 </a>
                 <a
+                rel="noreferrer"
                   href="https://www.creative-tim.com/learning-lab/tailwind/vue/alerts/notus?ref=vtw-index"
                   target="_blank"
                 >
@@ -405,6 +417,7 @@ export default function Home() {
               </span>
             </div>
             <a
+            rel="noreferrer"
               href="https://www.creative-tim.com/learning-lab/tailwind/nextjs/alerts/notus?ref=nnjs-index"
               target="_blank"
               className="font-bold text-blueGray-700 hover:text-blueGray-500 ease-linear transition-all duration-150"
@@ -576,6 +589,7 @@ export default function Home() {
                 href="https://tailwindcss.com/?ref=creative"
                 className="text-blueGray-300"
                 target="_blank"
+                rel="noreferrer"
               >
                 Tailwind CSS
               </a>{" "}
@@ -588,6 +602,7 @@ export default function Home() {
               Star!
             </p>
             <a
+            rel="noreferrer"
               href="https://github.com/creativetimofficial/notus-nextjs?ref=nnjs-index"
               target="_blank"
               className="github-star mt-4 inline-block text-white font-bold px-6 py-4 rounded outline-none focus:outline-none mr-1 mb-1 bg-blueGray-700 active:bg-blueGray-600 uppercase text-sm shadow hover:shadow-lg"
@@ -642,6 +657,7 @@ export default function Home() {
             </p>
             <div className="sm:block flex flex-col mt-10">
               <a
+              rel="noreferrer"
                 href="https://www.creative-tim.com/learning-lab/tailwind/nextjs/overview/notus?ref=nnjs-index"
                 target="_blank"
                 className="get-started text-white font-bold px-6 py-4 rounded outline-none focus:outline-none mr-1 mb-2 bg-blueGray-400 active:bg-blueGray-500 uppercase text-sm shadow hover:shadow-lg ease-linear transition-all duration-150"
@@ -649,6 +665,7 @@ export default function Home() {
                 Get started
               </a>
               <a
+              rel="noreferrer"
                 href="https://github.com/creativetimofficial/notus-nextjs?ref=nnjs-index"
                 target="_blank"
                 className="github-star sm:ml-1 text-white font-bold px-6 py-4 rounded outline-none focus:outline-none mr-1 mb-1 bg-blueGray-700 active:bg-blueGray-600 uppercase text-sm shadow hover:shadow-lg"

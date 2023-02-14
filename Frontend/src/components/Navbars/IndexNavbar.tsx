@@ -4,6 +4,10 @@ import Link from "next/link";
 // components
 
 import IndexDropdown from "../Dropdowns/IndexDropdown";
+import { faArrowAltCircleDown, faBars, faFileAlt,  } from "@fortawesome/free-solid-svg-icons";
+import { faFacebook, faGithub, faTwitter  } from "@fortawesome/free-brands-svg-icons";
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default function Navbar(props:any) {
   const [navbarOpen, setNavbarOpen] = React.useState(false);
@@ -25,7 +29,10 @@ export default function Navbar(props:any) {
               type="button"
               onClick={() => setNavbarOpen(!navbarOpen)}
             >
-              <i className="fas fa-bars"></i>
+              {/* <i className="fas fa-bars"></i> */}
+              
+              <FontAwesomeIcon icon={faBars} />{" "}
+
             </button>
           </div>
           <div
@@ -41,9 +48,12 @@ export default function Navbar(props:any) {
                   className="hover:text-blueGray-500 text-blueGray-700 px-3 py-4 lg:py-2 flex items-center text-xs uppercase font-bold"
                   href="https://www.creative-tim.com/learning-lab/tailwind/nextjs/overview/notus?ref=nnjs-index-navbar"
                 >
-                  <i className="text-blueGray-400 far fa-file-alt text-lg leading-lg mr-2" />{" "}
+                  <FontAwesomeIcon className="text-blueGray-400 far text-lg leading-lg mr-2"  icon={faFileAlt} />{" "}
+
+                  {/* <i className="text-blueGray-400 far fa-file-alt text-lg leading-lg mr-2" />{" "} */}
                   Docs
                 </a>
+
               </li>
             </ul>
             <ul className="flex flex-col lg:flex-row list-none lg:ml-auto">
@@ -55,8 +65,10 @@ export default function Navbar(props:any) {
                   className="hover:text-blueGray-500 text-blueGray-700 px-3 py-4 lg:py-2 flex items-center text-xs uppercase font-bold"
                   href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdemos.creative-tim.com%2Fnotus-nextjs%2F"
                   target="_blank"
+                  rel="noreferrer" 
                 >
-                  <i className="text-blueGray-400 fab fa-facebook text-lg leading-lg " />
+                  <FontAwesomeIcon className="text-blueGray-400 fab fa-facebook text-lg leading-lg "  icon={faFacebook} />{" "}
+
                   <span className="lg:hidden inline-block ml-2">Share</span>
                 </a>
               </li>
@@ -66,8 +78,10 @@ export default function Navbar(props:any) {
                   className="hover:text-blueGray-500 text-blueGray-700 px-3 py-4 lg:py-2 flex items-center text-xs uppercase font-bold"
                   href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fdemos.creative-tim.com%2Fnotus-nextjs%2F&text=Start%20your%20development%20with%20a%20Free%20Tailwind%20CSS%20and%20NextJS%20UI%20Kit%20and%20Admin.%20Let%20Notus%20NextJS%20amaze%20you%20with%20its%20cool%20features%20and%20build%20tools%20and%20get%20your%20project%20to%20a%20whole%20new%20level."
                   target="_blank"
+                  rel="noreferrer" 
                 >
-                  <i className="text-blueGray-400 fab fa-twitter text-lg leading-lg " />
+                                    <FontAwesomeIcon className="text-blueGray-400 fab fa-twitter text-lg leading-lg "  icon={faTwitter} />{" "}
+
                   <span className="lg:hidden inline-block ml-2">Tweet</span>
                 </a>
               </li>
@@ -77,8 +91,9 @@ export default function Navbar(props:any) {
                   className="hover:text-blueGray-500 text-blueGray-700 px-3 py-4 lg:py-2 flex items-center text-xs uppercase font-bold"
                   href="https://github.com/creativetimofficial/notus-nextjs?ref=nnjs-index-navbar"
                   target="_blank"
+                  rel="noreferrer" 
                 >
-                  <i className="text-blueGray-400 fab fa-github text-lg leading-lg " />
+                  <FontAwesomeIcon className="text-blueGray-400 fab  text-lg leading-lg "  icon={faGithub} />{" "}
                   <span className="lg:hidden inline-block ml-2">Star</span>
                 </a>
               </li>
@@ -88,6 +103,8 @@ export default function Navbar(props:any) {
                   className="bg-blueGray-700 text-white active:bg-blueGray-600 text-xs font-bold uppercase px-4 py-2 rounded shadow hover:shadow-lg outline-none focus:outline-none lg:mr-1 lg:mb-0 ml-3 mb-3 ease-linear transition-all duration-150"
                   type="button"
                 >
+                  <FontAwesomeIcon icon={faArrowAltCircleDown} />{" "}
+
                   <i className="fas fa-arrow-alt-circle-down"></i> Download
                 </button>
               </li>
