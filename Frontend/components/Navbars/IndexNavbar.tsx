@@ -4,25 +4,26 @@ import Link from "next/link";
 // components
 
 import IndexDropdown from "../Dropdowns/IndexDropdown";
-import { faArrowAltCircleDown, faBars, faFileAlt,  } from "@fortawesome/free-solid-svg-icons";
-import { faFacebook, faGithub, faTwitter  } from "@fortawesome/free-brands-svg-icons";
+import { faArrowAltCircleDown, faBars, faFileAlt, } from "@fortawesome/free-solid-svg-icons";
+import { faFacebook, faGithub, faTwitter } from "@fortawesome/free-brands-svg-icons";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-export default function Navbar(props:any) {
+export default function Navbar(props: any) {
   const [navbarOpen, setNavbarOpen] = React.useState(false);
   return (
     <>
       <nav className="top-0 fixed z-50 w-full flex flex-wrap items-center justify-between px-2 py-3 navbar-expand-lg bg-white shadow">
         <div className="container px-4 mx-auto flex flex-wrap items-center justify-between">
+
           <div className="w-full relative flex justify-between lg:w-auto lg:static lg:block lg:justify-start">
             {/* <Link href="/"> */}
-              <a
-                className="text-blueGray-700 text-sm font-bold leading-relaxed inline-block mr-4 py-2 whitespace-nowrap uppercase"
-                href="#pablo"
-              >
-                Notus NextJS
-              </a>
+            {/* <div className="container flex flex-wrap items-center justify-between mx-auto"> */}
+            <a className=" flex items-center"
+              href="#pablo">
+              <img src="/logo-black.svg" className="-mt-10 md:-mt-12 ml-3 md:ml-0 h-24 w-36 md:h-40 md:w-40 " alt="Flowbite Logo" />
+            </a>
+            {/* </div> */}
             {/* </Link> */}
             <button
               className="cursor-pointer text-xl leading-none px-3 py-1 border border-solid border-transparent rounded bg-transparent block lg:hidden outline-none focus:outline-none"
@@ -30,7 +31,7 @@ export default function Navbar(props:any) {
               onClick={() => setNavbarOpen(!navbarOpen)}
             >
               {/* <i className="fas fa-bars"></i> */}
-              
+
               <FontAwesomeIcon icon={faBars} />{" "}
 
             </button>
@@ -48,7 +49,7 @@ export default function Navbar(props:any) {
                   className="hover:text-blueGray-500 text-blueGray-700 px-3 py-4 lg:py-2 flex items-center text-xs uppercase font-bold"
                   href="https://www.creative-tim.com/learning-lab/tailwind/nextjs/overview/notus?ref=nnjs-index-navbar"
                 >
-                  <FontAwesomeIcon className="text-blueGray-400 far text-lg leading-lg mr-2"  icon={faFileAlt} />{" "}
+                  <FontAwesomeIcon className="text-blueGray-400 far text-lg leading-lg mr-2" icon={faFileAlt} />{" "}
 
                   {/* <i className="text-blueGray-400 far fa-file-alt text-lg leading-lg mr-2" />{" "} */}
                   Docs
@@ -65,9 +66,9 @@ export default function Navbar(props:any) {
                   className="hover:text-blueGray-500 text-blueGray-700 px-3 py-4 lg:py-2 flex items-center text-xs uppercase font-bold"
                   href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdemos.creative-tim.com%2Fnotus-nextjs%2F"
                   target="_blank"
-                  rel="noreferrer" 
+                  rel="noreferrer"
                 >
-                  <FontAwesomeIcon className="text-blueGray-400 fab fa-facebook text-lg leading-lg "  icon={faFacebook} />{" "}
+                  <FontAwesomeIcon className="text-blueGray-400 fab fa-facebook text-lg leading-lg " icon={faFacebook} />{" "}
 
                   <span className="lg:hidden inline-block ml-2">Share</span>
                 </a>
@@ -78,9 +79,9 @@ export default function Navbar(props:any) {
                   className="hover:text-blueGray-500 text-blueGray-700 px-3 py-4 lg:py-2 flex items-center text-xs uppercase font-bold"
                   href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fdemos.creative-tim.com%2Fnotus-nextjs%2F&text=Start%20your%20development%20with%20a%20Free%20Tailwind%20CSS%20and%20NextJS%20UI%20Kit%20and%20Admin.%20Let%20Notus%20NextJS%20amaze%20you%20with%20its%20cool%20features%20and%20build%20tools%20and%20get%20your%20project%20to%20a%20whole%20new%20level."
                   target="_blank"
-                  rel="noreferrer" 
+                  rel="noreferrer"
                 >
-                                    <FontAwesomeIcon className="text-blueGray-400 fab fa-twitter text-lg leading-lg "  icon={faTwitter} />{" "}
+                  <FontAwesomeIcon className="text-blueGray-400 fab fa-twitter text-lg leading-lg " icon={faTwitter} />{" "}
 
                   <span className="lg:hidden inline-block ml-2">Tweet</span>
                 </a>
@@ -91,9 +92,9 @@ export default function Navbar(props:any) {
                   className="hover:text-blueGray-500 text-blueGray-700 px-3 py-4 lg:py-2 flex items-center text-xs uppercase font-bold"
                   href="https://github.com/creativetimofficial/notus-nextjs?ref=nnjs-index-navbar"
                   target="_blank"
-                  rel="noreferrer" 
+                  rel="noreferrer"
                 >
-                  <FontAwesomeIcon className="text-blueGray-400 fab  text-lg leading-lg "  icon={faGithub} />{" "}
+                  <FontAwesomeIcon className="text-blueGray-400 fab  text-lg leading-lg " icon={faGithub} />{" "}
                   <span className="lg:hidden inline-block ml-2">Star</span>
                 </a>
               </li>

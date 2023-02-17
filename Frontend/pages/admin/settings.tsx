@@ -24,4 +24,9 @@ export default function Settings() {
   );
 }
 
-Settings.layout = Admin;
+// Settings.layout = Admin;
+Settings.getLayout= function getLayout(page:any){
+  return (
+    <Admin>{page}</Admin>
+  )
+}

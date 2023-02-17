@@ -1,4 +1,4 @@
-import './globals.css'
+// import './globals.css'
 
 import React from "react";
 
@@ -9,7 +9,11 @@ import Sidebar from "../components/Sidebar/Sidebar";
 import HeaderStats from "../components/Headers/HeaderStats";
 import FooterAdmin from "../components/Footers/FooterAdmin";
 
-export default function Admin( {children} :any) {
+export default function Admin( {
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
     <>
       <Sidebar />

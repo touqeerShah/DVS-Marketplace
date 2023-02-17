@@ -22,4 +22,9 @@ export default function Maps() {
   );
 }
 
-Maps.layout = Admin;
+// Maps.layout = Admin;
+Maps.getLayout= function getLayout(page:any){
+  return (
+    <Admin>{page}</Admin>
+  )
+}

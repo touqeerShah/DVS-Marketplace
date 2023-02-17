@@ -1,5 +1,5 @@
 
-import './globals.css'
+// import './globals.css'
 import React from "react";
 
 // components

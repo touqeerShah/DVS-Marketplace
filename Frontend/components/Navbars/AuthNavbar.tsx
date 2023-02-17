@@ -17,7 +17,7 @@ export default function Navbar(props:any) {
                 className="text-white text-sm font-bold leading-relaxed inline-block mr-4 py-2 whitespace-nowrap uppercase"
                 >
              
-                Notus NextJS
+                Notus NextJS test
             
             </Link>
             <button

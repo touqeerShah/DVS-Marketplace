@@ -23,4 +23,9 @@ export default function Tables() {
   );
 }
 
-Tables.layout = Admin;
+// Tables.layout = Admin;
+Tables.getLayout= function getLayout(page:any){
+  return (
+    <Admin>{page}</Admin>
+  )
+}

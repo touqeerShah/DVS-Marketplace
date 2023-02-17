@@ -34,4 +34,10 @@ export default function Dashboard() {
   );
 }
 
-Dashboard.layout = Admin;
+// Dashboard.layout = Admin;
+
+Dashboard.getLayout= function getLayout(page:any){
+  return (
+    <Admin>{page}</Admin>
+  )
+}
