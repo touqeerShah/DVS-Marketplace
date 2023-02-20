@@ -1262,9 +1262,13 @@ select {
   --tw-bg-opacity: 1;
   background-color: rgba(185, 28, 28, var(--tw-bg-opacity));
 }
-
-.bg-gray-100 {
+.bg-gray-50 {
   --tw-bg-opacity: 1;
+  background-color: rgb(226 232 240);
+
+}
+.bg-gray-100 {
+  --tw-bg-opacity: 0.5;
   background-color: rgba(244, 244, 245, var(--tw-bg-opacity));
 }
 
@@ -3255,3 +3259,4 @@ select {
 
 @media (min-width: 1536px) {
 }
+

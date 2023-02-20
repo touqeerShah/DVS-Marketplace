@@ -4,12 +4,12 @@ import React from "react";
 
 // components
 
-import AdminNavbar from "../components/Navbars/AdminNavbar";
+import IndexNavbar from "../components/Navbars/IndexNavbar";
 import Sidebar from "../components/Sidebar/Sidebar";
 import HeaderStats from "../components/Headers/HeaderStats";
-import FooterAdmin from "../components/Footers/FooterAdmin";
+import Footer from "../components/Footers/Footer";
 
-export default function Admin({
+export default function Notification({
   children,
 }: {
   children: React.ReactNode
@@ -18,12 +18,12 @@ export default function Admin({
     <>
       <Sidebar />
       <div className="relative md:ml-64 bg-blueGray-100">
-        <AdminNavbar />
+        <IndexNavbar />
         {/* Header */}
         <HeaderStats />
         <div className="px-4 md:px-10 mx-auto w-full -m-24">
           {children}
-          <FooterAdmin />
+          <Footer />
         </div>
       </div>
     </>

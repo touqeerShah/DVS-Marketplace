@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import {useState } from "react"
+import { useState } from "react"
 
 import NotificationDropdown from "../Dropdowns/NotificationDropdown";
 import UserDropdown from "../Dropdowns/UserDropdown";
@@ -25,10 +25,10 @@ export default function Sidebar() {
           </button>
           {/* Brand */}
           <Link href="/"
-                        className="md:block text-left md:pb-2 text-blueGray-600 mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold p-4 px-0"
-                        >
-            
-              Notus NextJS
+            className="md:block text-left md:pb-2 text-blueGray-600 mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold p-4 px-0"
+          >
+
+            <img src="/logo-black.png" className="-mt-10 md:-mt-12 ml-3 md:ml-0 h-18 w-30 md:h-40 md:w-40 " alt="Flowbite Logo" />
           </Link>
           {/* User */}
           <ul className="md:hidden items-center flex flex-wrap list-none">
@@ -51,10 +51,10 @@ export default function Sidebar() {
               <div className="flex flex-wrap">
                 <div className="w-6/12">
                   <Link href="/"
-                                        className="md:block text-left md:pb-2 text-blueGray-600 mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold p-4 px-0"
-                                        >
-                
-                      Notus NextJS
+                    className="md:block text-left md:pb-2 text-blueGray-600 mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold p-4 px-0"
+                  >
+
+                    Notus NextJS
                   </Link>
                 </div>
                 <div className="w-6/12 flex justify-end">
@@ -92,88 +92,88 @@ export default function Sidebar() {
             <ul className="md:flex-col md:min-w-full flex flex-col list-none">
               <li className="items-center">
                 <Link href="/admin/dashboard"
-                className={
-                  "text-xs uppercase py-3 font-bold block " +
-                  (router.pathname.indexOf("/admin/dashboard") !== -1
-                    ? "text-lightBlue-500 hover:text-lightBlue-600"
-                    : "text-blueGray-700 hover:text-blueGray-500")
-                }>
-                  
-                    <i
-                      className={
-                        "fas fa-tv mr-2 text-sm " +
-                        (router.pathname.indexOf("/admin/dashboard") !== -1
-                          ? "opacity-75"
-                          : "text-blueGray-300")
-                      }
-                    ></i>{" "}
-                    Dashboard
+                  className={
+                    "text-xs uppercase py-3 font-bold block " +
+                    (router.pathname.indexOf("/admin/dashboard") !== -1
+                      ? "text-lightBlue-500 hover:text-lightBlue-600"
+                      : "text-blueGray-700 hover:text-blueGray-500")
+                  }>
+
+                  <i
+                    className={
+                      "fas fa-tv mr-2 text-sm " +
+                      (router.pathname.indexOf("/admin/dashboard") !== -1
+                        ? "opacity-75"
+                        : "text-blueGray-300")
+                    }
+                  ></i>{" "}
+                  Dashboard
                 </Link>
               </li>
 
               <li className="items-center">
                 <Link href="/admin/settings"
-                className={
-                  "text-xs uppercase py-3 font-bold block " +
-                  (router.pathname.indexOf("/admin/settings") !== -1
-                    ? "text-lightBlue-500 hover:text-lightBlue-600"
-                    : "text-blueGray-700 hover:text-blueGray-500")
-                }>
-                 
-                    <i
-                      className={
-                        "fas fa-tools mr-2 text-sm " +
-                        (router.pathname.indexOf("/admin/settings") !== -1
-                          ? "opacity-75"
-                          : "text-blueGray-300")
-                      }
-                    ></i>{" "}
-                    Settings
-                 
+                  className={
+                    "text-xs uppercase py-3 font-bold block " +
+                    (router.pathname.indexOf("/admin/settings") !== -1
+                      ? "text-lightBlue-500 hover:text-lightBlue-600"
+                      : "text-blueGray-700 hover:text-blueGray-500")
+                  }>
+
+                  <i
+                    className={
+                      "fas fa-tools mr-2 text-sm " +
+                      (router.pathname.indexOf("/admin/settings") !== -1
+                        ? "opacity-75"
+                        : "text-blueGray-300")
+                    }
+                  ></i>{" "}
+                  Settings
+
                 </Link>
               </li>
 
               <li className="items-center">
                 <Link href="/admin/tables"
-                 className={
-                  "text-xs uppercase py-3 font-bold block " +
-                  (router.pathname.indexOf("/admin/tables") !== -1
-                    ? "text-lightBlue-500 hover:text-lightBlue-600"
-                    : "text-blueGray-700 hover:text-blueGray-500")
-                }>
-                
-                    <i
-                      className={
-                        "fas fa-table mr-2 text-sm " +
-                        (router.pathname.indexOf("/admin/tables") !== -1
-                          ? "opacity-75"
-                          : "text-blueGray-300")
-                      }
-                    ></i>{" "}
-                    Tables
-              
+                  className={
+                    "text-xs uppercase py-3 font-bold block " +
+                    (router.pathname.indexOf("/admin/tables") !== -1
+                      ? "text-lightBlue-500 hover:text-lightBlue-600"
+                      : "text-blueGray-700 hover:text-blueGray-500")
+                  }>
+
+                  <i
+                    className={
+                      "fas fa-table mr-2 text-sm " +
+                      (router.pathname.indexOf("/admin/tables") !== -1
+                        ? "opacity-75"
+                        : "text-blueGray-300")
+                    }
+                  ></i>{" "}
+                  Tables
+
                 </Link>
               </li>
 
               <li className="items-center">
                 <Link href="/admin/maps"
-                 className={
-                  "text-xs uppercase py-3 font-bold block " +
-                  (router.pathname.indexOf("/admin/maps") !== -1
-                    ? "text-lightBlue-500 hover:text-lightBlue-600"
-                    : "text-blueGray-700 hover:text-blueGray-500")
-                }>
-                  
-                    <i
-                      className={
-                        "fas fa-map-marked mr-2 text-sm " +
-                        (router.pathname.indexOf("/admin/maps") !== -1
-                          ? "opacity-75"
-                          : "text-blueGray-300")
-                      }
-                    ></i>{" "}
-                    Maps
-                 
+                  className={
+                    "text-xs uppercase py-3 font-bold block " +
+                    (router.pathname.indexOf("/admin/maps") !== -1
+                      ? "text-lightBlue-500 hover:text-lightBlue-600"
+                      : "text-blueGray-700 hover:text-blueGray-500")
+                  }>
+
+                  <i
+                    className={
+                      "fas fa-map-marked mr-2 text-sm " +
+                      (router.pathname.indexOf("/admin/maps") !== -1
+                        ? "opacity-75"
+                        : "text-blueGray-300")
+                    }
+                  ></i>{" "}
+                  Maps
+
                 </Link>
               </li>
             </ul>
@@ -189,21 +189,21 @@ export default function Sidebar() {
             <ul className="md:flex-col md:min-w-full flex flex-col list-none md:mb-4">
               <li className="items-center">
                 <Link href="/auth/login"
-                 className="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block">
-                 
-                    <i className="fas fa-fingerprint text-blueGray-400 mr-2 text-sm"></i>{" "}
-                    Login
+                  className="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block">
+
+                  <i className="fas fa-fingerprint text-blueGray-400 mr-2 text-sm"></i>{" "}
+                  Login
                   {/* </a> */}
                 </Link>
               </li>
 
               <li className="items-center">
                 <Link href="/auth/register"
-                 className="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block">
-                
-                    <i className="fas fa-clipboard-list text-blueGray-300 mr-2 text-sm"></i>{" "}
-                    Register
-                 
+                  className="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block">
+
+                  <i className="fas fa-clipboard-list text-blueGray-300 mr-2 text-sm"></i>{" "}
+                  Register
+
                 </Link>
               </li>
             </ul>
@@ -219,20 +219,20 @@ export default function Sidebar() {
             <ul className="md:flex-col md:min-w-full flex flex-col list-none md:mb-4">
               <li className="items-center">
                 <Link href="/landing"
-                 className="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block">
-                
-                    <i className="fas fa-newspaper text-blueGray-400 mr-2 text-sm"></i>{" "}
-                    Landing Page
+                  className="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block">
+
+                  <i className="fas fa-newspaper text-blueGray-400 mr-2 text-sm"></i>{" "}
+                  Landing Page
                 </Link>
               </li>
 
               <li className="items-center">
                 <Link href="/profile"
-                 className="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block">
-                 
-                    <i className="fas fa-user-circle text-blueGray-400 mr-2 text-sm"></i>{" "}
-                    Profile Page
-                 
+                  className="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block">
+
+                  <i className="fas fa-user-circle text-blueGray-400 mr-2 text-sm"></i>{" "}
+                  Profile Page
+
                 </Link>
               </li>
             </ul>
@@ -246,59 +246,59 @@ export default function Sidebar() {
             {/* Navigation */}
             <ul className="md:flex-col md:min-w-full flex flex-col list-none md:mb-4">
               <li className="inline-flex">
-                
-                  <i className="fas fa-paint-brush mr-2 text-blueGray-300 text-base"></i>
-                  Styles
-                
+
+                <i className="fas fa-paint-brush mr-2 text-blueGray-300 text-base"></i>
+                Styles
+
               </li>
 
               <li className="inline-flex">
-               
-                  <i className="fab fa-css3-alt mr-2 text-blueGray-300 text-base"></i>
-                  CSS Components
-                
+
+                <i className="fab fa-css3-alt mr-2 text-blueGray-300 text-base"></i>
+                CSS Components
+
               </li>
 
               <li className="inline-flex">
-                
-                  <i className="fab fa-angular mr-2 text-blueGray-300 text-base"></i>
-                  Angular
-             
+
+                <i className="fab fa-angular mr-2 text-blueGray-300 text-base"></i>
+                Angular
+
               </li>
 
               <li className="inline-flex">
-                
-                  <i className="fab fa-js-square mr-2 text-blueGray-300 text-base"></i>
-                  Javascript
-                
+
+                <i className="fab fa-js-square mr-2 text-blueGray-300 text-base"></i>
+                Javascript
+
               </li>
 
               <li className="inline-flex">
-               
-                  <i className="fab fa-react mr-2 text-blueGray-300 text-base"></i>
-                  NextJS
-                
+
+                <i className="fab fa-react mr-2 text-blueGray-300 text-base"></i>
+                NextJS
+
               </li>
 
               <li className="inline-flex">
-               
-                  <i className="fab fa-react mr-2 text-blueGray-300 text-base"></i>
-                  React
-                
+
+                <i className="fab fa-react mr-2 text-blueGray-300 text-base"></i>
+                React
+
               </li>
 
               <li className="inline-flex">
-                
-                  <i className="fas fa-link mr-2 text-blueGray-300 text-base"></i>
-                  Svelte
-                
+
+                <i className="fas fa-link mr-2 text-blueGray-300 text-base"></i>
+                Svelte
+
               </li>
 
               <li className="inline-flex">
-              
-                  <i className="fab fa-vuejs mr-2 text-blueGray-300 text-base"></i>
-                  VueJS
-               
+
+                <i className="fab fa-vuejs mr-2 text-blueGray-300 text-base"></i>
+                VueJS
+
               </li>
             </ul>
           </div>
