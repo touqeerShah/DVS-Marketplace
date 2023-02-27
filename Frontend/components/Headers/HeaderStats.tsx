@@ -1,6 +1,5 @@
 import React from "react";
 import { faClockRotateLeft, faFileDownload, faCheckCircle, faGavel } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 // components
 
 import CardStats from "../../components/Cards/CardStats";
