@@ -1,8 +1,9 @@
 import { IChainData } from '../lib/types'
+import { Web3Provider } from "@ethersproject/providers"
 
 export type StateType = {
     provider: any
-    web3Provider: any
+    web3Provider: Web3Provider | undefined
     address?: string
     chainId?: number
     chainData?: IChainData

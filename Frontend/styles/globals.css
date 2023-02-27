@@ -1133,6 +1133,11 @@ select {
   background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
 }
 
+.bg-white-2 {
+  --tw-bg-opacity: 0.5;
+  background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
+}
+
 .bg-pink-200 {
   --tw-bg-opacity: 1;
   background-color: rgba(251, 207, 232, var(--tw-bg-opacity));
@@ -1227,6 +1232,10 @@ select {
   --tw-bg-opacity: 1;
   background-color: rgba(234, 179, 8, var(--tw-bg-opacity));
 }
+.bg-green-500 {
+  --tw-bg-opacity: 1;
+  background-color:#4CAF50;
+}
 
 .bg-orange-200 {
   --tw-bg-opacity: 1;
@@ -1306,6 +1315,11 @@ select {
   --tw-bg-opacity: 1;
   background-color: rgba(30, 41, 59, var(--tw-bg-opacity));
 }
+.bg-themeColor-800 {
+  --tw-bg-opacity: 0.2;
+  background-color: rgba(46,108,230,var(--tw-bg-opacity));
+/* rgba(46,108,230,255);  */
+}
 
 .focus\:bg-white:focus {
   --tw-bg-opacity: 1;
@@ -1359,6 +1373,7 @@ select {
 
 .border-pink-700 {
   --tw-border-opacity: 1;
+  
   border-color: rgba(190, 24, 93, var(--tw-border-opacity));
 }
 
@@ -1381,6 +1396,13 @@ select {
   --tw-border-opacity: 1;
   border-color: rgba(241, 245, 249, var(--tw-border-opacity));
 }
+
+.border-blue-100 {
+  --tw-border-opacity: 1;
+  border-color: rgba(46,108,230,255);
+}
+
+
 
 .border-blueGray-200 {
   --tw-border-opacity: 1;
@@ -1461,7 +1483,14 @@ select {
 }
 
 .border-2 {
-  border-width: 2px;
+  border-width: 2px solid #4CAF50;
+  border: 2px solid rgba(46,108,230,255); /* Green */
+
+}
+.border-4 {
+  border-width: 4px solid #4CAF50;
+  border: 2px solid rgba(46,108,230,255); /* Green */
+
 }
 
 .border {
@@ -2103,11 +2132,17 @@ select {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
 }
+.px-2-5 {
+  
+  padding-top: 0.625rem; /* 10px */
+padding-bottom: 0.625rem; /* 10px */
+}
 
 .py-3 {
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
 }
+
 
 .px-3 {
   padding-left: 0.75rem;
@@ -2595,6 +2630,15 @@ select {
   color: rgba(239, 68, 68, var(--tw-text-opacity));
 }
 
+.text-yellow-500 {
+  --tw-text-opacity: 1;
+  color: rgba(255,240, 0, var(--tw-text-opacity));
+}
+.text-green-500 {
+  --tw-text-opacity: 1;
+  color: rgb(125, 178, 66,var(--tw-text-opacity));
+}
+
 .text-gray-500 {
   --tw-text-opacity: 1;
   color: rgba(113, 113, 122, var(--tw-text-opacity));
@@ -2670,6 +2714,11 @@ select {
   color: rgba(100, 116, 139, var(--tw-text-opacity));
 }
 
+.hover\:bg-black:hover {
+  --tw-text-opacity: 1;
+  background-color: rgba(0, 0, 0, var(--tw-bg-opacity));
+}
+
 .hover\:text-blueGray-700:hover {
   --tw-text-opacity: 1;
   color: rgba(51, 65, 85, var(--tw-text-opacity));
@@ -2740,10 +2789,13 @@ select {
 .w-1\/2 {
   width: 50%;
 }
-
+.w-3\/12 {
+  width: 25%;
+}
 .w-6\/12 {
   width: 50%;
 }
+
 
 .w-10\/12 {
   width: 83.333333%;

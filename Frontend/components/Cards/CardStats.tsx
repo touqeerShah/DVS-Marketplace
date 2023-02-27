@@ -1,5 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { IconDefinition } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default function CardStats({
   statSubtitle,
@@ -10,10 +12,10 @@ export default function CardStats({
   statDescripiron,
   statIconName,
   statIconColor,
-}:any) {
+}: any) {
   return (
     <>
-      <div className="relative flex flex-col min-w-0 break-words bg-white rounded mb-6 xl:mb-0 shadow-lg">
+      <div className="relative flex border-4 flex-col min-w-0 break-words bg-white rounded mb-6 xl:mb-0 shadow-lg">
         <div className="flex-auto p-4">
           <div className="flex flex-wrap">
             <div className="relative w-full pr-4 max-w-full flex-grow flex-1">
@@ -31,7 +33,7 @@ export default function CardStats({
                   statIconColor
                 }
               >
-                <i className={statIconName}></i>
+                <FontAwesomeIcon icon={statIconName} />
               </div>
             </div>
           </div>
@@ -42,11 +44,11 @@ export default function CardStats({
                   statArrow === "up"
                     ? "fas fa-arrow-up"
                     : statArrow === "down"
-                    ? "fas fa-arrow-down"
-                    : ""
+                      ? "fas fa-arrow-down"
+                      : ""
                 }
               ></i>{" "}
-              {statPercent}%
+              {statPercent == "" ? "" : statPercent + "%"}
             </span>
             <span className="whitespace-nowrap">{statDescripiron}</span>
           </p>
@@ -76,7 +78,7 @@ CardStats.propTypes = {
   // from tailwindcss
   statPercentColor: PropTypes.string,
   statDescripiron: PropTypes.string,
-  statIconName: PropTypes.string,
+  statIconName: PropTypes.any,
   // can be any of the background color utilities
   // from tailwindcss
   statIconColor: PropTypes.string,

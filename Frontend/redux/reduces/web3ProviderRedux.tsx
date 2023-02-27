@@ -3,9 +3,9 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { RootState } from "./../store"
 import { IChainData } from '../../lib/types'
 
-const initialState: StateType = {
+export const initialState: StateType = {
     provider: null,
-    web3Provider: null,
+    web3Provider: undefined,
     address: undefined,
     chainId: undefined,
     chainData: undefined
@@ -29,12 +29,17 @@ export const web3ProviderSlice = createSlice({
 
         },
         disconnectState: (state: StateType, action: PayloadAction) => {
-            state = initialState
+
+            state.provider = null;
+            state.web3Provider = undefined
+            state.address = undefined
+            state.chainId = undefined
+            state.chainData = undefined
         },
-        changeAddress: (state: StateType, action: PayloadAction<any>) => {
+        changeAddress: (state: StateType, action: PayloadAction<string>) => {
             const _state = action.payload;
 
-            state.web3Provider = _state;
+            state.address = _state;
         }
         ,
         changeChain: (state: StateType, action: PayloadAction<number>) => {

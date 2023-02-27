@@ -1,8 +1,10 @@
 "use client"
 import React from "react";
+import { useRouter } from 'next/router'
+
 import Link from "next/link";
 // components
-import { useCallback, useEffect, useReducer } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Web3Modal from 'web3modal'
 import { Web3Provider } from "@ethersproject/providers"
 
@@ -13,7 +15,7 @@ import { ellipseAddress } from '../../lib/utilities'
 
 import { StateType } from "../../config"
 import { useAppSelector, useAppDispatch } from "./../../redux/hooks"
-import { web3ProviderReduxState, connectState, disconnectState, changeAddress, changeChain } from "./../../redux/reduces/web3ProviderRedux"
+import { web3ProviderReduxState, connectState, disconnectState, changeAddress, changeChain, initialState } from "./../../redux/reduces/web3ProviderRedux"
 
 
 import IndexDropdown from "../Dropdowns/IndexDropdown";
@@ -25,11 +27,15 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 
 export default function Navbar(props: any) {
+  const router = useRouter()
+
   const [navbarOpen, setNavbarOpen] = React.useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = React.useState(true);
   let web3Modal: Web3Modal | null;
   let chainData: any;
   let web3ProviderState: StateType = useAppSelector(web3ProviderReduxState);
+  // const [web3ProviderState, setCollapseShow] = useState("hidden");
+
   const dispatch = useAppDispatch();
 
   const connect = useCallback(async function () {
@@ -38,6 +44,7 @@ export default function Navbar(props: any) {
     // This is the initial `provider` that is returned when
     // using web3Modal to connect. Can be MetaMask or WalletConnect.
     const provider = await web3Modal?.connect()
+
     // We plug the initial `provider` into ethers.js and get back
     // a Web3Provider. This will add on methods from ethers.js and
     // event listeners such as `.on()` will be different.
@@ -67,11 +74,20 @@ export default function Navbar(props: any) {
 
   const disconnect = useCallback(
     async function () {
-      await web3Modal?.clearCachedProvider()
-      if (web3ProviderState.provider?.disconnect && typeof web3ProviderState.provider.disconnect === 'function') {
+      console.log("disconnect");
+      // dispatch(disconnectState())
+      localStorage.clear();
+
+      console.log(await web3Modal?.clearCachedProvider())
+      console.log("disconnect", await web3ProviderState.web3Provider?.detectNetwork());
+
+      if (web3ProviderState.provider.disconnect && typeof web3ProviderState.provider.disconnect === 'function') {
+        console.log("disconnect");
+
         await web3ProviderState.provider.disconnect()
       }
       dispatch(disconnectState())
+      // web3ProviderState = initialState
 
     },
     [web3ProviderState.provider]
@@ -83,13 +99,13 @@ export default function Navbar(props: any) {
 
     web3Modal = web3ModalSetup();
   }, [])
-  // // // Auto connect to the cached provider
+
+
   useEffect(() => {
     if (web3Modal?.cachedProvider) {
       connect()
     }
   }, [connect])
-
   // // A `provider` should come with EIP-1193 events. We'll listen for those events
   // // here so that when a user switches accounts or networks, we can update the
   // // local React state with that new information.
@@ -133,19 +149,20 @@ export default function Navbar(props: any) {
 
   return (
     <>
-      <nav className="top-0 fixed z-50 w-full flex flex-wrap items-center justify-between px-2 py-3 navbar-expand-lg bg-white shadow">
+      {/* absolute top-0 left-0 w-full z-10 bg-transparent md:flex-row md:flex-nowrap md:justify-start flex items-center p-4 */}
+      <nav className={(router.pathname.indexOf("user") == -1) ? "top-0 fixed z-50 w-full flex flex-wrap items-center justify-between px-2 py-3 navbar-expand-lg bg-black shadow" : "absolute top-0 left-0 w-full z-10 bg-transparent md:flex-row md:flex-nowrap md:justify-start flex items-center p-4"}>
         <NotificationMenu
           notificationMenuOpen={notificationMenuOpen}
           setNotificationMenuOpen={setNotificationMenuOpen}
         />
 
         <div className="container px-10 mx-auto flex flex-wrap items-center justify-between">
-          <div className="w-full relative flex justify-between lg:w-auto lg:static lg:block lg:justify-start">
+          {(router.pathname.indexOf("user") == -1) && <div className="w-full relative flex justify-between lg:w-auto lg:static lg:block lg:justify-start">
             {/* <Link href="/"> */}
             {/* <div className="container flex flex-wrap items-center justify-between mx-auto"> */}
             <a className=" flex items-center"
               href="#pablo">
-              <img src="/logo-black.png" className="-mt-10 md:-mt-12 ml-3 md:ml-0 h-24 w-30 md:h-40 md:w-40 " alt="Flowbite Logo" />
+              <img src="/logo-white.png" className="-mt-10 md:-mt-12 ml-3 md:ml-0 h-24 w-30 md:h-40 md:w-40 " alt="Flowbite Logo" />
             </a>
             {/* </div> */}
             {/* </Link> */}
@@ -159,7 +176,7 @@ export default function Navbar(props: any) {
               <FontAwesomeIcon icon={faBars} />{" "}
 
             </button>
-          </div>
+          </div>}
           <div
             className={
               "lg:flex flex-grow items-center bg-white lg:bg-opacity-0 lg:shadow-none" +
@@ -167,33 +184,24 @@ export default function Navbar(props: any) {
             }
             id="example-navbar-warning"
           >
-            {/* <ul className="flex flex-col lg:flex-row list-none mr-auto">
-              <li className="flex items-center">
-                <a
-                  className="hover:text-blueGray-500 text-blueGray-700 px-3 py-4 lg:py-2 flex items-center text-xs uppercase font-bold"
-                  href="https://www.creative-tim.com/learning-lab/tailwind/nextjs/overview/notus?ref=nnjs-index-navbar"
-                >
-                  <FontAwesomeIcon className="text-blueGray-400 far text-lg leading-lg mr-2" icon={faFileAlt} />{" "}
+            <ul className="flex flex-col lg:flex-row list-none mr-auto">
 
-                  Docs
-                </a>
-
-              </li>
-            </ul> */}
+            </ul>
             <ul className="flex flex-col lg:flex-row list-none lg:ml-auto">
-              <li className="flex items-center">
+              {(router.pathname.indexOf("user") == -1) && <li className="flex items-center">
                 <IndexDropdown />
-              </li>
-              <li className="flex items-center">
+              </li>}
+              {(router.pathname.indexOf("user") == -1) &&
+                <li className="flex items-center">
 
-                <div onClick={() => { setNotificationMenuOpen(false) }} className="hover:text-blueGray-500 text-blueGray-700 px-1 py-1  lg:py-2 flex items-center text-xs uppercase font-bold relative">
+                  <div onClick={() => { setNotificationMenuOpen(false) }} className="hover:text-blueGray-500 text-blueGray-700 px-1 py-1  lg:py-2 flex items-center text-xs uppercase font-bold relative">
 
-                  <FontAwesomeIcon className="text-blueGray-400 far text-lg leading-lg mr-2" icon={faBell} />{" "}
-                  <span className="lg:hidden inline-block ml-2">Noftification</span>
+                    <FontAwesomeIcon className="text-blueGray-400 far text-lg leading-lg mr-2" icon={faBell} />{" "}
+                    <span className="lg:hidden inline-block ml-2">Noftification</span>
 
-                  <div className="absolute inline-block top-0 right-0 bottom-auto left-auto translate-x-2/4 -translate-y-1/2  text-center	rotate-0 skew-x-0 skew-y-0 scale-x-100 scale-y-100 p-2.5 text-xs bg-red-600 rounded-full z-10" style={{ height: 10, width: 10 }}>       &nbsp;       </div>
-                </div>
-              </li>
+                    <div className="absolute inline-block top-0 right-0 bottom-auto left-auto translate-x-2/4 -translate-y-1/2  text-center	rotate-0 skew-x-0 skew-y-0 scale-x-100 scale-y-100 p-2.5 text-xs bg-red-600 rounded-full z-10" style={{ height: 10, width: 10 }}>       &nbsp;       </div>
+                  </div>
+                </li>}
 
               <li className="flex items-center">
                 {/* <button
@@ -205,12 +213,12 @@ export default function Navbar(props: any) {
                   <i className="fas fa-arrow-alt-circle-down"></i> Download
                 </button> */}
                 {web3ProviderState?.web3Provider ? (
-                  <button className="bg-blueGray-700 text-white active:bg-blueGray-600 text-xs font-bold uppercase px-4 py-2 rounded shadow hover:shadow-lg outline-none focus:outline-none lg:mr-1 lg:mb-0 ml-3 mb-3 ease-linear transition-all duration-150"
-                    type="button" onClick={() => { }}>
+                  <button className="bg-blueGray-700 text-white active:bg-blueGray-600 border-2 text-xs font-bold uppercase px-4 py-2 rounded shadow hover:shadow-lg outline-none focus:outline-none lg:mr-1 lg:mb-0 ml-3 mb-3 ease-linear transition-all duration-150"
+                    type="button" onClick={disconnect}>
                     Disconnect
                   </button>
                 ) : (
-                  <button className="bg-blueGray-700 text-white active:bg-blueGray-600 text-xs font-bold uppercase px-4 py-2 rounded shadow hover:shadow-lg outline-none focus:outline-none lg:mr-1 lg:mb-0 ml-3 mb-3 ease-linear transition-all duration-150"
+                  <button className="bg-blueGray-700 text-white active:bg-blueGray-600 border-2 text-xs font-bold uppercase px-4 py-2 rounded shadow hover:shadow-lg outline-none focus:outline-none lg:mr-1 lg:mb-0 ml-3 mb-3 ease-linear transition-all duration-150"
                     type="button" onClick={connect}>
                     Connect
                   </button>
@@ -218,7 +226,7 @@ export default function Navbar(props: any) {
                 <>  {web3ProviderState?.address && (
 
 
-                  <button className=" text-black active:bg-blueGray-600 text-xs font-bold uppercase px-4 py-2 rounded shadow hover:shadow-lg outline-none focus:outline-none lg:mr-1 lg:mb-0 ml-3 mb-3 ease-linear transition-all duration-150" type="button" >
+                  <button className=" text-white active:bg-blueGray-600 text-xs border-2 font-bold uppercase px-4 py-2 rounded shadow hover:shadow-lg outline-none focus:outline-none lg:mr-1 lg:mb-0 ml-3 mb-3 ease-linear transition-all duration-150" type="button" >
                     {/* Network:
             {props?.chainData?.name}  */}
                     {ellipseAddress(web3ProviderState.address)}
