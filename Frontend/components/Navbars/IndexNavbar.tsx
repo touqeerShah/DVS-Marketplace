@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from 'react'
 import Web3Modal from 'web3modal'
 import { Web3Provider } from "@ethersproject/providers"
+// import { providers } from "ethers";
 
 
 import { getChainData } from '../../lib/utilities'
@@ -95,7 +96,6 @@ export default function Navbar(props: any) {
 
   // // // Auto connect to the cached provider
   useEffect(() => {
-    console.log("web3ProviderState", web3ProviderState);
 
     web3Modal = web3ModalSetup();
   }, [])

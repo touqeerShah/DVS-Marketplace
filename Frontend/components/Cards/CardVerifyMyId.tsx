@@ -2,10 +2,130 @@ import React from "react";
 import { faFingerprint, faFile, faIdCard, faBell } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import CardUserDetails from "../../components/Cards/CardUserDetails";
+import { UserIdVoucherStruct } from "../../class/typechain-types/contracts/core/UserIdentityNFT";
+import { ContractAddress } from "../../config/"
 
 // components
 
+import { StateType } from "../../config"
+import { useAppSelector } from "./../../redux/hooks"
+import { web3ProviderReduxState } from "./../../redux/reduces/web3ProviderRedux"
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup";
+import { toast } from "react-toastify";
+import { create } from "ipfs-http-client";
+import { useState } from "react";
+import { getUserIdentityNFT, getFigurePrintOracle } from "../../lib/getDeploy";
+import { createUserId } from "../../lib/createVoucher"
+import { getStringToBytes } from "../../lib/convert";
+import {
+  SIGNING_DOMAIN_NAME,
+  SIGNING_DOMAIN_VERSION,
+  INFURA_URL,
+  INFURA_IPFS_PROJECJECT_ID,
+  INFURA_IPFS_PROJECJECT_SECRET
+} from "../../lib/config"
+
 export default function CardVerifyMyId(props: any) {
+  let web3ProviderState: StateType = useAppSelector(web3ProviderReduxState);
+  const validationSchema = Yup.object().shape({
+    // image: Yup.string().required("NFG image is required"),
+  });
+
+  const formOptions = { resolver: yupResolver(validationSchema) };
+  const { register, handleSubmit, formState } = useForm(formOptions);
+  const [url, setURL] = useState("")
+
+
+  const projectIdAndSecret = `${INFURA_IPFS_PROJECJECT_ID}:${INFURA_IPFS_PROJECJECT_SECRET}`;
+  const client = create({
+    host: INFURA_URL,
+    port: 5001,
+    protocol: "https",
+    headers: {
+      authorization: `Basic ${Buffer.from(projectIdAndSecret).toString(
+        "base64"
+      )}`,
+    },
+  });
+
+  async function RequestForVerification() {
+
+    if (web3ProviderState.provider == null && web3ProviderState.address) {
+      console.log("error");
+
+      toast.error("Please Connect to your wallet First");
+      return;
+    }
+    if (web3ProviderState.chainId != 5) {
+      toast.error("Please Change your network to Goerli");
+      return;
+    }
+    let voucher: Partial<UserIdVoucherStruct> = {};
+
+    if (web3ProviderState.web3Provider) {
+      const signer = await web3ProviderState.web3Provider.getSigner();
+      let userIdentityNFTContract = await getUserIdentityNFT(signer)
+      let figurePrintOracleContract = await getFigurePrintOracle(signer)
+      console.log(await figurePrintOracleContract.getUserRecord(await signer.getAddress()));
+
+      const _userId = getStringToBytes(props.username)
+      const _fingurePrint = getStringToBytes(props.fingerPrintHash)
+      let imageObject = JSON.stringify({
+        image: "",
+        firstName: props.firstName,
+        lastName: props.lastName,
+        aboutMe: props.aboutMe,
+        username: props.username,
+      })
+      let uri: string = ""
+      try {
+        const added = await client.add(imageObject);
+        // ipfs = `${INFURA_GATEWAY_URL}${added.path}`;
+        uri = `https://ipfs.io/ipfs/${added.path}`
+        setURL(uri)
+      } catch (error) {
+        toast.error("something is wrong with IPFS")
+        return "";
+      }
+      try {
+
+        voucher = (await createUserId(
+          signer,
+          _userId,
+          url,
+          _fingurePrint,
+          SIGNING_DOMAIN_NAME,
+          SIGNING_DOMAIN_VERSION,
+          web3ProviderState.chainId.toString(),
+          ContractAddress.UserIdentityNFT
+        )) as UserIdVoucherStruct;
+
+        console.log("url", url);
+
+        console.log("voucher", voucher);
+      } catch (error: any) {
+        console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
+        toast.error(error.message.substring(0, error.message.indexOf("(")))
+      }
+
+      try {
+        // console.log("_userId", _userId, "_fingurePrint", _fingurePrint);
+
+        await userIdentityNFTContract.verifyFingerPrint(_userId, _fingurePrint);
+        // (await tx).wait();
+
+      } catch (error: any) {
+        console.log(error);
+
+        console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
+      }
+
+    }
+
+
+  }
   const myRef: React.LegacyRef<HTMLInputElement> = React.createRef();
   const isApply = false
   return (
@@ -21,7 +141,9 @@ export default function CardVerifyMyId(props: any) {
             </div>
           </div>
             <div className="flex-auto px-4 lg:px-10 py-10 pt-0">
-              <form>
+              <form
+                id="create-choose-type-single"
+                onSubmit={handleSubmit(RequestForVerification)}>
                 <h6 className="text-blueGray-400 text-sm mt-3 mb-6 font-bold uppercase">
                   User Information
                 </h6>
@@ -32,7 +154,7 @@ export default function CardVerifyMyId(props: any) {
                         className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
                         htmlFor="grid-password"
                       >
-                        Username
+                        User Id
                       </label>
                       <input
                         type="text"
@@ -41,6 +163,7 @@ export default function CardVerifyMyId(props: any) {
                         onChange={(e: React.FormEvent<HTMLInputElement>) => {
                           props.setUsername(e.currentTarget.value)
                         }}
+                        required
                       />
                     </div>
                   </div>
@@ -211,7 +334,7 @@ export default function CardVerifyMyId(props: any) {
                         City
                       </label>
                       <input
-                        type="email"
+                        type="text"
                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                         defaultValue=""
                         onChange={(e: React.FormEvent<HTMLInputElement>) => {
@@ -288,7 +411,8 @@ export default function CardVerifyMyId(props: any) {
                   <div className="w-3/12  lg:w-12/12 px-4">
                     <div className="relative  center mb-3">
                       <button className="border-0 px-3 px-2-5 my-4 placeholder-blueGray-300 text-blueGray-600 bg-white rounded border-2 text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                        type="button">
+                        type="submit"
+                      >
                         Verify
                       </button>
                     </div>

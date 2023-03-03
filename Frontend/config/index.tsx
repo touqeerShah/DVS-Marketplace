@@ -1,6 +1,7 @@
 import { IChainData } from '../lib/types'
 import { Web3Provider } from "@ethersproject/providers"
-
+export { ContractAddress } from "./contractAddress"
+export { GovernorContract, TimeLock, LinkToken, OrcaleUrlProvider, FigurePrintOracle, UserIdentityNFT, DocumentSignature, MockOracleABI } from "./ContractABI"
 export type StateType = {
     provider: any
     web3Provider: Web3Provider | undefined
@@ -8,6 +9,8 @@ export type StateType = {
     chainId?: number
     chainData?: IChainData
 }
+
+
 
 export type ActionType =
     | {

@@ -1,7 +1,8 @@
 // import './globals.css'
 
 import React from "react";
-
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 // components
 
 import Navbar from "../components/Navbars/IndexNavbar";
@@ -17,7 +18,7 @@ export default function Admin({
   return (
     <>
       <Sidebar />
-      <div className="relative md:ml-64  bg-themeColor-800">
+      <div className="relative md:ml-64 mx-auto	  bg-themeColor-800">
         <Navbar />
         {/* Header */}
         <HeaderStats />
@@ -25,6 +26,7 @@ export default function Admin({
           {children}
           <FooterAdmin />
         </div>
+        <ToastContainer />
       </div>
     </>
   );

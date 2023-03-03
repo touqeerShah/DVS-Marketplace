@@ -37,7 +37,17 @@ export default function VerifyId() {
             setCity={setCity}
             setCountry={setCountry}
             setPostalCode={setPostalCode}
-            setAboutMe={setAboutMe} />
+            setAboutMe={setAboutMe}
+            username={username}
+            email={email}
+            fingerPrintHash={fingerPrintHash}
+            firstName={firstName}
+            lastName={lastName}
+            address={address}
+            city={city}
+            country={country}
+            postalCode={postalCode}
+            aboutMe={aboutMe} />
         </div>
         <div className="w-full lg:w-4/12 px-4">
           <CardVerifyProfile

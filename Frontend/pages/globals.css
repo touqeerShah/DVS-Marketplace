@@ -1,9 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/*! tailwindcss v2.0.4 | MIT License | https://tailwindcss.com */
 
-/*! modern-normalize v1.0.0 | MIT License | https://github.com/sindresorhus/modern-normalize */
 
 /*
 Document
@@ -1920,7 +1918,16 @@ select {
 .ml-auto {
   margin-left: auto;
 }
-
+.mb-auto {
+  margin-bottom: auto;
+}
+.mb-60	{
+  margin-bottom: 15rem
+}
+.my-64	{
+  margin-top: 16rem; /* 256px */
+margin-bottom: 16rem; /* 256px */
+}
 .-ml-4 {
   margin-left: -1rem;
 }

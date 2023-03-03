@@ -11,7 +11,7 @@ export default function CardUserDetails({ color }: any) {
     <>
       <div
         className={
-          "relative flex border-2 flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded " +
+          "relative flex flex-col min-w-0 break-words w-full mb-6  rounded " +
           (color === "light" ? "bg-white" : "bg-blueGray-700 text-white")
         }
       >
