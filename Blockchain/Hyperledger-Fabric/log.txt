@@ -1,0 +1,10 @@
+Installed chaincodes on peer:
+Package ID: company-registration_1.0:6e4435d62c7444a6835a894daa8598a0e518c9cd865c8c1c17f15fd2a7d45b3f, Label: company-registration_1.0
+Package ID: company-registration_6.0:c1eb258c71999e0d06ee28d91454d0d6baca3501d77cb78c4640dcbb874bf46b, Label: company-registration_6.0
+Package ID: company-registration_9.0:f9b51d29cd3e24fa5efe9fb887c052be262a4dfa59227def52b53f7af64006a1, Label: company-registration_9.0
+Package ID: company-registration_2.0:4363a4bd78f762d721c18d4c6a895976ff794d9266414a2747e9d97be1fd960c, Label: company-registration_2.0
+Package ID: company-registration_3.0:7a45643bf92b4e95e194bf3aa950cd77657610f4f1094c51d4a86c52d4e41d08, Label: company-registration_3.0
+Package ID: company-registration_4.0:736a6825d5625eebff8d21f2c74b3ee5609272599fce3ac9899466edc7ad3c08, Label: company-registration_4.0
+Package ID: company-registration_5.0:ec38a56218586862f019b1e1a6482e15960e0391f781f831bd51bd175d8e3b76, Label: company-registration_5.0
+Package ID: company-registration_7.0:49845681ce4166d9d9b9008202105035da4116e5b5f4a3ac5eb2fdbad921ca1e, Label: company-registration_7.0
+Package ID: company-registration_8.0:761ea1479b4b64d69a9def476f65c7af734f1cd41874ebc0860813144577c34b, Label: company-registration_8.0

@@ -13,17 +13,25 @@ var {
   PROVIDER_REN_URL,
   INFURA_API_KEY,
   ETHERSCANAPIKEY,
-  USER2_PRIVATE_KEY,
+  PRIVATE_KEY_0,
   COINMARKETCAP_API_KEY,
+
 } = process.env
 const PRIVATE_KEY = process.env.PRIVATE_KEY || "privatKey"
-
+let MUMBAI_RPC_URI = process.env.MUMBAI_RPC_URI || ""
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
       chainId: 31337,
       allowUnlimitedContractSize: true
+    },
+    mumbai: {
+      url: MUMBAI_RPC_URI,
+      chainId: 80001,
+      accounts: [`${PRIVATE_KEY_0}`],
+      gas: 10000000,
+      blockGasLimit: 100000000,
     },
     localhost: {
       chainId: 31337,

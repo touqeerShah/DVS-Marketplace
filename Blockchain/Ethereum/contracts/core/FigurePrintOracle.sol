@@ -3,6 +3,8 @@ pragma solidity ^0.8.7;
 
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/ERC677ReceiverInterface.sol";
+
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
@@ -25,7 +27,8 @@ contract FigurePrintOracle is
     ConfirmedOwner,
     IFigurePrintOracle,
     AccessControl,
-    ReentrancyGuard
+    ReentrancyGuard,
+    ERC677ReceiverInterface
 {
     using Chainlink for Chainlink.Request;
     bytes32 private constant VERIFIER_ROLE = keccak256("VERIFIER_ROLE");
@@ -88,14 +91,16 @@ contract FigurePrintOracle is
      */
     function verifyFingerPrint(
         address userAddress,
-        bytes calldata userId,
-        bytes calldata fingerPrint
-    ) public nonReentrant onlyVerifier {
+        bytes memory userId,
+        bytes memory fingerPrint
+    ) public nonReentrant {
         //if record exist and pending
 
         uint numberTries = 0;
         VerifcaitonRecord memory userRecord = userVerficationRecord[userAddress];
-
+        if (amounts[userAddress] < fee) {
+            revert FigurePrintOracle__InsufficientBalance(userAddress);
+        }
         if (userRecord.status == VerficationStatus.PENDING) {
             revert FigurePrintOracle__RequestAlreadyExist(userAddress);
         } else if (userRecord.status == VerficationStatus.VERIFIED) {
@@ -168,8 +173,16 @@ contract FigurePrintOracle is
         emit WithDrawAmount(msg.sender, amount);
     }
 
-    function getUserRecord(address userAddress) public view returns (VerficationStatus) {
+    function getUserStatusRecord(address userAddress) public view returns (VerficationStatus) {
         return userVerficationRecord[userAddress].status;
+    }
+
+    function getUserRecord(address userAddress) public view returns (VerifcaitonRecord memory) {
+        return userVerficationRecord[userAddress];
+    }
+
+    function getLinkBalance() public view returns (uint256) {
+        return amounts[msg.sender];
     }
 
     function getUserVerification(address userAddress) public view returns (bool) {
@@ -253,6 +266,11 @@ contract FigurePrintOracle is
 
     function getVerifier() public view returns (bool) {
         return hasRole(VERIFIER_ROLE, msg.sender);
+    }
+
+    function onTokenTransfer(address sender, uint256 amount, bytes calldata data) public {
+        amounts[sender] += amount;
+        emit ReceivedCalled(sender, amount);
     }
 
     function burnUserRecord(address userAddress) public onlyVerifier nonReentrant {

@@ -9,3 +9,9 @@ export type TypeContractAddress = {
     MockOracle: string
     PTNFT: string
 }
+
+export type VerifcaitonRecord = {
+    userId: string;
+    numberTries: number; //no more the 3 request if case of Rejection
+    status: number; //
+}

@@ -13,6 +13,11 @@ export interface networkConfigInfo {
 export const networkConfig: networkConfigInfo = {
     localhost: {},
     hardhat: {},
+    mumbai: {
+        blockConfirmations: 5,
+        linkToken: "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
+        oricle: "0x022EEA14A6010167ca026B32576D6686dD7e85d2",
+    },
     goerli: {
         blockConfirmations: 5,
         linkToken: "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",

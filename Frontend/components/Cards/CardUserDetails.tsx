@@ -2,11 +2,54 @@ import React from "react";
 import PropTypes from "prop-types";
 import { faClockRotateLeft, faBan, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { toast } from "react-toastify";
+
 // components
+import { VerifcaitonRecord } from "../../class/contract"
 
 import TableDropdown from "../Dropdowns/TableDropdown";
 
-export default function CardUserDetails({ color }: any) {
+export default function CardUserDetails({ color, userRecord, web3ProviderState, userIdentityNFTContract }: any) {
+
+  async function RequestForVerification() {
+
+    if (web3ProviderState.provider == null && web3ProviderState.address) {
+      console.log("error");
+
+      toast.error("Please Connect to your wallet First");
+      return;
+    }
+    if (web3ProviderState.chainId != 5) {
+      toast.error("Please Change your network to Goerli");
+      return;
+    }
+    if (userRecord?.status == 2) {
+
+      if (web3ProviderState.web3Provider) {
+        const signer = await web3ProviderState.web3Provider.getSigner();
+        // let userIdentityNFTContract = await getUserIdentityNFT(signer)
+        // let figurePrintOracleContract = await getFigurePrintOracle(signer)
+        // console.log(await figurePrintOracleContract.getUserRecord(await signer.getAddress()));
+
+        try {
+          // console.log("_userId", _userId, "_fingurePrint", _fingurePrint);
+          if (userIdentityNFTContract) {
+            await userIdentityNFTContract.redeem();
+          }
+
+          // (await tx).wait();
+
+        } catch (error: any) {
+          console.log(error);
+
+          console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
+        }
+
+      }
+    }
+
+
+  }
   return (
     <>
       <div
@@ -121,9 +164,9 @@ export default function CardUserDetails({ color }: any) {
                   (color === "light"
                     ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                     : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
-                  Request Status :   Pending   &nbsp;&nbsp;     <FontAwesomeIcon icon={faClockRotateLeft} className="text-lg text-yellow-500 font-bold" />{" "}
-                  <FontAwesomeIcon icon={faBan} className="text-lg text-red-500 font-bold" />{" "}
-                  <FontAwesomeIcon icon={faCheckCircle} className="text-lg  text-green-500  font-bold" />{" "}
+                  Request Status :    {userRecord.status}  &nbsp;&nbsp;  {userRecord.status === 0 && <>Pending < FontAwesomeIcon icon={faClockRotateLeft} className="text-lg text-yellow-500 font-bold" /></>}
+                  {userRecord.status === 1 && <>Fail <FontAwesomeIcon icon={faBan} className="text-lg text-red-500 font-bold" /></>}
+                  {userRecord.status === "2" && <>Successful <FontAwesomeIcon icon={faCheckCircle} className="text-lg  text-green-500  font-bold" /></>}
 
                 </td>
                 <td className={
@@ -131,7 +174,13 @@ export default function CardUserDetails({ color }: any) {
                   (color === "light"
                     ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                     : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
-                  {""}&nbsp;
+                  <button className="border-0 px-3 px-2-5 my-4 placeholder-blueGray-300 text-blueGray-600 bg-white rounded border-2 text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                    type="button"
+                    onClick={() => {
+                    }}>
+
+                    Generate NFT
+                  </button>
                 </td>
 
               </tr>
@@ -147,8 +196,12 @@ export default function CardUserDetails({ color }: any) {
 
 CardUserDetails.defaultProps = {
   color: "light",
+  userRecord: {},
+  web3ProviderState: {},
+  userIdentityNFTContract: {},
+  voucher: {}
 };
 
 CardUserDetails.propTypes = {
-  color: PropTypes.oneOf(["light", "dark"]),
+  color: PropTypes.oneOf(["light", "dark"])
 };

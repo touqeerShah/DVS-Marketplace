@@ -5,7 +5,7 @@ import verify from "../instructions/verify-code"
 import { networkConfig, developmentChains, JOB_ID, contractAddressFile } from "../helper-hardhat-config"
 import { ethers } from "hardhat"
 import { storeProposalId } from "../utils/storeContractAddress"
-import { getOrcaleUrlProvider, getUserIdentityNFT } from "../instructions"
+import { getOrcaleUrlProvider, getUserIdentityNFT, getFigurePrintOracle } from "../instructions"
 
 const deployFigurePrintOracle: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     let { network, deployments, getNamedAccounts } = hre
@@ -67,12 +67,17 @@ const deployFigurePrintOracle: DeployFunction = async function (hre: HardhatRunt
         waitConfirmations: networkConfig[network.name].blockConfirmations || 1,
     })
     await storeProposalId(figurePrintOracle.address, "FigurePrintOracle", contractAddressFile)
+    let deployedFingerPrint = await getFigurePrintOracle()
+
     let tx = await userIdentityNFT.setFingerPrintAddress(figurePrintOracle.address)
     await tx.wait(1)
+    // tx = await deployedFingerPrint.setVeriferRole(userIdentityNFT.address)
+    // await tx.wait(1)
+
     log(`figurePrintOracle at ${figurePrintOracle.address}`)
-    if (!developmentChains.includes(network.name) && process.env.ETHERSCANAPIKEY) {
-        await verify(figurePrintOracle.address, args)
-    }
+    // if (!developmentChains.includes(network.name) && process.env.ETHERSCANAPIKEY) {
+    //     await verify(figurePrintOracle.address, args)
+    // }
 
 }
 

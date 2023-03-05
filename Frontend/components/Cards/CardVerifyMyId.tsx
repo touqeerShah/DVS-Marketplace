@@ -3,6 +3,11 @@ import { faFingerprint, faFile, faIdCard, faBell } from "@fortawesome/free-solid
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import CardUserDetails from "../../components/Cards/CardUserDetails";
 import { UserIdVoucherStruct } from "../../class/typechain-types/contracts/core/UserIdentityNFT";
+
+import { ethers, Signer } from "ethers";
+import { toast } from "react-toastify";
+
+
 import { ContractAddress } from "../../config/"
 
 // components
@@ -13,12 +18,13 @@ import { web3ProviderReduxState } from "./../../redux/reduces/web3ProviderRedux"
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import { toast } from "react-toastify";
 import { create } from "ipfs-http-client";
-import { useState } from "react";
-import { getUserIdentityNFT, getFigurePrintOracle } from "../../lib/getDeploy";
+import { useEffect, useState } from "react";
+
+import { getUserIdentityNFT, getFigurePrintOracle, getLinkToken } from "../../lib/getDeploy";
 import { createUserId } from "../../lib/createVoucher"
 import { getStringToBytes } from "../../lib/convert";
+import { VerifcaitonRecord } from "../../class/contract"
 import {
   SIGNING_DOMAIN_NAME,
   SIGNING_DOMAIN_VERSION,
@@ -26,6 +32,7 @@ import {
   INFURA_IPFS_PROJECJECT_ID,
   INFURA_IPFS_PROJECJECT_SECRET
 } from "../../lib/config"
+import { KeyObject } from "crypto";
 
 export default function CardVerifyMyId(props: any) {
   let web3ProviderState: StateType = useAppSelector(web3ProviderReduxState);
@@ -36,6 +43,13 @@ export default function CardVerifyMyId(props: any) {
   const formOptions = { resolver: yupResolver(validationSchema) };
   const { register, handleSubmit, formState } = useForm(formOptions);
   const [url, setURL] = useState("")
+
+  const [userIdentityNFTContract, setUserIdentityNFTContract] = useState<ethers.Contract>()
+  const [figurePrintOracleContract, setFigurePrintOracleContract] = useState<ethers.Contract>()
+  const [linkToken, setLinkToken] = useState<ethers.Contract>()
+
+  const [userRecord, setUserRecord] = useState<VerifcaitonRecord>()
+  const [userLinkBalance, setUserLinkBalance] = useState(0)
 
 
   const projectIdAndSecret = `${INFURA_IPFS_PROJECJECT_ID}:${INFURA_IPFS_PROJECJECT_SECRET}`;
@@ -50,6 +64,42 @@ export default function CardVerifyMyId(props: any) {
     },
   });
 
+  useEffect(() => {
+    const fetchData = async () => {
+
+      if (web3ProviderState.web3Provider) {
+        const signer = await web3ProviderState.web3Provider.getSigner();
+        let userIdentityNFTContract = await getUserIdentityNFT(signer)
+        setUserIdentityNFTContract(userIdentityNFTContract)
+        let figurePrintOracleContract = await getFigurePrintOracle(signer)
+        setFigurePrintOracleContract(figurePrintOracleContract)
+        let linkToken = await getLinkToken(signer)
+        setLinkToken(linkToken)
+
+        let userRecord: any = await figurePrintOracleContract.getUserRecord(web3ProviderState.address)
+        console.log("userRecord === > ", Object.keys(userRecord));
+        console.log("userRecord === > ", (Number(userRecord["0"])));
+        console.log(" userRecord[]", userRecord["2"].toString());
+
+
+        // let userLinkBalance = await figurePrintOracleContract.getLinkBalance()
+
+        setUserLinkBalance(userLinkBalance)
+        setUserRecord({
+          userId: userRecord["0"].toString(),
+          numberTries: userRecord["1"].toString(), //no more the 3 request if case of Rejection
+          status: userRecord["2"].toString() //
+        })
+      }
+    }
+
+    if (!figurePrintOracleContract) {
+      console.log('figurePrintOracleContract', figurePrintOracleContract);
+
+      fetchData()
+    }
+  }, [web3ProviderState])
+
   async function RequestForVerification() {
 
     if (web3ProviderState.provider == null && web3ProviderState.address) {
@@ -62,66 +112,82 @@ export default function CardVerifyMyId(props: any) {
       toast.error("Please Change your network to Goerli");
       return;
     }
-    let voucher: Partial<UserIdVoucherStruct> = {};
+    if (userRecord?.status == 0 || (userRecord?.status == 3 && userRecord?.numberTries < 3)) {
+      let voucher: Partial<UserIdVoucherStruct> = {};
 
-    if (web3ProviderState.web3Provider) {
-      const signer = await web3ProviderState.web3Provider.getSigner();
-      let userIdentityNFTContract = await getUserIdentityNFT(signer)
-      let figurePrintOracleContract = await getFigurePrintOracle(signer)
-      console.log(await figurePrintOracleContract.getUserRecord(await signer.getAddress()));
+      if (web3ProviderState.web3Provider) {
+        const signer = await web3ProviderState.web3Provider.getSigner();
+        // let userIdentityNFTContract = await getUserIdentityNFT(signer)
+        // let figurePrintOracleContract = await getFigurePrintOracle(signer)
+        // console.log(await figurePrintOracleContract.getUserRecord(await signer.getAddress()));
 
-      const _userId = getStringToBytes(props.username)
-      const _fingurePrint = getStringToBytes(props.fingerPrintHash)
-      let imageObject = JSON.stringify({
-        image: "",
-        firstName: props.firstName,
-        lastName: props.lastName,
-        aboutMe: props.aboutMe,
-        username: props.username,
-      })
-      let uri: string = ""
-      try {
-        const added = await client.add(imageObject);
-        // ipfs = `${INFURA_GATEWAY_URL}${added.path}`;
-        uri = `https://ipfs.io/ipfs/${added.path}`
-        setURL(uri)
-      } catch (error) {
-        toast.error("something is wrong with IPFS")
-        return "";
+        const _userId = getStringToBytes(props.username)
+        const _fingurePrint = getStringToBytes(props.fingerPrintHash)
+        let imageObject = JSON.stringify({
+          image: "",
+          firstName: props.firstName,
+          lastName: props.lastName,
+          aboutMe: props.aboutMe,
+          username: props.username,
+        })
+        let uri: string = ""
+        try {
+          const added = await client.add(imageObject);
+          // ipfs = `${INFURA_GATEWAY_URL}${added.path}`;
+          uri = `https://ipfs.io/ipfs/${added.path}`
+          setURL(uri)
+        } catch (error) {
+          toast.error("something is wrong with IPFS")
+          return "";
+        }
+        try {
+
+          voucher = (await createUserId(
+            signer,
+            _userId,
+            url,
+            _fingurePrint,
+            SIGNING_DOMAIN_NAME,
+            SIGNING_DOMAIN_VERSION,
+            web3ProviderState.chainId.toString(),
+            ContractAddress.UserIdentityNFT
+          )) as UserIdVoucherStruct;
+
+          console.log("url", url);
+
+          console.log("voucher", voucher);
+        } catch (error: any) {
+          console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
+          toast.error(error.message.substring(0, error.message.indexOf("(")))
+        }
+
+        try {
+          let isLinkTransfer = false
+          if (userLinkBalance < ethers.parseEther("0.1")) {
+            if (linkToken) {
+              // await linkToken.transfer(ContractAddress.UserIdentityNFT)
+              let tx = await linkToken.transferAndCall(ContractAddress.FigurePrintOracle, ethers.parseEther("0.1"), _userId)
+
+              isLinkTransfer = true;
+            }
+          } else {
+            isLinkTransfer = true;
+          }
+          // console.log("_userId", _userId, "_fingurePrint", _fingurePrint);
+          if (userIdentityNFTContract && isLinkTransfer) {
+            ethers.parseEther("0.1")
+            await userIdentityNFTContract.verifyFingerPrint(_userId, _fingurePrint);
+          }
+
+          // (await tx).wait();
+
+        } catch (error: any) {
+          console.log(error);
+
+          console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
+        }
+
       }
-      try {
-
-        voucher = (await createUserId(
-          signer,
-          _userId,
-          url,
-          _fingurePrint,
-          SIGNING_DOMAIN_NAME,
-          SIGNING_DOMAIN_VERSION,
-          web3ProviderState.chainId.toString(),
-          ContractAddress.UserIdentityNFT
-        )) as UserIdVoucherStruct;
-
-        console.log("url", url);
-
-        console.log("voucher", voucher);
-      } catch (error: any) {
-        console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
-        toast.error(error.message.substring(0, error.message.indexOf("(")))
-      }
-
-      try {
-        // console.log("_userId", _userId, "_fingurePrint", _fingurePrint);
-
-        await userIdentityNFTContract.verifyFingerPrint(_userId, _fingurePrint);
-        // (await tx).wait();
-
-      } catch (error: any) {
-        console.log(error);
-
-        console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
-      }
-
     }
 
 
@@ -131,9 +197,9 @@ export default function CardVerifyMyId(props: any) {
   return (
     <>
       <div className="relative border-2 flex flex-col min-w-0 break-words w-full mt-6 shadow-lg rounded-lg bg-blueGray-100 border-0">
-        {isApply && <CardUserDetails />}
+        {userRecord?.status !== 0 && <CardUserDetails web3ProviderState={web3ProviderState} userIdentityNFTContract={userIdentityNFTContract} userRecord={userRecord} voucher={{}} />}
 
-        {!isApply &&
+        {userRecord?.status === 0 &&
           <><div className="rounded-t bg-white mb-0 px-6 py-6">
             <div className="text-center flex justify-between">
               <h6 className="text-blueGray-700 text-xl font-bold">My account</h6>

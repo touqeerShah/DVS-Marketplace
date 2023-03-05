@@ -16,6 +16,18 @@ interface IDocumentSignature {
         uint64 signatureStart;
         uint64 signatureEnd;
     }
+    struct DocumentDetialsWithSigature {
+        address creator;
+        bytes name;
+        bytes description;
+        Party[] parties;
+        DocumentState status;
+        uint64 signatureStart;
+        uint64 signatureEnd;
+        uint256 documentId;
+        string uri;
+        bytes[] signatures;
+    }
     struct Party {
         uint256 tokenId;
         SignatureStatus status;
@@ -45,7 +57,7 @@ interface IDocumentSignature {
         address indexed creator
     );
     event DocumentProcess(uint256 indexed documentId, bool indexed isValidation);
-
+    event DocumentProcessWithSignature(uint256 indexed documentId, DocumentState status);
     // Error
     error DocumentSignature__CreatorIdentityNotExit(address creator);
     error DocumentSignature__StartingAndEndingValuesNotSome(uint64 start, uint64 end);
@@ -64,11 +76,15 @@ interface IDocumentSignature {
         uint256[] memory partiesTokenId
     ) external;
 
-    function processDocument(
-        uint256 documentId,
-        // uint256[] memory tokenIds,
-        bytes[] memory signatures,
-        bool isValidation
+    // function processDocument(
+    //     uint256 documentId,
+    //     // uint256[] memory tokenIds,
+    //     bytes[] memory signatures,
+    //     bool isValidation
+    // ) external;
+
+    function processDocumentWithSignature(
+        DocumentDetialsWithSigature calldata documentDetialsWithSigature
     ) external;
 
     function getDocumentDetails(uint256 documentId) external view returns (DocumentDetials memory);

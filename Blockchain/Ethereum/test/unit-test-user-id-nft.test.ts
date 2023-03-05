@@ -20,6 +20,7 @@ describe("FigurePrintOracle", async function () {
   let deployer4: Signer
   let deployer5: Signer
   let deployer6: Signer //0x0308b55f7bACa0324Ba6Ff06b22Af1B4e5d71a74
+  let deployer7: Signer //0x0308b55f7bACa0324Ba6Ff06b22Af1B4e5d71a74
 
   let linkToken: LinkToken;
   let figurePrintOracle: FigurePrintOracle;
@@ -27,7 +28,7 @@ describe("FigurePrintOracle", async function () {
   let voucher: UserIdVoucherStruct;
 
   before(async () => {
-    [deployer, deployer2, deployer3, deployer4, deployer5, deployer6] = await ethers.getSigners(); // could also do with getNamedAccounts
+    [deployer, deployer2, deployer3, deployer4, deployer5, deployer6, deployer7] = await ethers.getSigners(); // could also do with getNamedAccounts
     linkToken = await getLinkToken();
     figurePrintOracle = await getFigurePrintOracle();
     const _userId = getStringToBytes("7d80a6386ef543a3abb52817f6707e3b")
@@ -53,29 +54,34 @@ describe("FigurePrintOracle", async function () {
       await expect(userIdentityNFT.connect(deployer).transferFrom(address, address, 2, { gasLimit: 3e7 })).to.revertedWithCustomError(userIdentityNFT, "UserIdentityNFT__TransferNoAllowed").withArgs(2, address)
     });
 
-    it("Fund figurePrint Oracle with Link", async function () {
-      let sendEther: BigNumber = ethers.utils.parseEther("1")
+    it("Fund figurePrint Oracle with Link with callback", async function () {
+      let sendEther: BigNumber = ethers.utils.parseEther("0.1")
+      const data = getStringToBytes("")
+      console.log("data", data, figurePrintOracle.address);
 
-      let tx = await linkToken.transfer(figurePrintOracle.address, sendEther)
+
+
+      let tx = await linkToken.connect(deployer).transferAndCall(figurePrintOracle.address, sendEther, data)
       var txReceipt = await tx.wait(1) // waits 1 block
-
-      let balance = await linkToken.balanceOf(figurePrintOracle.address)
+      let balance = await figurePrintOracle.getLinkBalance()
       const ethValue = ethers.utils.formatEther(balance);
       console.log("url => ", ethValue);
-      assert.equal(ethValue, "1.0")
+      assert.equal(ethValue, "0.1")
 
     });
-    // it("Check verifySignature", async function () {
-    //   const signer = await userIdentityNFT.connect(deployer2).verifySignature(voucher);
-    //   let address = await deployer.getAddress()
-    //   console.log("signer", signer, "address", address);
+    it("Check User NFT Balance", async function () {
+      const balance = await userIdentityNFT.connect(deployer).balanceOf(await deployer.getAddress());
+      // let address = await deployer.getAddress()
+      console.log("address", balance);
 
-    //   assert.equal(signer, (address));
-    // });
+      // assert.equal(signer, (address));
+    });
     it("Check Fingerprint Address", async function () {
-      const signer = await userIdentityNFT.connect(deployer2).getFingerPrintAddress();
+      const signer = await userIdentityNFT.connect(deployer).getFingerPrintAddress();
 
-      console.log("signer", signer);
+      const getLinkBalance = await figurePrintOracle.connect(deployer).getLinkBalance();
+
+      console.log("signer", getLinkBalance);
 
     });
 
@@ -159,7 +165,7 @@ describe("FigurePrintOracle", async function () {
           console.log("VerifationResponse event fired!")
           try {
             // add our asserts here
-            const userData = await figurePrintOracle.connect(deployer).getUserRecord(userAddres)
+            const userData = await figurePrintOracle.connect(deployer).getUserStatusRecord(userAddres)
             console.log("userData =>", userData)
 
             assert.equal(userData, 2);

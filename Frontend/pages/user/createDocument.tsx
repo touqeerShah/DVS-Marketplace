@@ -2,7 +2,6 @@ import React from "react";
 import { useState, useEffect } from 'react'
 
 // components
-
 import CreateDocumentDetails from "../../components/Document/CreateDocumentDetails";
 import { TypeDocumentSignerFields } from "./../../class/document"
 
@@ -14,17 +13,6 @@ export default function VerifyId() {
   let [documentSignerFieldsState, setDocumentSignerFieldsState] = useState<TypeDocumentSignerFields[]>([]);
   let [documentSignerDivCountState, setDocumentSignerDivCountState] = useState(0);
 
-  let [username, setUsername] = useState("");
-  let [email, setEmail] = useState("")
-  let [fingerPrintHash, setFingerPrintHash] = useState("")
-  let [firstName, setFirstName] = useState("")
-  let [lastName, setLastName] = useState("")
-  let [address, setAddress] = useState("")
-  let [country, setCountry] = useState("")
-  let [city, setCity] = useState("")
-
-  let [postalCode, setPostalCode] = useState("")
-  let [aboutMe, setAboutMe] = useState("")
   let addParameterFields = () => {
     // setParameterDivCountState(parameterDivCountState + 1);
 
@@ -35,14 +23,14 @@ export default function VerifyId() {
     setDocumentSignerDivCountState(documentSignerDivCountState + 1);
 
   }
+
+
   useEffect(() => {
     console.log("out", documentSignerFieldsState.length);
 
     if (documentSignerFieldsState.length == 0) {
       addParameterFields()
       console.log("in");
-
-
     }
 
   }, [])

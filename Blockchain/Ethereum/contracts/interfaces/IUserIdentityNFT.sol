@@ -7,6 +7,8 @@ import "./../libraries/UserIdentityNFT.sol";
 interface IUserIdentityNFT {
     //Events
     event IdVerifedAndIssued(bytes indexed userId, address userAddres);
+    event IssueDigitalIdentity(bytes indexed userId, address userAddres, uint256 tokenId);
+
     event SetFingerPrintAddress(address figureprintOracle);
 
     // Error

@@ -26,14 +26,14 @@ contract UserIdentityNFT is ERC721URIStorage, ReentrancyGuard, ERC721Votes, IUse
         string memory signingDomain,
         string memory signatureVersion
     ) ERC721(name, symbol) EIP712(signingDomain, signatureVersion) {
-        idCount.increment();
-        uint256 tokenId = idCount.current();
-        super._mint(msg.sender, tokenId);
+        // idCount.increment();
+        // uint256 tokenId = idCount.current();
+        // super._mint(msg.sender, tokenId);
     }
 
     // The functions below are overrides required by Solidity.
     function verifyFingerPrint(bytes memory userId, bytes memory fingerPrint) public {
-        checkBalance();
+        this.checkBalance();
         IFigurePrintOracle(figureprintOracle).verifyFingerPrint(msg.sender, userId, fingerPrint);
         emit IdVerifedAndIssued(userId, msg.sender);
     }
@@ -50,7 +50,9 @@ contract UserIdentityNFT is ERC721URIStorage, ReentrancyGuard, ERC721Votes, IUse
     /// @notice Redeems an NFTVoucher for an actual NFT, creating it in the process.
 
     function redeem(UserIdVoucher calldata voucher) public {
-        VerficationStatus status = IFigurePrintOracle(figureprintOracle).getUserRecord(msg.sender);
+        VerficationStatus status = IFigurePrintOracle(figureprintOracle).getUserStatusRecord(
+            msg.sender
+        );
         if (status == VerficationStatus.DEAFULT) {
             revert UserIdentityNFT__FirstVerifyIdenetity();
         } else if (status == VerficationStatus.PENDING) {
@@ -64,7 +66,7 @@ contract UserIdentityNFT is ERC721URIStorage, ReentrancyGuard, ERC721Votes, IUse
         uint256 tokenId = idCount.current();
         _mint(msg.sender, tokenId);
         _setTokenURI(tokenId, voucher.uri);
-        emit IdVerifedAndIssued(voucher.userId, msg.sender);
+        emit IssueDigitalIdentity(voucher.userId, msg.sender, tokenId);
     }
 
     /// @notice Redeems an NFTVoucher for an actual NFT, creating it in the process.
@@ -77,9 +79,7 @@ contract UserIdentityNFT is ERC721URIStorage, ReentrancyGuard, ERC721Votes, IUse
     }
 
     function checkBalance() public view {
-        if (balanceOf(msg.sender) > 0) {
-            revert UserIdentityNFT__UserIdAlreadyIssued(msg.sender);
-        }
+        require(super.balanceOf(msg.sender) == 0, "Card Digital Card Already issued");
     }
 
     function _hash(UserIdVoucher calldata voucher) internal view returns (bytes32) {

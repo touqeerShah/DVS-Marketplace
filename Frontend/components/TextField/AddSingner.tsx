@@ -47,12 +47,12 @@ export default function AddParameter(props: any) {
                         className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
                         htmlFor="grid-password"
                     >
-                        Code Oracle
+                        Signer User Id (NFT Token ID)
                     </label>
                     <input
                         type="text"
                         key={props.id}
-                        name={"codeOracle"}
+                        name={"userId"}
                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                         defaultValue=""
                         onChange={(e: React.FormEvent<HTMLInputElement>) => {

@@ -9,12 +9,15 @@ import Navbar from "../components/Navbars/IndexNavbar";
 import Sidebar from "../components/Sidebar/Sidebar";
 import HeaderStats from "../components/Headers/HeaderStats";
 import FooterAdmin from "../components/Footers/FooterAdmin";
+import { SUBGRAPH_URL } from "./../lib/config";
+
 
 export default function Admin({
   children,
 }: {
   children: React.ReactNode
 }) {
+
   return (
     <>
       <Sidebar />
@@ -28,6 +31,7 @@ export default function Admin({
         </div>
         <ToastContainer />
       </div>
+
     </>
   );
 }

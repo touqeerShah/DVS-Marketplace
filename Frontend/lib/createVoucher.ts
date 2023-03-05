@@ -1,16 +1,17 @@
 import { VoidSigner, Signer } from "@ethersproject/abstract-signer";
 // import { Signer } from "ethers";
 
-export async function castVote(
+export async function createDocument(
   signer: Signer,
-  tokenId: number,
+  creator: string,
+  uri: string,
   documentId: number,
   signingDomain: string,
   signatureVersion: string,
   chainId: string,
   contractAddress: string
 ) {
-  const voucher = { tokenId, documentId };
+  const voucher = { creator, documentId, uri };
   const domain = {
     name: signingDomain,
     version: signatureVersion,
@@ -19,8 +20,9 @@ export async function castVote(
   };
   const types = {
     createDocument: [
-      { name: "tokenId", type: "uint256" },
+      { name: "creator", type: "address" },
       { name: "documentId", type: "uint256" },
+      { name: "uri", type: "string" },
     ],
   };
   const signature = await (signer as VoidSigner)._signTypedData(domain, types, voucher);

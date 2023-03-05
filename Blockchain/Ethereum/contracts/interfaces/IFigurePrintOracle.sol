@@ -21,6 +21,7 @@ interface IFigurePrintOracle {
     event SetVeriferRole(address indexed verifer);
 
     // Error
+    error FigurePrintOracle__InsufficientBalance(address userAddress);
     error FigurePrintOracle__RequestAlreadyExist(address userAddress);
     error FigurePrintOracle__VerficationAlreadyDone(address userAddress);
     error FigurePrintOracle__ExceedNumberTries(address userAddress);
@@ -30,13 +31,15 @@ interface IFigurePrintOracle {
 
     function verifyFingerPrint(
         address userAddress,
-        bytes calldata userId,
-        bytes calldata fingerPrint
+        bytes memory userId,
+        bytes memory fingerPrint
     ) external;
 
     function withdrawLink() external payable;
 
-    function getUserRecord(address userAddress) external view returns (VerficationStatus);
+    function getUserStatusRecord(address userAddress) external view returns (VerficationStatus);
+
+    function getUserRecord(address userAddress) external view returns (VerifcaitonRecord memory);
 
     function getUserVerification(address userAddress) external returns (bool);
 
@@ -59,6 +62,8 @@ interface IFigurePrintOracle {
     function getJobId() external view returns (bytes32);
 
     function getFee() external view returns (uint256);
+
+    function getLinkBalance() external view returns (uint256);
 
     function getVerifier() external view returns (bool);
 
