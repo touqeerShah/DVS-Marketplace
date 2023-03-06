@@ -1,0 +1,4 @@
+{
+    "type": "external",
+    "label": "${CC_NAME}_${SEQUENCE}"
+}

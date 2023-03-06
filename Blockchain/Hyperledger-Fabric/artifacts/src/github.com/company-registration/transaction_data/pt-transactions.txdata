@@ -1,0 +1,44 @@
+[
+    {
+        "transactionName": "ptExists",
+        "transactionLabel": "A test ptExists transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "createPt",
+        "transactionLabel": "A test createPt transaction",
+        "arguments": [
+            "001",
+            "some value"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "readPt",
+        "transactionLabel": "A test readPt transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "updatePt",
+        "transactionLabel": "A test updatePt transaction",
+        "arguments": [
+            "001",
+            "some other value"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "deletePt",
+        "transactionLabel": "A test deletePt transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    }
+]
