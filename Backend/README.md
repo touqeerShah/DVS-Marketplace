@@ -1,11 +1,11 @@
-# Minting ERC1155 NFT and Farming
+# pt-bc-conn-service
 
-## Architecture
+# Key Store in couchdb
 
-![image info](./public/architecture.png)
+<!-- https://towardsdatascience.com/store-hyperledger-fabric-certificates-and-keys-in-couchdb-43c8f91a61b0 -->
+<!--
+                "key": "../artifacts/channel/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore",
+                "cert": "../artifacts/channel/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts" -->
 
-# Thank you!
-
-[![Touqeer Medium](https://img.shields.io/badge/Medium-000000?style=for-the-badge&logo=medium&logoColor=white)](https://medium.com/@touqeershah32)
-[![Touqeer YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/channel/UC3oUDpfMOBefugPp4GADyUQ)
-[![Touqeer Linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/touqeer-shah/)
+Checj websockert working
+wscat -c "ws://ae92a3e258a1e4201ae868ffa18aabaa-638756542.eu-central-1.elb.amazonaws.com:8080"

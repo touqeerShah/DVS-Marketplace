@@ -1,0 +1,672 @@
+{ 
+    "_id" : ObjectId("628cd3b5c402d62d4e82866e"), 
+    "channel" : "mychannel", 
+    "functionName" : "createUser", 
+    "isCreator" : "true", 
+    "schema" : {
+        "type" : "object", 
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            }, 
+            "apiName" : {
+                "type" : "string"
+            }, 
+            "parameters" : {
+                "type" : "object"
+            }, 
+            "userId" : {
+                "type" : "string"
+            }, 
+            "organization" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "transactionCode", 
+            "apiName", 
+            "parameters", 
+            "userId", 
+            "organization"
+        ], 
+        "additionalProperties" : true
+    }, 
+    "parameters" : {
+        "type" : "object", 
+        "properties" : {
+            "id" : {
+                "type" : "string"
+            }, 
+            "userRole" : {
+                "type" : "string"
+            }, 
+            "status" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "id", 
+            "userRole", 
+            "status"
+        ], 
+        "additionalProperties" : false
+    }, 
+    "apiName" : "registerAdmin", 
+    "contractName" : "user-managment"
+}
+{ 
+    "_id" : ObjectId("628e07f7c402d62d4e82868d"), 
+    "channel" : "mychannel", 
+    "functionName" : "createCompany", 
+    "contractName" : "company-registration", 
+    "schema" : {
+        "type" : "object", 
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            }, 
+            "apiName" : {
+                "type" : "string"
+            }, 
+            "parameters" : {
+                "type" : "object"
+            }, 
+            "userId" : {
+                "type" : "string"
+            }, 
+            "organization" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "transactionCode", 
+            "apiName", 
+            "parameters", 
+            "userId", 
+            "organization"
+        ], 
+        "additionalProperties" : true
+    }, 
+    "parameters" : {
+        "type" : "object", 
+        "properties" : {
+            "companyName" : {
+                "type" : "string"
+            }, 
+            "currency" : {
+                "type" : "string"
+            }, 
+            "licenseNumber" : {
+                "type" : "string"
+            }, 
+            "licenseIssuingAgency" : {
+                "type" : "string"
+            }, 
+            "networkId" : {
+                "type" : "string"
+            }, 
+            "status" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "companyName", 
+            "currency", 
+            "licenseNumber", 
+            "licenseIssuingAgency", 
+            "networkId", 
+            "status"
+        ], 
+        "additionalProperties" : false
+    }, 
+    "apiName" : "createCompany"
+}
+{ 
+    "_id" : ObjectId("62961e28deed5b013b591108"), 
+    "channel" : "pharmatrace", 
+    "functionName" : "", 
+    "schema" : {
+        "type" : "object", 
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            }, 
+            "apiName" : {
+                "type" : "string"
+            }, 
+            "parameters" : {
+                "type" : "object"
+            }, 
+            "organization" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "transactionCode", 
+            "apiName", 
+            "parameters", 
+            "organization"
+        ], 
+        "additionalProperties" : true
+    }, 
+    "parameters" : {
+        "type" : "object", 
+        "properties" : {
+            "id" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "id"
+        ], 
+        "additionalProperties" : false
+    }, 
+    "apiName" : "enrollAdmin", 
+    "contractName" : ""
+}
+{ 
+    "_id" : ObjectId("62974038b7efc221d9a1b929"), 
+    "channel" : "mychannel", 
+    "functionName" : "createTransaction", 
+    "contractName" : "company-registration", 
+    "schema" : {
+        "type" : "object", 
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            }, 
+            "apiName" : {
+                "type" : "string"
+            }, 
+            "parameters" : {
+                "type" : "object"
+            }, 
+            "userId" : {
+                "type" : "string"
+            }, 
+            "organization" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "transactionCode", 
+            "apiName", 
+            "parameters", 
+            "userId", 
+            "organization"
+        ], 
+        "additionalProperties" : true
+    }, 
+    "parameters" : {
+        "type" : "object", 
+        "properties" : {
+            "transactionId" : {
+                "type" : "string"
+            }, 
+            "encryptedData" : {
+                "type" : "string"
+            }, 
+            "status" : {
+                "type" : "string"
+            }, 
+            "allowToView" : {
+                "type" : "array"
+            }
+        }, 
+        "required" : [
+            "transactionId", 
+            "encryptedData", 
+            "status", 
+            "allowToView"
+        ], 
+        "additionalProperties" : false
+    }, 
+    "apiName" : "createTransaction"
+}
+{ 
+    "_id" : ObjectId("62977bcc46e3991efc235f2a"), 
+    "channel" : "mychannel", 
+    "functionName" : "updateCompanyStatus", 
+    "contractName" : "company-registration", 
+    "schema" : {
+        "type" : "object", 
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            }, 
+            "apiName" : {
+                "type" : "string"
+            }, 
+            "parameters" : {
+                "type" : "object"
+            }, 
+            "userId" : {
+                "type" : "string"
+            }, 
+            "organization" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "transactionCode", 
+            "apiName", 
+            "parameters", 
+            "userId", 
+            "organization"
+        ], 
+        "additionalProperties" : true
+    }, 
+    "parameters" : {
+        "type" : "object", 
+        "properties" : {
+            "companyid" : {
+                "type" : "string"
+            }, 
+            "newStatus" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "companyid", 
+            "newStatus"
+        ], 
+        "additionalProperties" : false
+    }, 
+    "apiName" : "updateCompanyStatus"
+}
+{ 
+    "_id" : ObjectId("62977bfc46e3991efc235f2b"), 
+    "channel" : "mychannel", 
+    "functionName" : "addAllowToView", 
+    "contractName" : "company-registration", 
+    "schema" : {
+        "type" : "object", 
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            }, 
+            "apiName" : {
+                "type" : "string"
+            }, 
+            "parameters" : {
+                "type" : "object"
+            }, 
+            "userId" : {
+                "type" : "string"
+            }, 
+            "organization" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "transactionCode", 
+            "apiName", 
+            "parameters", 
+            "userId", 
+            "organization"
+        ], 
+        "additionalProperties" : true
+    }, 
+    "parameters" : {
+        "type" : "object", 
+        "properties" : {
+            "transactionId" : {
+                "type" : "string"
+            }, 
+            "allowToView" : {
+                "type" : "array"
+            }
+        }, 
+        "required" : [
+            "transactionId", 
+            "allowToView"
+        ], 
+        "additionalProperties" : false
+    }, 
+    "apiName" : "addAllowToView"
+}
+{ 
+    "_id" : ObjectId("62977c2d46e3991efc235f2c"), 
+    "channel" : "mychannel", 
+    "functionName" : "suspendAllowToView", 
+    "contractName" : "company-registration", 
+    "schema" : {
+        "type" : "object", 
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            }, 
+            "apiName" : {
+                "type" : "string"
+            }, 
+            "parameters" : {
+                "type" : "object"
+            }, 
+            "userId" : {
+                "type" : "string"
+            }, 
+            "organization" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "transactionCode", 
+            "apiName", 
+            "parameters", 
+            "userId", 
+            "organization"
+        ], 
+        "additionalProperties" : true
+    }, 
+    "parameters" : {
+        "type" : "object", 
+        "properties" : {
+            "transactionId" : {
+                "type" : "string"
+            }, 
+            "permissionUserId" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "transactionId", 
+            "permissionUserId"
+        ], 
+        "additionalProperties" : false
+    }, 
+    "apiName" : "suspendAllowToView"
+}
+{ 
+    "_id" : ObjectId("62977cac46e3991efc235f2d"), 
+    "channel" : "mychannel", 
+    "functionName" : "activateAllowToView", 
+    "contractName" : "company-registration", 
+    "schema" : {
+        "type" : "object", 
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            }, 
+            "apiName" : {
+                "type" : "string"
+            }, 
+            "parameters" : {
+                "type" : "object"
+            }, 
+            "userId" : {
+                "type" : "string"
+            }, 
+            "organization" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "transactionCode", 
+            "apiName", 
+            "parameters", 
+            "userId", 
+            "organization"
+        ], 
+        "additionalProperties" : true
+    }, 
+    "parameters" : {
+        "type" : "object", 
+        "properties" : {
+            "transactionId" : {
+                "type" : "string"
+            }, 
+            "permissionUserId" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "transactionId", 
+            "permissionUserId"
+        ], 
+        "additionalProperties" : false
+    }, 
+    "apiName" : "activateAllowToView"
+}
+{ 
+    "_id" : ObjectId("62977f0546e3991efc235f2e"), 
+    "channel" : "mychannel", 
+    "functionName" : "getCompanyDetails", 
+    "contractName" : "company-registration", 
+    "schema" : {
+        "type" : "object", 
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            }, 
+            "apiName" : {
+                "type" : "string"
+            }, 
+            "parameters" : {
+                "type" : "object"
+            }, 
+            "userId" : {
+                "type" : "string"
+            }, 
+            "organization" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "transactionCode", 
+            "apiName", 
+            "parameters", 
+            "userId", 
+            "organization"
+        ], 
+        "additionalProperties" : true
+    }, 
+    "parameters" : {
+        "type" : "object", 
+        "properties" : {
+            "companyid" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "companyid"
+        ], 
+        "additionalProperties" : false
+    }, 
+    "apiName" : "getCompanyDetails"
+}
+{ 
+    "_id" : ObjectId("62977f7846e3991efc235f2f"), 
+    "channel" : "mychannel", 
+    "functionName" : "getTransaction", 
+    "contractName" : "company-registration", 
+    "schema" : {
+        "type" : "object", 
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            }, 
+            "apiName" : {
+                "type" : "string"
+            }, 
+            "parameters" : {
+                "type" : "object"
+            }, 
+            "userId" : {
+                "type" : "string"
+            }, 
+            "organization" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "transactionCode", 
+            "apiName", 
+            "parameters", 
+            "userId", 
+            "organization"
+        ], 
+        "additionalProperties" : true
+    }, 
+    "parameters" : {
+        "type" : "object", 
+        "properties" : {
+            "transactionId" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "transactionId"
+        ], 
+        "additionalProperties" : false
+    }, 
+    "apiName" : "getTransaction"
+}
+{ 
+    "_id" : ObjectId("6297807546e3991efc235f30"), 
+    "channel" : "mychannel", 
+    "functionName" : "updateUserStatus", 
+    "contractName" : "user-managment", 
+    "schema" : {
+        "type" : "object", 
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            }, 
+            "apiName" : {
+                "type" : "string"
+            }, 
+            "parameters" : {
+                "type" : "object"
+            }, 
+            "userId" : {
+                "type" : "string"
+            }, 
+            "organization" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "transactionCode", 
+            "apiName", 
+            "parameters", 
+            "userId", 
+            "organization"
+        ], 
+        "additionalProperties" : true
+    }, 
+    "parameters" : {
+        "type" : "object", 
+        "properties" : {
+            "userid" : {
+                "type" : "string"
+            }, 
+            "newStatus" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "userid", 
+            "newStatus"
+        ], 
+        "additionalProperties" : false
+    }, 
+    "apiName" : "updateUserStatus"
+}
+{ 
+    "_id" : ObjectId("629780c946e3991efc235f32"), 
+    "channel" : "mychannel", 
+    "functionName" : "updateUserRole", 
+    "contractName" : "user-managment", 
+    "schema" : {
+        "type" : "object", 
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            }, 
+            "apiName" : {
+                "type" : "string"
+            }, 
+            "parameters" : {
+                "type" : "object"
+            }, 
+            "userId" : {
+                "type" : "string"
+            }, 
+            "organization" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "transactionCode", 
+            "apiName", 
+            "parameters", 
+            "userId", 
+            "organization"
+        ], 
+        "additionalProperties" : true
+    }, 
+    "parameters" : {
+        "type" : "object", 
+        "properties" : {
+            "userid" : {
+                "type" : "string"
+            }, 
+            "newRole" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "userid", 
+            "newRole"
+        ], 
+        "additionalProperties" : false
+    }, 
+    "apiName" : "updateUserRole"
+}
+{ 
+    "_id" : ObjectId("6297812946e3991efc235f37"), 
+    "channel" : "mychannel", 
+    "functionName" : "getUser", 
+    "contractName" : "user-managment", 
+    "schema" : {
+        "type" : "object", 
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            }, 
+            "apiName" : {
+                "type" : "string"
+            }, 
+            "parameters" : {
+                "type" : "object"
+            }, 
+            "userId" : {
+                "type" : "string"
+            }, 
+            "organization" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "transactionCode", 
+            "apiName", 
+            "parameters", 
+            "userId", 
+            "organization"
+        ], 
+        "additionalProperties" : true
+    }, 
+    "parameters" : {
+        "type" : "object", 
+        "properties" : {
+            "userid" : {
+                "type" : "string"
+            }
+        }, 
+        "required" : [
+            "userid"
+        ], 
+        "additionalProperties" : false
+    }, 
+    "apiName" : "getUser"
+}

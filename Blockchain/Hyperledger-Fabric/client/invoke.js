@@ -61,7 +61,7 @@ async function main() {
     //For Company Registration Contract
 
     // var arr =
-    //   '{"companyId":"pharmaTrace","companyName":"evonik","address":"786","status":"activated"}';
+    //   '{"companyId":"dvs","companyName":"evonik","address":"786","status":"activated"}';
     // await contract
     //   .createTransaction("createCompany")
     //   .setEndorsingPeers(myOrgPeers)

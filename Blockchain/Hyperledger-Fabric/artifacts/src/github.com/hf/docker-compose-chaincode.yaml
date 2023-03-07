@@ -1,0 +1,19 @@
+version: "3.6"
+
+networks:
+    artifacts_test:
+        external: true
+
+services:
+    company-registration.org1.example.com:
+        container_name:  hf.org1.example.com
+        hostname:  hf.org1.example.com
+        image: hyperledger/hf
+        volumes:
+            - ./:/crypto
+        env_file:
+            - chaincode.env
+        networks:
+            artifacts_test:
+        expose:
+            - 9999

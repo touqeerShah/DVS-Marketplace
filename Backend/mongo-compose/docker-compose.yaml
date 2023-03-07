@@ -1,0 +1,19 @@
+version: "3.5"
+services:
+  mongodb:
+    # build: ./mongodb
+    image: mongo:latest
+    container_name: dvs-mongo
+    command: mongod --auth
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_PASSWORD: dvs
+      MONGO_INITDB_ROOT_USERNAME: dvs
+      MONGO_INITDB_DATABASE: admin
+      MONGO_USERNAME: dvs
+      MONGO_PASSWORD: dvs
+      MONGO_DATABASE: dvs
+    volumes:
+     - /etc/localtime:/etc/localtime
+     - ./data/db:/data/db      
