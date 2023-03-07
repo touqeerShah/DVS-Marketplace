@@ -1,0 +1,6 @@
+exit
+use dvs
+exit
+use dvsr({ user: "dvs", pwd: "dvs123", roles: [{ role: "dbOwner", db: "dvs" }] })
+use dvsr({ user: "dvs", pwd: "dvs123", roles: [{ role: "dbOwner", db: "dvs" }] })
+use dvs

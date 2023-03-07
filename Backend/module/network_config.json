@@ -1,0 +1,21 @@
+{
+  "network-config": {
+    "org1": {
+      "name": "peerOrg1",
+      "mspid": "Org1MSP",
+      "ca": "https://localhost:7054",
+      "admin": {
+        "key": "-----BEGIN PRIVATE KEY-----MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgzcAkye8xsgv8prGtmsTzZMzz+a4Pndhb/AM+o9vyn0ihRANCAASMnlfc7LLur0CZlopNCAbZncSvcym6LDCjGMRScFBDj7X+1dINpDUQdojsAxujMRh1dZRxpDsvd0VZyRRfaj3m-----END PRIVATE KEY-----",
+        "cert": "-----BEGIN CERTIFICATE-----MIICKTCCAdCgAwIBAgIRAOlHZcbl2CkUhBLulMfvoLQwCgYIKoZIzj0EAwIwczELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNhbiBGcmFuY2lzY28xGTAXBgNVBAoTEG9yZzEuZXhhbXBsZS5jb20xHDAaBgNVBAMTE2NhLm9yZzEuZXhhbXBsZS5jb20wHhcNMjIwNDEyMjAwMjAwWhcNMzIwNDA5MjAwMjAwWjBrMQswCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZyYW5jaXNjbzEOMAwGA1UECxMFYWRtaW4xHzAdBgNVBAMMFkFkbWluQG9yZzEuZXhhbXBsZS5jb20wWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASMnlfc7LLur0CZlopNCAbZncSvcym6LDCjGMRScFBDj7X+1dINpDUQdojsAxujMRh1dZRxpDsvd0VZyRRfaj3mo00wSzAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADArBgNVHSMEJDAigCDUMtPiUygUSrQoWdqWyyC4Xmkq3KiuJ74VcromI1qcLDAKBggqhkjOPQQDAgNHADBEAiB2gD90rULk07kTIRL0xRVvIbqgkpLcQO0O7ityssvWHAIgaU4YdwpyZbbMMzF2qCEDZXhXx07y3X0ZedFndFFUj6s=-----END CERTIFICATE-----"
+      }
+    }
+  },
+  "keyValueStore": "/tmp/fabric-client-kvs",
+  "eventWaitTime": "30000",
+  "admins": [
+    {
+      "username": "admin",
+      "secret": "adminpw"
+    }
+  ]
+}

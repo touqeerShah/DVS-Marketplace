@@ -1,0 +1,17 @@
+networks:
+  byfn:
+services:
+  couchdb-org1:
+    container_name: couchdb-org1
+    image: couchdb:3.2.1
+    environment:
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=password
+    # volumes:
+    #   - ./couchSSL/couchdb_tls:/etc/hyperledger/fabric/tls
+    #   - ./couchSSL/docker.ini:/opt/couchdb/etc/local.d/docker.ini
+    ports:
+      - "11984:5984"
+      - "11985:6984"
+    networks:
+      - byfn
