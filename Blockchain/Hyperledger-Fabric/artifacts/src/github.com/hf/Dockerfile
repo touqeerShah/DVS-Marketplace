@@ -1,4 +1,4 @@
-FROM node:14-alpine
+FROM node:16.14-alpine3.14
 WORKDIR /smartcontract
 COPY . .
 RUN npm install && npm run build && printf "ls\nnpm run start\n" > entrypoint.sh

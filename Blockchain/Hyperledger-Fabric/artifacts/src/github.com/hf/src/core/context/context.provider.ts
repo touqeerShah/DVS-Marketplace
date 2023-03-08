@@ -52,9 +52,12 @@ export class ContextProvider {
         return this.ctx.clientIdentity.getMSPID();
     }
 
-    public getTxTimestamp(): string {
+    public getTxTimestamp(): any {
         const { seconds, nanos } = this.ctx.stub.getTxTimestamp();
-        return (seconds * 1000 + nanos / 1000000).toString();
+        if (typeof seconds == "number" || typeof seconds == "bigint")
+            return (seconds * 1000 + nanos / 1000000).toString();
+        else
+            return "0"
     }
 
     public getTxID(): string {

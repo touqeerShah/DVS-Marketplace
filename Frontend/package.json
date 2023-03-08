@@ -30,6 +30,7 @@
     "ethers": "^6.0.8",
     "etherscan-api": "^10.3.0",
     "ipfs-http-client": "^60.0.0",
+    "moment": "^2.29.4",
     "next": "13.1.6",
     "node-etherscan-api": "^0.1.3",
     "react": "18.2.0",

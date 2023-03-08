@@ -33,7 +33,7 @@ interface IFigurePrintOracle {
         address userAddress,
         bytes memory userId,
         bytes memory fingerPrint
-    ) external;
+    ) external returns (bytes32);
 
     function withdrawLink() external payable;
 

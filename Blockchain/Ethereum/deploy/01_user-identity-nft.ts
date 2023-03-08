@@ -23,9 +23,9 @@ const deployUserIdentityNFT: DeployFunction = async function (hre: HardhatRuntim
     // await delegate(UserIdentityNFT.address, deployer)
 
     log(`UserIdentityNFT at ${UserIdentityNFT.address}`)
-    // if (!developmentChains.includes(network.name) && process.env.ETHERSCANAPIKEY) {
-    //     await verify(UserIdentityNFT.address, [NFT_NAME, NFT_SYMBOL, SIGNING_DOMAIN_NAME, SIGNING_DOMAIN_VERSION])
-    // }
+    if (!developmentChains.includes(network.name) && process.env.ETHERSCANAPIKEY) {
+        await verify(UserIdentityNFT.address, [NFT_NAME, NFT_SYMBOL, SIGNING_DOMAIN_NAME, SIGNING_DOMAIN_VERSION])
+    }
 
 }
 

@@ -9,7 +9,6 @@ let responseObj = {};
 var client;
 async function getDataFromMongoDB(client, collectionName, findRequest, res) {
   var response = {};
-  console.log("client, collectionName, findRequest,", collectionName, findRequest,);
   var apiConfig = await getCollection(
     client,
     configObj.MONGO_DB,
@@ -17,7 +16,7 @@ async function getDataFromMongoDB(client, collectionName, findRequest, res) {
     findRequest
   );
   if (apiConfig.status != 200) {
-    console.log("apiConfig,", apiConfig);
+    // console.log("apiConfig,", apiConfig);
     return error;
   }
   var isnull = await isNull(apiConfig, "Invalid API Route", res);

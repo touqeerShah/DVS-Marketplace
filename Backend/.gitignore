@@ -17,9 +17,9 @@
 /class/typechain-types
 /client/node_modules
 /artifacts/channel/crypto-config
-/mongo-compose/data
+/mongo-compose
 /pg-compose/db
-/pg-rabbitMQ/db
+/pg-rabbitMQ
 /wallet
 
 # misc

@@ -52,7 +52,7 @@ module.exports.invoke = async function (
       identity: userid,
       discovery: {
         enabled: true,
-        asLocalhost: false,
+        asLocalhost: true,
       },
     });
 
@@ -148,7 +148,7 @@ module.exports.query = async function (
       identity: userid,
       discovery: {
         enabled: true,
-        asLocalhost: false,
+        asLocalhost: true,
       },
     });
 
@@ -555,7 +555,7 @@ blockchainevent = async function (
       identity: userid,
       discovery: {
         enabled: true,
-        asLocalhost: false,
+        asLocalhost: true,
       },
     });
     // Get the network (channel) our contract is deployed to.

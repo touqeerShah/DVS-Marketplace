@@ -1,15 +1,14 @@
 import { gql } from "@apollo/client";
-export const GET_MIN_OFFER = gql`
-  query GetMinBidOffer($tokenId: String!, $collection: String!) {
-    offerCreatedEntities(
-      first: 1
-      orderBy: ts
-      orderDirection: asc
-      where: { tokenId: $tokenId, collection: $collection }
-    ) {
-      offerPrice
-      tokenId
-      ts
+export const GET_MY_VERIFICATION_REQUEST_DATA = gql`
+  query GetMyVerifcationRequestData($userAddress: String) {
+    idVerifedAndIssueds(where: { userAddres: $userAddress }) {
+      blockNumber
+      blockTimestamp
+      id
+      requestId
+      transactionHash
+      userAddres
+      userId
     }
   }
 `;
