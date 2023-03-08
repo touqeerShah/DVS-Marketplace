@@ -5,7 +5,7 @@ networks:
         external: true
 
 services:
-    company-registration.org1.example.com:
+    hf.org1.example.com :
         container_name:  hf.org1.example.com
         hostname:  hf.org1.example.com
         image: hyperledger/hf

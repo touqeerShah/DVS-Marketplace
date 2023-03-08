@@ -75,9 +75,9 @@ const deployFigurePrintOracle: DeployFunction = async function (hre: HardhatRunt
     // await tx.wait(1)
 
     log(`figurePrintOracle at ${figurePrintOracle.address}`)
-    // if (!developmentChains.includes(network.name) && process.env.ETHERSCANAPIKEY) {
-    //     await verify(figurePrintOracle.address, args)
-    // }
+    if (!developmentChains.includes(network.name) && process.env.ETHERSCANAPIKEY) {
+        await verify(figurePrintOracle.address, args)
+    }
 
 }
 

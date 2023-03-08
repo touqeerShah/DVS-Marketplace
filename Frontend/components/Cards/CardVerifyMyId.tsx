@@ -1,6 +1,8 @@
 import React from "react";
 import { faFingerprint, faFile, faIdCard, faBell } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useApolloClient } from "@apollo/client";
+
 import CardUserDetails from "../../components/Cards/CardUserDetails";
 import { UserIdVoucherStruct } from "../../class/typechain-types/contracts/core/UserIdentityNFT";
 
@@ -32,18 +34,22 @@ import {
   INFURA_IPFS_PROJECJECT_ID,
   INFURA_IPFS_PROJECJECT_SECRET
 } from "../../lib/config"
-import { KeyObject } from "crypto";
 
+import { IdVerifedAndIssuedResponse } from "./../../class/subgraphResponse"
+import { GET_MY_VERIFICATION_REQUEST_DATA } from "./../../lib/subgrapQueries"
 export default function CardVerifyMyId(props: any) {
   let web3ProviderState: StateType = useAppSelector(web3ProviderReduxState);
   const validationSchema = Yup.object().shape({
     // image: Yup.string().required("NFG image is required"),
   });
 
+  const subgraphClient = useApolloClient();
+
   const formOptions = { resolver: yupResolver(validationSchema) };
   const { register, handleSubmit, formState } = useForm(formOptions);
   const [url, setURL] = useState("")
 
+  const [idVerifedAndIssuedResponse, setIdVerifedAndIssuedResponse] = useState<IdVerifedAndIssuedResponse>()
   const [userIdentityNFTContract, setUserIdentityNFTContract] = useState<ethers.Contract>()
   const [figurePrintOracleContract, setFigurePrintOracleContract] = useState<ethers.Contract>()
   const [linkToken, setLinkToken] = useState<ethers.Contract>()
@@ -80,8 +86,16 @@ export default function CardVerifyMyId(props: any) {
         console.log("userRecord === > ", Object.keys(userRecord));
         console.log("userRecord === > ", (Number(userRecord["0"])));
         console.log(" userRecord[]", userRecord["2"].toString());
-
-
+        const idVerifedAndIssuedResponse = await subgraphClient.query({
+          query: GET_MY_VERIFICATION_REQUEST_DATA,
+          variables: {
+            userAddress: web3ProviderState.address
+          },
+        });
+        console.log("idVerifedAndIssuedResponse", idVerifedAndIssuedResponse.data.idVerifedAndIssueds.length);
+        if (idVerifedAndIssuedResponse.data?.idVerifedAndIssueds.length > 0) {
+          setIdVerifedAndIssuedResponse(idVerifedAndIssuedResponse.data?.idVerifedAndIssueds[0])
+        }
         // let userLinkBalance = await figurePrintOracleContract.getLinkBalance()
 
         setUserLinkBalance(userLinkBalance)
@@ -197,7 +211,7 @@ export default function CardVerifyMyId(props: any) {
   return (
     <>
       <div className="relative border-2 flex flex-col min-w-0 break-words w-full mt-6 shadow-lg rounded-lg bg-blueGray-100 border-0">
-        {userRecord?.status !== 0 && <CardUserDetails web3ProviderState={web3ProviderState} userIdentityNFTContract={userIdentityNFTContract} userRecord={userRecord} voucher={{}} />}
+        {userRecord?.status !== 0 && <CardUserDetails web3ProviderState={web3ProviderState} userIdentityNFTContract={userIdentityNFTContract} userRecord={userRecord} voucher={{}} idVerifedAndIssuedResponse={idVerifedAndIssuedResponse} collection={ContractAddress.UserIdentityNFT} />}
 
         {userRecord?.status === 0 &&
           <><div className="rounded-t bg-white mb-0 px-6 py-6">

@@ -93,7 +93,7 @@ contract FigurePrintOracle is
         address userAddress,
         bytes memory userId,
         bytes memory fingerPrint
-    ) public nonReentrant {
+    ) public nonReentrant returns (bytes32) {
         //if record exist and pending
 
         uint numberTries = 0;
@@ -135,6 +135,7 @@ contract FigurePrintOracle is
             VerficationStatus.PENDING
         );
         emit VerifyFingerPrint(userId, requestId, userAddress);
+        return requestId;
     }
 
     //0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266

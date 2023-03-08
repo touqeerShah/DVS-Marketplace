@@ -3,14 +3,22 @@ import PropTypes from "prop-types";
 import { faClockRotateLeft, faBan, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast } from "react-toastify";
-
+import { ellipseAddress } from '../../lib/utilities'
+import { useEffect, useState } from "react";
+import * as moment from "moment"
 // components
 import { VerifcaitonRecord } from "../../class/contract"
 
 import TableDropdown from "../Dropdowns/TableDropdown";
 
-export default function CardUserDetails({ color, userRecord, web3ProviderState, userIdentityNFTContract }: any) {
+export default function CardUserDetails({ color, collection, userRecord, web3ProviderState, userIdentityNFTContract, idVerifedAndIssuedResponse }: any) {
+  const [timestamp, setTimestamp] = useState("")
 
+  useEffect(() => {
+    console.log("new Date(idVerifedAndIssuedResponse.blockTimestamp)", (new Date(idVerifedAndIssuedResponse.blockTimestamp * 1000)));
+
+    setTimestamp(new Date(idVerifedAndIssuedResponse.blockTimestamp * 1000).toDateString())
+  }, [])
   async function RequestForVerification() {
 
     if (web3ProviderState.provider == null && web3ProviderState.address) {
@@ -108,6 +116,25 @@ export default function CardUserDetails({ color, userRecord, web3ProviderState, 
                   (color === "light"
                     ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                     : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
+                  Block  number :{(idVerifedAndIssuedResponse.blockNumber)}
+                </td>
+                <td className={
+                  "px-6 align-middle border border-solid py-3 text-xs  border-l-0 border-r-0 whitespace-nowrap  text-left font-bold " +
+                  (color === "light"
+                    ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
+                    : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
+                  Block Timestamp  : {(timestamp)}
+                </td>
+
+              </tr>
+
+              <tr>
+
+                <td className={
+                  "px-6 align-middle border border-solid py-3 text-xs border-l-0 border-r-0 whitespace-nowrap  text-left font-bold " +
+                  (color === "light"
+                    ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
+                    : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
                   Transaction Signature :
                 </td>
                 <td className={
@@ -115,7 +142,7 @@ export default function CardUserDetails({ color, userRecord, web3ProviderState, 
                   (color === "light"
                     ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                     : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
-                  Transaction hash :
+                  Transaction hash : {ellipseAddress(idVerifedAndIssuedResponse.transactionHash)}
                 </td>
 
               </tr>
@@ -126,7 +153,7 @@ export default function CardUserDetails({ color, userRecord, web3ProviderState, 
                   (color === "light"
                     ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                     : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
-                  Collection :
+                  Collection : {ellipseAddress(collection)}
                 </td>
                 <td className={
                   "px-6 align-middle border border-solid py-3 text-xs  border-l-0 border-r-0 whitespace-nowrap  text-left  font-bold " +
@@ -145,14 +172,14 @@ export default function CardUserDetails({ color, userRecord, web3ProviderState, 
                   (color === "light"
                     ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                     : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
-                  Request Id :
+                  Request Id : {ellipseAddress(idVerifedAndIssuedResponse.requestId)}
                 </td>
                 <td className={
                   "px-6 align-middle border border-solid py-3 text-xs  border-l-0 border-r-0 whitespace-nowrap  text-left font-bold " +
                   (color === "light"
                     ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                     : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
-                  Number of Tries :
+                  Number of Tries : {userRecord.numberTries}
                 </td>
 
               </tr>
@@ -174,13 +201,13 @@ export default function CardUserDetails({ color, userRecord, web3ProviderState, 
                   (color === "light"
                     ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                     : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
-                  <button className="border-0 px-3 px-2-5 my-4 placeholder-blueGray-300 text-blueGray-600 bg-white rounded border-2 text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                  {userRecord.status === "2" ? <button className="border-0 px-3 px-2-5 my-4 placeholder-blueGray-300 text-blueGray-600 bg-white rounded border-2 text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                     type="button"
                     onClick={() => {
                     }}>
 
                     Generate NFT
-                  </button>
+                  </button> : ""}
                 </td>
 
               </tr>
@@ -199,7 +226,9 @@ CardUserDetails.defaultProps = {
   userRecord: {},
   web3ProviderState: {},
   userIdentityNFTContract: {},
-  voucher: {}
+  voucher: {},
+  idVerifedAndIssuedResponse: {},
+  collection: ""
 };
 
 CardUserDetails.propTypes = {

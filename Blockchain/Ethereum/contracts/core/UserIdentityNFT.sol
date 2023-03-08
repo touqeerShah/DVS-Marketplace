@@ -34,8 +34,12 @@ contract UserIdentityNFT is ERC721URIStorage, ReentrancyGuard, ERC721Votes, IUse
     // The functions below are overrides required by Solidity.
     function verifyFingerPrint(bytes memory userId, bytes memory fingerPrint) public {
         this.checkBalance();
-        IFigurePrintOracle(figureprintOracle).verifyFingerPrint(msg.sender, userId, fingerPrint);
-        emit IdVerifedAndIssued(userId, msg.sender);
+        bytes32 requestId = IFigurePrintOracle(figureprintOracle).verifyFingerPrint(
+            msg.sender,
+            userId,
+            fingerPrint
+        );
+        emit IdVerifedAndIssued(userId, msg.sender, requestId);
     }
 
     function _afterTokenTransfer(

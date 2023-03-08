@@ -10,8 +10,7 @@
         "sourceMap": true
     },
     "include": [
-        "./src/**/*"
-, "src/userVerificationRequest/userVerificationRequest.repository.ts"    ],
+        "./src/**/*"   ],
     "exclude": [
         "./src/**/*.spec.ts"
     ]

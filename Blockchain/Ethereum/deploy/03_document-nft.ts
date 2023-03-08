@@ -23,8 +23,8 @@ const deployDocumentSignature: DeployFunction = async function (hre: HardhatRunt
     await storeProposalId(DocumentSignature.address, "DocumentSignature", contractAddressFile)
 
     log(`DocumentSignature at ${DocumentSignature.address}`)
-    if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
-        await verify(DocumentSignature.address, [])
+    if (!developmentChains.includes(network.name) && process.env.ETHERSCANAPIKEY) {
+        await verify(DocumentSignature.address, [userIdentityNFT.address, DS_NFT_NAME, DS_NFT_SYMBOL, DS_SIGNING_DOMAIN_NAME, DS_SIGNING_DOMAIN_VERSION])
     }
 
 }

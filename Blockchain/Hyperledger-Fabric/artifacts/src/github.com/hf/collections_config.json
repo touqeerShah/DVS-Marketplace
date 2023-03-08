@@ -1,6 +1,6 @@
 [
     {
-        "name": "CompanyRegistrationOrg1MSP",
+        "name": "DocumentOrg1MSP",
         "policy": "OR('Org1MSP.member')",
         "requiredPeerCount": 0,
         "maxPeerCount": 2,
@@ -8,15 +8,7 @@
         "memberOnlyRead": true
     },
     {
-        "name": "CompanyRegistrationOrg2MSP",
-        "policy": "OR('Org2MSP.member')",
-        "requiredPeerCount": 0,
-        "maxPeerCount": 2,
-        "blockToLive": 0,
-        "memberOnlyRead": true
-    },
-    {
-        "name": "TransactionOrg1MSP",
+        "name": "UserVerificationOrg1MSP",
         "policy": "OR('Org1MSP.member')",
         "requiredPeerCount": 0,
         "maxPeerCount": 2,
@@ -24,24 +16,8 @@
         "memberOnlyRead": true
     },
     {
-        "name": "TransactionOrg2MSP",
-        "policy": "OR('Org2MSP.member')",
-        "requiredPeerCount": 0,
-        "maxPeerCount": 2,
-        "blockToLive": 0,
-        "memberOnlyRead": true
-    },
-    {
-        "name": "LotOrg1MSP",
+        "name": "VerificationEntityOrg1MSP",
         "policy": "OR('Org1MSP.member')",
-        "requiredPeerCount": 0,
-        "maxPeerCount": 2,
-        "blockToLive": 0,
-        "memberOnlyRead": true
-    },
-    {
-        "name": "LotOrg2MSP",
-        "policy": "OR('Org2MSP.member')",
         "requiredPeerCount": 0,
         "maxPeerCount": 2,
         "blockToLive": 0,

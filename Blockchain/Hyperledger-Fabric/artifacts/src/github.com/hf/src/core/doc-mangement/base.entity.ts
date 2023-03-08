@@ -2,10 +2,10 @@
 export class BaseEntity {
     public createdBy: string;
     public updatedBy: string;
-    public updatedAt: string;
-    public createdAt: string;
+    public updatedAt: any;
+    public createdAt: any;
     public txID: string;
-    
+
     public toString() {
         return JSON.stringify(this);
     }

@@ -8,7 +8,7 @@ export const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "";
 export const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID;
 export const HUGGING_FACE_API_KEY = process.env.NEXT_PUBLIC_HUGGING_FACE_API_KEY; //"";
 
-export const SUBGRAPH_URL = ""
+export const SUBGRAPH_URL = process.env.NEXT_PUBLIC_SUB_GRAPH
 
 
 export const NFT_STORAGE = process.env.NEXT_PUBLIC_NFT_STORAGE
