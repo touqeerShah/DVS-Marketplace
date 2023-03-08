@@ -27,7 +27,7 @@ export class BaseRepository<T extends VerificationEntity> {
     public async exists(query: T): Promise<boolean> {
         const key = this.getKey(query);
         const mspID = this.contextProvider.getTxMSPID();
-        const bufferData = await this.contextProvider.get(key, "Lot" + mspID);
+        const bufferData = await this.contextProvider.get(key, "VerificationEntity" + mspID);
         return !!bufferData && bufferData.length > 0;
     }
 

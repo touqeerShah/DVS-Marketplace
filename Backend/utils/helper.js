@@ -158,6 +158,7 @@ module.exports.initQueue = async (data, res, mathodeType) => {
       res
     );
     if (validationRES.status != 200) {
+      console.log("requestData");
       return validationRES;
     }
     validationRES = await validation(
@@ -166,6 +167,8 @@ module.exports.initQueue = async (data, res, mathodeType) => {
       res
     );
     if (validationRES.status != 200) {
+      console.log("parameters", validationRES.message);
+
       return validationRES;
     }
   } catch (error) {

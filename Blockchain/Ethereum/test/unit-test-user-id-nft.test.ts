@@ -63,7 +63,9 @@ describe("FigurePrintOracle", async function () {
 
       let tx = await linkToken.connect(deployer).transferAndCall(figurePrintOracle.address, sendEther, data)
       var txReceipt = await tx.wait(1) // waits 1 block
-      let balance = await figurePrintOracle.getLinkBalance()
+      let balance = await figurePrintOracle.connect(deployer).getLinkBalance()
+      console.log("balance", balance);
+
       const ethValue = ethers.utils.formatEther(balance);
       console.log("url => ", ethValue);
       assert.equal(ethValue, "0.1")

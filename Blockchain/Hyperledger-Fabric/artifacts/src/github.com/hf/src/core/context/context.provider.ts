@@ -54,10 +54,10 @@ export class ContextProvider {
 
     public getTxTimestamp(): any {
         const { seconds, nanos } = this.ctx.stub.getTxTimestamp();
-        if (typeof seconds == "number" || typeof seconds == "bigint")
-            return (seconds * 1000 + nanos / 1000000).toString();
-        else
-            return "0"
+        // if (typeof seconds == "number" || typeof seconds == "bigint")
+        return (seconds * 1000 + nanos / 1000000).toString();
+        // else
+        // return "0"
     }
 
     public getTxID(): string {

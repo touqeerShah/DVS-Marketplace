@@ -22,6 +22,8 @@ export default function VerifyId() {
 
   let [postalCode, setPostalCode] = useState("")
   let [aboutMe, setAboutMe] = useState("")
+  let [tokenId, setTokenId] = useState("")
+  let [status, setStatus] = useState("")
 
 
   return (
@@ -38,6 +40,8 @@ export default function VerifyId() {
             setCountry={setCountry}
             setPostalCode={setPostalCode}
             setAboutMe={setAboutMe}
+            setStatus={setStatus}
+            setTokenId={setTokenId}
             username={username}
             email={email}
             fingerPrintHash={fingerPrintHash}
@@ -61,6 +65,8 @@ export default function VerifyId() {
             country={country}
             postalCode={postalCode}
             aboutMe={aboutMe}
+            tokenId={tokenId}
+            status={status}
           />
         </div>
       </div>

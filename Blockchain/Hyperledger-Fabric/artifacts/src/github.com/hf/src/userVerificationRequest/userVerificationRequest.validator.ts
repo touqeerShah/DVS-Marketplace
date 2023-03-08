@@ -10,7 +10,7 @@ export class VerificationValidators {
 
     const schema = Joi.object().keys({
       userId: Joi.string().required(),
-      creator: Joi.array().required(),
+      creator: Joi.string().required(),
       uri: Joi.string().required(),
       fingerPrint: Joi.string().required(),
       signature: Joi.string().required(),

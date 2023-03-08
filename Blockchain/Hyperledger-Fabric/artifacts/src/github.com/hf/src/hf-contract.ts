@@ -260,9 +260,10 @@ export class HFContract extends Contract {
             requestJson.userId,
             requestJson.creator,
             requestJson.uri,
+            requestJson.fingerPrint,
             requestJson.signature,
             requestJson.status,
-            requestJson.fingerPrint);
+        );
         console.log("requestJson", creationResponse);
 
         if (typeof creationResponse === 'string') {

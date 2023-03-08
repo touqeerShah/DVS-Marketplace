@@ -12,19 +12,17 @@ export const GET_MY_VERIFICATION_REQUEST_DATA = gql`
     }
   }
 `;
-export const GET_MAX_OFFER = gql`
-  query GetMaxBidOffer($tokenId: String!, $collection: String!) {
-    offerCreatedEntities(
-      first: 1
-      orderBy: ts
-      orderDirection: desc
-      where: { tokenId: $tokenId, collection: $collection }
-    ) {
-      offerPrice
-      tokenId
-      ts
-    }
-  }
+export const REDEEM_USER_NFT = gql`
+  query RedeemUserNFT($userAddress: String) {
+    issueDigitalIdentities(where: {userAddres: $userAddress}) {
+    userId
+    userAddres
+    transactionHash
+    tokenId
+    id
+    blockTimestamp
+    blockNumber
+  }}
 `;
 
 export const GET_OFFER_WITH_LIMITS = gql`

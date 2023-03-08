@@ -107,9 +107,9 @@ async function consumeInvoke() {
             async (msg) => {
                 if (msg !== null) {
                     var data = JSON.parse(msg.content.toString());
-                    // console.log("data.data", data.data);
+                    console.log("data.data", data.data);
                     var collrollerObject = await initQueue(data.data, {}, "POST"); /// this function is connect to mongoDB,get API Defination  and Network config for that bucket
-                    console.log("1.collrollerObject ==>", collrollerObject.apiConfig);
+                    console.log("1.collrollerObject ==>", collrollerObject);
                     console.log("isLoaded", isLoaded, data.uuid);
                     var isDataExist = isExist(data.uuid);
                     if (!isDataExist) {
@@ -119,7 +119,7 @@ async function consumeInvoke() {
                     }
                     if (isLoaded) {
                         isLoaded = false;
-                        console.log("2.collrollerObject ==>", collrollerObject.apiConfig.data.channel);
+                        console.log("2.collrollerObject ==>", collrollerObject.requestData.parameters);
 
                         await
                             invoke(

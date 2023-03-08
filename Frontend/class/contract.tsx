@@ -15,3 +15,12 @@ export type VerifcaitonRecord = {
     numberTries: number; //no more the 3 request if case of Rejection
     status: number; //
 }
+
+export type VerificationEntity = {
+    userId: string;
+    creator: string;
+    uri: string
+    fingerPrint: string;
+    status: string;
+    signature: string;
+}
