@@ -33,3 +33,5 @@ export const DS_NFT_SYMBOL = "DS_786"
 
 export const AVERAGE_BLOCK_MINT_TIME = 10
 export const IPFS_SIMPLE = process.env.IPFS_SIMPLE || ""
+
+export const BACKEND_ENDPOINT = process.env.NEXT_PUBLIC_BACKEND_ENDPOINT

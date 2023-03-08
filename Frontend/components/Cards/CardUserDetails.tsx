@@ -5,19 +5,26 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast } from "react-toastify";
 import { ellipseAddress } from '../../lib/utilities'
 import { useEffect, useState } from "react";
-import * as moment from "moment"
+import { post } from "../../utils"
+import { UserIdVoucherStruct } from "../../class/typechain-types/contracts/core/UserIdentityNFT";
 // components
-import { VerifcaitonRecord } from "../../class/contract"
 
-import TableDropdown from "../Dropdowns/TableDropdown";
 
-export default function CardUserDetails({ color, collection, userRecord, web3ProviderState, userIdentityNFTContract, idVerifedAndIssuedResponse }: any) {
+
+export default function CardUserDetails({ color, collection, userRecord, web3ProviderState, userIdentityNFTContract, idVerifedAndIssuedResponse, issueDigitalIdentity, verificationEntity }: any) {
   const [timestamp, setTimestamp] = useState("")
+  const [verificationTimestamp, setVerificationTimestamp] = useState("")
+  // const [verificationEntity, setVerificationEntity] = useState<VerificationEntity>()
 
   useEffect(() => {
-    console.log("new Date(idVerifedAndIssuedResponse.blockTimestamp)", (new Date(idVerifedAndIssuedResponse.blockTimestamp * 1000)));
 
-    setTimestamp(new Date(idVerifedAndIssuedResponse.blockTimestamp * 1000).toDateString())
+    if (JSON.stringify(issueDigitalIdentity) != "{}") {
+      console.log("ssss", issueDigitalIdentity);
+      setVerificationTimestamp(new Date(issueDigitalIdentity.blockTimestamp * 1000).toDateString())
+
+    }
+    if (JSON.stringify(idVerifedAndIssuedResponse) != "{}")
+      setTimestamp(new Date(idVerifedAndIssuedResponse.blockTimestamp * 1000).toDateString())
   }, [])
   async function RequestForVerification() {
 
@@ -41,8 +48,23 @@ export default function CardUserDetails({ color, collection, userRecord, web3Pro
 
         try {
           // console.log("_userId", _userId, "_fingurePrint", _fingurePrint);
-          if (userIdentityNFTContract) {
-            await userIdentityNFTContract.redeem();
+          if (userIdentityNFTContract && verificationEntity) {
+            let voucher: UserIdVoucherStruct = { uri: verificationEntity.uri, userId: userRecord.userId, fingerPrint: verificationEntity.fingerPrint, signature: verificationEntity.signature }
+            console.log("voucher", voucher);
+
+            await userIdentityNFTContract.redeem(voucher);
+            await post("addQueue", {
+              data: JSON.stringify({
+                transactionCode: "002",
+                apiName: "updateStatus",
+                parameters: {
+                  userId: userRecord.userId,
+                  status: "2"
+                },
+                userId: "user1",
+                organization: "org1"
+              })
+            });
           }
 
           // (await tx).wait();
@@ -93,7 +115,7 @@ export default function CardUserDetails({ color, collection, userRecord, web3Pro
                       : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")
                   }
                 >
-                  User Verfication Result
+                  User Verification Request Result
                 </th>
                 <th
                   className={
@@ -135,7 +157,7 @@ export default function CardUserDetails({ color, collection, userRecord, web3Pro
                   (color === "light"
                     ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                     : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
-                  Transaction Signature :
+                  Transaction Signature : {verificationEntity?.signature}
                 </td>
                 <td className={
                   "px-6 align-middle border border-solid py-3 text-xs  border-l-0 border-r-0 whitespace-nowrap  text-left font-bold " +
@@ -160,7 +182,7 @@ export default function CardUserDetails({ color, collection, userRecord, web3Pro
                   (color === "light"
                     ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                     : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
-                  Uri :
+                  Uri : {verificationEntity?.uri}
                 </td>
 
               </tr>
@@ -193,7 +215,7 @@ export default function CardUserDetails({ color, collection, userRecord, web3Pro
                     : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
                   Request Status :    {userRecord.status}  &nbsp;&nbsp;  {userRecord.status === 0 && <>Pending < FontAwesomeIcon icon={faClockRotateLeft} className="text-lg text-yellow-500 font-bold" /></>}
                   {userRecord.status === 1 && <>Fail <FontAwesomeIcon icon={faBan} className="text-lg text-red-500 font-bold" /></>}
-                  {userRecord.status === "2" && <>Successful <FontAwesomeIcon icon={faCheckCircle} className="text-lg  text-green-500  font-bold" /></>}
+                  {userRecord.status === 2 && <>Successful &nbsp;&nbsp; <FontAwesomeIcon icon={faCheckCircle} className="text-lg  text-green-500  font-bold" /></>}
 
                 </td>
                 <td className={
@@ -201,9 +223,10 @@ export default function CardUserDetails({ color, collection, userRecord, web3Pro
                   (color === "light"
                     ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                     : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
-                  {userRecord.status === "2" ? <button className="border-0 px-3 px-2-5 my-4 placeholder-blueGray-300 text-blueGray-600 bg-white rounded border-2 text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                  {(userRecord.status === 2 && !issueDigitalIdentity.tokenId) ? <button className="border-0 px-3 px-2-5 my-4 placeholder-blueGray-300 text-blueGray-600 bg-white rounded border-2 text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                     type="button"
                     onClick={() => {
+                      RequestForVerification()
                     }}>
 
                     Generate NFT
@@ -211,6 +234,77 @@ export default function CardUserDetails({ color, collection, userRecord, web3Pro
                 </td>
 
               </tr>
+
+            </tbody>
+          </table>
+
+          <table className="items-center w-full bg-transparent border-collapse">
+            <thead>
+              <tr>
+                <th
+                  className={
+                    "px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left " +
+                    (color === "light"
+                      ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
+                      : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")
+                  }
+                >
+                  User Verification Result
+                </th>
+                <th
+                  className={
+                    "px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left " +
+                    (color === "light"
+                      ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
+                      : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")
+                  }
+                >
+                  {"         "}&nbsp;
+                </th>
+
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+
+                <td className={
+                  "px-6 align-middle border border-solid py-3 text-xs border-l-0 border-r-0 whitespace-nowrap  text-left font-bold " +
+                  (color === "light"
+                    ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
+                    : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
+                  Block  number : &nbsp;{(issueDigitalIdentity.blockNumber)}
+                </td>
+                <td className={
+                  "px-6 align-middle border border-solid py-3 text-xs  border-l-0 border-r-0 whitespace-nowrap  text-left font-bold " +
+                  (color === "light"
+                    ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
+                    : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
+                  Block Timestamp  : {(verificationTimestamp)}
+                </td>
+
+              </tr>
+
+              <tr>
+
+                <td className={
+                  "px-6 align-middle border border-solid py-3 text-xs border-l-0 border-r-0 whitespace-nowrap  text-left font-bold " +
+                  (color === "light"
+                    ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
+                    : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
+                  Token ID  : {issueDigitalIdentity?.tokenId}
+                </td>
+                <td className={
+                  "px-6 align-middle border border-solid py-3 text-xs  border-l-0 border-r-0 whitespace-nowrap  text-left font-bold " +
+                  (color === "light"
+                    ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
+                    : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
+                  Transaction hash : {ellipseAddress(issueDigitalIdentity.transactionHash)}
+                </td>
+
+              </tr>
+
+
+
 
             </tbody>
           </table>
@@ -226,9 +320,10 @@ CardUserDetails.defaultProps = {
   userRecord: {},
   web3ProviderState: {},
   userIdentityNFTContract: {},
-  voucher: {},
   idVerifedAndIssuedResponse: {},
-  collection: ""
+  collection: "",
+  issueDigitalIdentity: {},
+  verificationEntity: {}
 };
 
 CardUserDetails.propTypes = {

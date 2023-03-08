@@ -269,7 +269,7 @@ contract FigurePrintOracle is
         return hasRole(VERIFIER_ROLE, msg.sender);
     }
 
-    function onTokenTransfer(address sender, uint256 amount, bytes calldata data) public {
+    function onTokenTransfer(address sender, uint256 amount, bytes calldata data) public override {
         amounts[sender] += amount;
         emit ReceivedCalled(sender, amount);
     }

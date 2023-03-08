@@ -48,12 +48,13 @@ export class UserVerificationProvider {
     * @paramtransactionId 
     * @returns 
     */
-    public async getUserVerificationDetails(userId: string): Promise<boolean | string> {
+    public async getUserVerificationDetails(userId: string): Promise<UserEntity | string> {
         const query = {
             userId: userId,
         } as UserEntity;
         let mspID = this.userRepository.getMSPID();
-        return await this.userRepository.verify(query, "UserVerification" + mspID);
+        return await this.userRepository.get(query, "UserVerification" + mspID);
+
     }
 
     /**
@@ -61,13 +62,14 @@ export class UserVerificationProvider {
   * @paramtransactionId 
   * @returns 
   */
-    public async VerifyUser(userId: string, fingerPrint: string): Promise<UserEntity | string> {
+    public async VerifyUser(userId: string, fingerPrint: string): Promise<boolean | string> {
         const query = {
             userId: userId,
             fingerPrint: fingerPrint
         } as UserEntity;
         let mspID = this.userRepository.getMSPID();
-        return await this.userRepository.get(query, "UserVerification" + mspID);
+        return await this.userRepository.verify(query, "UserVerification" + mspID);
+
     }
 
 
