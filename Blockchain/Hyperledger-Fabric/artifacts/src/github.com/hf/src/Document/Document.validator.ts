@@ -19,6 +19,8 @@ export class DocumentValidators {
       creator: Joi.string().required(),
       ownerSignature: Joi.string().required(),
       status: Joi.string().required(),
+      singers: Joi.array().required(),
+
     })
 
     try {

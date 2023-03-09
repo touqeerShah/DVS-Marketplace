@@ -1,4 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { useApolloClient } from "@apollo/client";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup";
+import { create } from "ipfs-http-client";
 import { faFingerprint, faFile, faPlusCircle, faUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import AddParameter from "../TextField/AddSingner"
@@ -10,24 +15,15 @@ import { UserIdVoucherStruct } from "../../class/typechain-types/contracts/core/
 
 import { ethers, Signer } from "ethers";
 import { toast } from "react-toastify";
-
-
 import { ContractAddress } from "../../config/"
-
-// components
-
+import { CHECK_SIGNER_EXIST } from "./../../lib/subgrapQueries"
 import { StateType } from "../../config"
 import { useAppSelector } from "./../../redux/hooks"
 import { web3ProviderReduxState } from "./../../redux/reduces/web3ProviderRedux"
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as Yup from "yup";
-import { create } from "ipfs-http-client";
-
 import { getDocumentSignature, getUserIdentityNFT } from "../../lib/getDeploy";
 import { createDocument } from "../../lib/createVoucher"
 import { getStringToBytes } from "../../lib/convert";
-
+import { post } from "../../utils"
 import {
   DS_SIGNING_DOMAIN_NAME,
   DS_SIGNING_DOMAIN_VERSION,
@@ -45,11 +41,12 @@ export default function CreateDocumentDetails(props: any) {
   const validationSchema = Yup.object().shape({
     // image: Yup.string().required("NFG image is required"),
   });
+  const subgraphClient = useApolloClient();
 
   const formOptions = { resolver: yupResolver(validationSchema) };
   const { register, handleSubmit, formState } = useForm(formOptions);
   const [url, setURL] = useState("")
-  const [documentId, setDocumentId] = useState(0)
+  const [documentId, setDocumentId] = useState("")
   const [documentName, setDocumentName] = useState("")
   const [purpose, setPurpose] = useState("")
   const [startDate, setStartDate] = useState("")
@@ -98,6 +95,7 @@ export default function CreateDocumentDetails(props: any) {
   }, [])
 
   async function signDocument() {
+    console.log("setPurpose");
 
     if (web3ProviderState.provider == null && web3ProviderState.address) {
       console.log("error");
@@ -122,95 +120,173 @@ export default function CreateDocumentDetails(props: any) {
       let parties: TypeDocumentSignerFields[] = props.documentSignerFieldsState as TypeDocumentSignerFields[]
       console.log("parties", parties);
       let partiesId: number[] = []
+      try {
 
-      let getPartiesId = async (party: TypeDocumentSignerFields) => {
-        console.log(party);
+        // let getPartiesId = async (party: TypeDocumentSignerFields) => {
+        //   console.log(party);
 
-        if (party.userId != "" && userIdentityNFTContract) {
-          let tokenId: number = parseInt(party.userId)
-          console.log("tokenId", tokenId);
+        //   if (party.userId != "" && userIdentityNFTContract) {
+        //     let tokenId: number = parseInt(party.userId)
+        //     console.log("tokenId", tokenId);
+        //     const isExist = await subgraphClient.query({
+        //       query: CHECK_SIGNER_EXIST,
+        //       variables: {
+        //         userAddress: tokenId.toString(),
+        //       },
+        //     });
+        //     console.log("isExist", isExist);
+        //     // issueDigitalIdentities
 
-          //check from sub graph party token exist or not
-          partiesId.push(tokenId)
+        //     if (isExist.data?.issueDigitalIdentities.length > 0) {
+        //       //check from sub graph party token exist or not
+        //       partiesId.push(tokenId)
+        //     } else {
+        //       toast.error(`User Token ${tokenId} Not Exist`);
+        //       return;
+        //     }
+        //   }
+        // }
+        // await parties.filter(async (party: TypeDocumentSignerFields) => { await getPartiesId(party) })
+
+        for (let index = 0; index < parties.length; index++) {
+          const party: TypeDocumentSignerFields = parties[index];
+          console.log(party);
+
+          if (party.userId != "" && userIdentityNFTContract) {
+            let tokenId: number = parseInt(party.userId)
+            console.log("tokenId", tokenId.toString());
+            const isExist = await subgraphClient.query({
+              query: CHECK_SIGNER_EXIST,
+              variables: {
+                tokenId: tokenId.toString(),
+              },
+            });
+            console.log("isExist", isExist);
+            // issueDigitalIdentities
+
+            if (isExist.data?.issueDigitalIdentities.length > 0) {
+              //check from sub graph party token exist or not
+              partiesId.push(tokenId)
+            } else {
+              toast.error(`User Token ${tokenId} Not Exist`);
+              return;
+            }
+          }
         }
+        console.log("partiesId", partiesId);
+
+      } catch (error) {
+        console.log(error);
+
+        toast.error(`User Token &{tokenId} Not Exist`);
+        return;
       }
-      parties.filter((party: TypeDocumentSignerFields) => { getPartiesId(party) })
-
-      console.log("partiesId", partiesId);
-
       if (userIdentityNFTContract && 0 == await userIdentityNFTContract.balanceOf(web3ProviderState.address)) {
 
         toast.error("Verify  Your Identity First");
         return;
       }
 
+      if (partiesId.length > 0) {
+        const type = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length)
+        console.log("type", type);
 
-      const type = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length)
-      console.log("type", type);
+        const base64data = Buffer.from(fileBuffer).toString('base64')
+        const file: string = `data:${type};base64,` + base64data
+        let _documentId: any = 0;
+        // console.log(file);
 
-      const base64data = Buffer.from(fileBuffer).toString('base64')
-      const file: string = `data:${type};base64,` + base64data
-      let documentId: number = 0;
-      // console.log(file);
-      try {
-        const _documentName = getStringToBytes(documentName)
-        const _purpose = getStringToBytes(purpose)
+        if (documentId == "") {
+          console.log("documentIddocumentIddocumentId", documentId);
 
-        documentId = await documentSignatureContract.getDocumentId(web3ProviderState.address, _documentName, _purpose, partiesId)
-        console.log("documentId", typeof documentId);
+          try {
+            const _documentName = getStringToBytes(documentName)
+            const _purpose = getStringToBytes(purpose)
 
-        setDocumentId(documentId)
-      } catch (error: any) {
-        console.log("getDocumentId error ", error);
-        toast.error(error.message.substring(0, error.message.indexOf("(")))
-        return;
+            _documentId = await documentSignatureContract.getDocumentId(web3ProviderState.address, _documentName, _purpose, partiesId)
+            console.log("documentId", _documentId);
+
+            setDocumentId(_documentId.toString())
+          } catch (error: any) {
+            console.log("getDocumentId error ", error);
+            toast.error(error.message.substring(0, error.message.indexOf("(")))
+            return;
+          }
+        } else {
+          _documentId = (documentId)
+        }
+
+        let imageObject = JSON.stringify({
+          documentId: _documentId.toString(),
+          documentName,
+          purpose,
+          file: file,
+          fileName,
+          startBlock,
+          endBlock,
+          creator: web3ProviderState.address,
+          signer: partiesId,
+        })
+        let uri: string = ""
+        try {
+          const added = await client.add(imageObject);
+
+          uri = `https://ipfs.io/ipfs/${added.path}`
+          console.log("uri", uri);
+
+          setURL(uri)
+        } catch (error) {
+          toast.error("something is wrong with IPFS")
+          return "";
+        }
+        try {
+
+          voucher = (await createDocument(
+            signer,
+            web3ProviderState.address,
+            uri,
+            _documentId,
+            DS_SIGNING_DOMAIN_NAME,
+            DS_SIGNING_DOMAIN_VERSION,
+            web3ProviderState.chainId.toString(),
+            ContractAddress.UserIdentityNFT
+          )) as string;
+
+          console.log("url", url);
+
+          console.log("voucher", voucher);
+          await post("addQueue", {
+            data: JSON.stringify({
+              transactionCode: "002",
+              apiName: "createDocument",
+              parameters: {
+                documentId: _documentId.toString(),
+                documentName: documentName,
+                purpose: purpose,
+                uri: uri,
+                startData: startDate,
+                expirationDate: endDate,
+                startBlock: startBlock.toString(),
+                endBlock: endBlock.toString(),
+                creator: web3ProviderState.address,
+                ownerSignature: voucher,
+                parties: partiesId
+              },
+              userId: "user1",
+              organization: "org1"
+            })
+          });
+          toast.success("Successfully Created Document " + _documentId.toString())
+
+        } catch (error: any) {
+          console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
+          toast.error(error.message.substring(0, error.message.indexOf("(")))
+        }
+
+      } else {
+        toast.error("Atleast One Signer");
+
       }
-
-      let imageObject = JSON.stringify({
-        documentId: documentId.toString(),
-        documentName,
-        purpose,
-        file: file,
-        fileName,
-        startBlock,
-        endBlock,
-        creator: web3ProviderState.address,
-        signer: partiesId,
-      })
-      let uri: string = ""
-      try {
-        const added = await client.add(imageObject);
-
-        uri = `https://ipfs.io/ipfs/${added.path}`
-        console.log("uri", uri);
-
-        setURL(uri)
-      } catch (error) {
-        toast.error("something is wrong with IPFS")
-        return "";
-      }
-      try {
-
-        voucher = (await createDocument(
-          signer,
-          web3ProviderState.address,
-          uri,
-          documentId,
-          DS_SIGNING_DOMAIN_NAME,
-          DS_SIGNING_DOMAIN_VERSION,
-          web3ProviderState.chainId.toString(),
-          ContractAddress.UserIdentityNFT
-        )) as string;
-
-        console.log("url", url);
-
-        console.log("voucher", voucher);
-      } catch (error: any) {
-        console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
-        toast.error(error.message.substring(0, error.message.indexOf("(")))
-      }
-
-
 
 
     }
@@ -286,7 +362,7 @@ export default function CreateDocumentDetails(props: any) {
                     <textarea className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                       id="w3review" name="w3review" rows={4} cols={50}
                       onChange={(e: any) => {
-                        setDocumentName(e.currentTarget.value)
+                        setPurpose(e.currentTarget.value)
                       }}
                     ></textarea>
                   </div>
