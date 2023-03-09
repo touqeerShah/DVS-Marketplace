@@ -25,6 +25,15 @@ export const REDEEM_USER_NFT = gql`
   }}
 `;
 
+
+export const CHECK_SIGNER_EXIST = gql`
+  query CheckSignerExist($tokenId: String) {
+    issueDigitalIdentities(where: {tokenId: $tokenId}) {
+    userId
+    blockNumber
+  }}
+`;
+
 export const GET_OFFER_WITH_LIMITS = gql`
   query GetAllRecordOfUser(
     $tokenId: String!
