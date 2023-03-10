@@ -23,7 +23,12 @@ export class Helper {
     arr.push(resIter.value);
     while (!resIter.done) {
       resIter = await this.getNextIterator(iterator);
-      arr.push(resIter.value);
+      console.log("resIter.value", resIter.value, resIter.value !== null, resIter.value != null, resIter.value == undefined);
+
+      if (resIter.value !== null) {
+        arr.push(resIter.value);
+      }
+
     }
     return arr;
   }

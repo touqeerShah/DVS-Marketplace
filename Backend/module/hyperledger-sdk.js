@@ -157,6 +157,7 @@ module.exports.query = async function (
 
     // Get the contract from the network.
     const contract = network.getContract(chaincode_name);
+    console.log("JSON.stringify(function_arguments)", JSON.stringify(function_arguments));
     const result = await contract.evaluateTransaction(
       function_name,
       JSON.stringify(function_arguments)
@@ -191,15 +192,20 @@ module.exports.query = async function (
     var endingIndex = error.message.indexOf('"}', firstIndex);
     let result = error.message.substring(firstIndex, endingIndex + 2);
     console.log("result", result);
-    var response_object = {};
-    var response = JSON.parse(result);
-    if (response["code"]) {
-      response_object.status = response["code"];
-      response_object.message = response["message"];
-    } else {
-      response_object.status = 200;
-      response_object.message = "SUCCESS";
-      response_object.data = JSON.parse(result.toString());
+    try {
+      var response_object = {};
+      var response = JSON.parse(result);
+      if (response["code"]) {
+        response_object.status = response["code"];
+        response_object.message = response["message"];
+      } else {
+        response_object.status = 200;
+        response_object.message = "SUCCESS";
+        response_object.data = JSON.parse(result.toString());
+      }
+    } catch (error) {
+      return { status: 400 };
+
     }
     return response_object;
   }

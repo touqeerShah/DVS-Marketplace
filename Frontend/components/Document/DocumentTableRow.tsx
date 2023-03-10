@@ -2,34 +2,37 @@ import React from "react";
 import { faRemove, faFile, faEye, faPlusCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { TypeDocumentSignerFields } from "../../class/document"
+import { ellipseAddress } from '../../lib/utilities'
+import { DocumentEntity } from './../../class/document'
 
 import ViewDocumentDetails from "./ViewDocumentDetails"
 // components
 
 export default function AddRow({
     documentId,
-    Name,
+    documentName,
     creatorAddress,
-    creactionTime, color
+    createdAt, color, documentDetails, web3ProviderState
 }: any) {
     const [showModal, setShowModal] = React.useState(false);
     return (<>
         <tr>
 
             <td className="border-t-0 ml-3 font-bold px-6 align-middle border-l-0 border-r-0 text-sm  whitespace-nowrap p-4">
-                $2,500 USD
+                {ellipseAddress(documentId)}
             </td>
             <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-sm  whitespace-nowrap p-4">
-                $2,500 USD
+                {documentName}
             </td>
             <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-sm  whitespace-nowrap p-4">
-                <i className="fas fa-circle text-orange-500 mr-2"></i> pending
+                {ellipseAddress(creatorAddress)}
             </td>
             <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-sm  whitespace-nowrap p-4">
                 <div className="flex">
-                    11:20 PM
+                    {(createdAt)}
                 </div>
             </td>
+
             <td className="border-t-0  align-middle border-l-0 border-r-0 text-sm  whitespace-nowrap p-4">
                 <div className="flex items-center">
                     <span className="mr-2">{""}</span>
@@ -45,12 +48,14 @@ export default function AddRow({
             </td>
 
         </tr>
-        <ViewDocumentDetails showModal={showModal} setShowModal={setShowModal} color={"light"} /></>
+        <ViewDocumentDetails showModal={showModal} setShowModal={setShowModal} color={"light"} documentDetails={documentDetails as DocumentEntity} web3ProviderState={web3ProviderState} /></>
     );
 }
 AddRow.defaultProps = {
     documentId: "",
-    Name: "",
-    creatorAddress: "",
-    creactionTime: "", color: "light"
+    documentName: "",
+    purpose: "",
+    createdAt: "",
+    documentDetails: {},
+    color: "light", web3ProviderState: {}
 };
