@@ -9,7 +9,7 @@ export const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID;
 export const HUGGING_FACE_API_KEY = process.env.NEXT_PUBLIC_HUGGING_FACE_API_KEY; //"";
 
 export const SUBGRAPH_URL = process.env.NEXT_PUBLIC_SUB_GRAPH
-
+export const ALCHMEY_KEY = process.env.NEXT_PUBLIC_ALCHMEY_KEY
 
 export const NFT_STORAGE = process.env.NEXT_PUBLIC_NFT_STORAGE
 export const NEW_STORE_VALUE = 77
@@ -35,3 +35,4 @@ export const AVERAGE_BLOCK_MINT_TIME = 10
 export const IPFS_SIMPLE = process.env.IPFS_SIMPLE || ""
 
 export const BACKEND_ENDPOINT = process.env.NEXT_PUBLIC_BACKEND_ENDPOINT
+

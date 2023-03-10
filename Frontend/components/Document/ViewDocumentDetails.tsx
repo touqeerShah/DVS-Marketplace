@@ -1,15 +1,46 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { faClockRotateLeft, faBan, faCheckCircle, faDownload } from "@fortawesome/free-solid-svg-icons";
+import React, { useState, useEffect } from "react";
+import { faClockRotateLeft, faBan, faCheckCircle, faDownload, faSignature } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ellipseAddress } from '../../lib/utilities'
+import { ContractAddress } from "../../config/";
+import { Signer } from "./../../class/document"
+import { getNftMetadataForExplorer } from "../../lib/alchemy"
 // components
 
 
-export default function ViewDocumentDetails(props: any) {
+export default function ViewDocumentDetails({ showModal, color, setShowModal, documentDetails, web3ProviderState }: any) {
+
+  let [isSigner, setIsSigner] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+
+      if (web3ProviderState.web3Provider) {
+        for (let index = 0; index < documentDetails.singers.length; index++) {
+          const element: Signer = documentDetails.singers[index];
+          console.log("here ", element);
+
+          let owner = await getNftMetadataForExplorer(ContractAddress.UserIdentityNFT, element.tokenId)
+          console.log("owner", owner.owners[0], web3ProviderState.address);
+
+          if (owner.owners[0] == web3ProviderState.address.toLowerCase()) {
+            console.log("yup yupyupyupyupyupyup");
+
+            setIsSigner(true)
+          }
+        }
+      }
+    }
+
+    if (!isSigner && documentDetails.singers) {
+
+      fetchData()
+    }
+  }, [])
   return (
     <>
 
-      {props.showModal ? (
+      {showModal ? (
         <>
           <div
             className="justify-center items-center flex w-full overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none"
@@ -24,7 +55,7 @@ export default function ViewDocumentDetails(props: any) {
                   </h3>
                   <button
                     className="p-1 ml-auto bg-transparent border-0 text-black opacity-5 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
-                    onClick={() => props.setShowModal(false)}
+                    onClick={() => setShowModal(false)}
                   >
                     <span className="bg-transparent text-black opacity-5 h-6 w-6 text-2xl block outline-none focus:outline-none">
                       ×
@@ -35,7 +66,7 @@ export default function ViewDocumentDetails(props: any) {
                 <div
                   className={
                     "relative flex flex-col min-w-0 break-words w-full mb-6  rounded " +
-                    (props.color === "light" ? "bg-white" : "bg-blueGray-700 text-white")
+                    (color === "light" ? "bg-white" : "bg-blueGray-700 text-white")
                   }
                 >
 
@@ -53,17 +84,18 @@ export default function ViewDocumentDetails(props: any) {
 
                           <td className={
                             "px-6 align-middle border border-solid py-3 text-xs border-l-0 border-r-0 whitespace-nowrap  text-left font-bold " +
-                            (props.color === "light"
+                            (color === "light"
                               ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                               : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
-                            Name  :
+                            Name  : {documentDetails.documentName}
                           </td>
                           <td className={
                             "px-6 align-middle border border-solid py-3 text-xs  border-l-0 border-r-0 whitespace-nowrap  text-left font-bold " +
-                            (props.color === "light"
+                            (color === "light"
                               ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                               : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
-                            Document Id  :
+                            Document Id  :                {ellipseAddress(documentDetails.documentId)}
+
                           </td>
 
                         </tr>
@@ -71,17 +103,17 @@ export default function ViewDocumentDetails(props: any) {
 
                           <td className={
                             "px-6 align-middle border border-solid py-3 text-xs border-l-0 border-r-0 whitespace-nowrap  text-left font-bold " +
-                            (props.color === "light"
+                            (color === "light"
                               ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                               : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
-                            Collection :
+                            Collection : {ellipseAddress(ContractAddress.DocumentSignature)}
                           </td>
                           <td className={
                             "px-6 align-middle border border-solid py-3 text-xs  border-l-0 border-r-0 whitespace-nowrap  text-left  font-bold " +
-                            (props.color === "light"
+                            (color === "light"
                               ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                               : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
-                            Creator Address :
+                            Creator Address :{ellipseAddress(documentDetails.creator)}
                           </td>
 
                         </tr>
@@ -90,17 +122,55 @@ export default function ViewDocumentDetails(props: any) {
 
                           <td className={
                             "px-6 align-middle border border-solid py-3 text-xs border-l-0 border-r-0 whitespace-nowrap  text-left font-bold " +
-                            (props.color === "light"
+                            (color === "light"
                               ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                               : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
-                            creation Time :
+                            creation Time :{documentDetails.createdAt}
                           </td>
                           <td className={
                             "px-6 align-middle border border-solid py-3 text-xs  border-l-0 border-r-0 whitespace-nowrap  text-left font-bold " +
-                            (props.color === "light"
+                            (color === "light"
                               ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                               : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
-                            Number of Signature :
+                            Owner of Signature :{ellipseAddress(documentDetails.ownerSignature)}
+                          </td>
+
+                        </tr>
+
+                        <tr>
+
+                          <td className={
+                            "px-6 align-middle border border-solid py-3 text-xs border-l-0 border-r-0 whitespace-nowrap  text-left font-bold " +
+                            (color === "light"
+                              ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
+                              : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
+                            Number of Signature :{documentDetails.singers.length}
+                          </td>
+                          <td className={
+                            "px-6 align-middle border border-solid py-3 text-xs  border-l-0 border-r-0 whitespace-nowrap  text-left font-bold " +
+                            (color === "light"
+                              ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
+                              : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
+                          </td>
+
+                        </tr>
+
+                        <tr>
+
+                          <td className={
+                            "px-6 align-middle border border-solid py-3 text-xs border-l-0 border-r-0 whitespace-nowrap  text-left font-bold " +
+                            (color === "light"
+                              ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
+                              : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
+                            Signature Starting Date/Block :{documentDetails.startData} ,{documentDetails.startBlock}
+                          </td>
+                          <td className={
+                            "px-6 align-middle border border-solid py-3 text-xs  border-l-0 border-r-0 whitespace-nowrap  text-left font-bold " +
+                            (color === "light"
+                              ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
+                              : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
+                            Signature Ending Date/Block :{documentDetails.expirationDate} ,{documentDetails.endBlock}
+
                           </td>
 
                         </tr>
@@ -110,17 +180,17 @@ export default function ViewDocumentDetails(props: any) {
                           <th
                             className={
                               "px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left " +
-                              (props.color === "light"
+                              (color === "light"
                                 ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                                 : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")
                             }
                           >
-                            Signer Address
+                            Signer Token
                           </th>
                           <th
                             className={
                               "px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left " +
-                              (props.color === "light"
+                              (color === "light"
                                 ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                                 : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")
                             }
@@ -129,39 +199,44 @@ export default function ViewDocumentDetails(props: any) {
                           </th>
 
                         </tr>
+                        {documentDetails.singers &&
+                          documentDetails.singers.map((item: Signer, i: number) => (
+                            <tr key={i}>
+                              <td className={
+                                "px-6 align-middle border border-solid py-3 text-xs border-l-0 border-r-0 whitespace-nowrap  text-left   font-bold " +
+                                (color === "light"
+                                  ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
+                                  : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
+                                {item.tokenId}
+                              </td>
+                              <td className={
+                                "px-6 align-middle border border-solid py-3 text-xs border-l-0 border-r-0 whitespace-nowrap  text-left   font-bold " +
+                                (color === "light"
+                                  ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
+                                  : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
+                                {item.signature == "" ? <FontAwesomeIcon icon={faClockRotateLeft} className="text-lg text-yellow-500 font-bold" /> :
+                                  <FontAwesomeIcon icon={faCheckCircle} className="text-lg  text-green-500  font-bold" />}
+                                {item.signature == "" ? "" :
+                                  ellipseAddress(item.signature)}
+                              </td>
+                            </tr>
+                          ))
+                        }
+
                         <tr>
                           <td className={
                             "px-6 align-middle border border-solid py-3 text-xs border-l-0 border-r-0 whitespace-nowrap  text-left   font-bold " +
-                            (props.color === "light"
+                            (color === "light"
                               ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                               : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
 
-                            `${"0xC4381d4BCb430c26A10CA789DC4498B939dD2F39".slice(0, 10)}...${"0xC4381d4BCb430c26A10CA789DC4498B939dD2F39".slice(-10)}`
+                            Document Status :  {documentDetails.status == 0 ? <FontAwesomeIcon icon={faClockRotateLeft} className="text-lg text-yellow-500 font-bold" />
+                              :
+                              <FontAwesomeIcon icon={faCheckCircle} className="text-lg  text-green-500  font-bold" />}
                           </td>
                           <td className={
                             "px-6 align-middle border border-solid py-3 text-xs border-l-0 border-r-0 whitespace-nowrap  text-left   font-bold " +
-                            (props.color === "light"
-                              ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
-                              : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
-                            Pending   &nbsp;&nbsp;     <FontAwesomeIcon icon={faClockRotateLeft} className="text-lg text-yellow-500 font-bold" />{" "}
-                            <FontAwesomeIcon icon={faBan} className="text-lg text-red-500 font-bold" />{" "}
-                            <FontAwesomeIcon icon={faCheckCircle} className="text-lg  text-green-500  font-bold" />{" "}
-                          </td>
-                        </tr>
-
-                        <tr>
-                          <td className={
-                            "px-6 align-middle border border-solid py-3 text-xs border-l-0 border-r-0 whitespace-nowrap  text-left   font-bold " +
-                            (props.color === "light"
-                              ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
-                              : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
-                            Document Status :   Pending   &nbsp;&nbsp;     <FontAwesomeIcon icon={faClockRotateLeft} className="text-lg text-yellow-500 font-bold" />{" "}
-                            <FontAwesomeIcon icon={faBan} className="text-lg text-red-500 font-bold" />{" "}
-                            <FontAwesomeIcon icon={faCheckCircle} className="text-lg  text-green-500  font-bold" />{" "}
-                          </td>
-                          <td className={
-                            "px-6 align-middle border border-solid py-3 text-xs border-l-0 border-r-0 whitespace-nowrap  text-left   font-bold " +
-                            (props.color === "light"
+                            (color === "light"
                               ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                               : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
                             <button className="py-2.5  my-2 placeholder-blueGray-300 text-blueGray-600 bg-white rounded border-2 text-sm shadow focus:outline-none focus:ring w-3/5 ease-linear transition-all duration-150"
@@ -183,30 +258,31 @@ export default function ViewDocumentDetails(props: any) {
                   <button
                     className="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                     type="button"
-                    onClick={() => props.setShowModal(false)}
+                    onClick={() => setShowModal(false)}
                   >
                     Close
                   </button>
-                  <button
+                  {isSigner && <button
                     className="py-2.5  my-2 placeholder-blueGray-300 mx-4  text-blueGray-600 bg-white rounded border-2 text-sm shadow focus:outline-none focus:ring w-1/5 ease-linear transition-all duration-150"
                     type="button"
-                    onClick={() => props.setShowModal(false)}
+                    onClick={() => setShowModal(false)}
                   >
-                    Sign Document
-                  </button>
+                    <FontAwesomeIcon icon={faSignature} />  Sign Document
+                  </button>}
                 </div>
               </div>
             </div>
           </div>
           <div className="fixed inset-0 z-40 bg-blueGray-2-00"></div>
         </>
-      ) : null}
+      ) : null
+      }
     </>
   );
 }
 
 // ViewDocumentDetails.defaultProps = {
-//   props.color: "light",
+//   color: "light",
 //   documentId: "",
 //   Name: "",
 //   creatorAddress: "",

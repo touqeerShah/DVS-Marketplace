@@ -34,7 +34,7 @@ import {
   ETHERSCANAPIKEY
 } from "../../lib/config"
 
-
+import { getLatestBlockNumber } from "./../../lib/alchemy"
 export default function CreateDocumentDetails(props: any) {
   // console.log("props =>", props);
   let web3ProviderState: StateType = useAppSelector(web3ProviderReduxState);
@@ -110,11 +110,12 @@ export default function CreateDocumentDetails(props: any) {
     let voucher: string;
 
     if (web3ProviderState.web3Provider && web3ProviderState.address && documentSignatureContract) {
+      let latestBlockNumber = await getLatestBlockNumber()
       var currentDate = new Date("2023-03-04");
       var startDateSeconds = (new Date(startDate).getTime() - currentDate.getTime()) / 1000;
       var endDateSeconds = (new Date(endDate).getTime() - currentDate.getTime()) / 1000;
-      var startBlock = startDateSeconds / AVERAGE_BLOCK_MINT_TIME
-      var endBlock = endDateSeconds / AVERAGE_BLOCK_MINT_TIME
+      var startBlock = latestBlockNumber + (startDateSeconds / AVERAGE_BLOCK_MINT_TIME)
+      var endBlock = startDateSeconds + (endDateSeconds / AVERAGE_BLOCK_MINT_TIME)
 
       const signer = await web3ProviderState.web3Provider.getSigner();
       let parties: TypeDocumentSignerFields[] = props.documentSignerFieldsState as TypeDocumentSignerFields[]
