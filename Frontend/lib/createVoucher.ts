@@ -1,5 +1,6 @@
 import { VoidSigner, Signer } from "@ethersproject/abstract-signer";
 // import { Signer } from "ethers";
+import { IDocumentSignature } from "../class/typechain-types/contracts/core/DocumentSignature"
 
 export async function createDocument(
   signer: Signer,
@@ -31,6 +32,60 @@ export async function createDocument(
     signature,
   };
   return signature;
+}
+
+export async function processDocumentWithSignature(
+  signer: Signer,
+  creator: string,
+  name: string,
+  description: string,
+  parties: Array<IDocumentSignature.PartyStruct>,
+  status: number,
+  signatureStart: number,
+  signatureEnd: number,
+  documentId: number,
+  uri: string,
+  signingDomain: string,
+  signatureVersion: string,
+  chainId: string,
+  contractAddress: string
+) {
+  const voucher = {
+    creator,
+    name,
+    description,
+    parties,
+    status,
+    signatureStart,
+    signatureEnd,
+    documentId,
+    uri,
+  };
+  const domain = {
+    name: signingDomain,
+    version: signatureVersion,
+    verifyingContract: contractAddress,
+    chainId,
+  };
+  const types = {
+    DocumentDetialsWithSigature: [
+      { name: "creator", type: "address" },
+      { name: "name", type: "bytes" },
+      { name: "description", type: "bytes" },
+      { name: "parties", type: "IDocumentSignature.PartyStruct[]" },
+      { name: "status", type: "DocumentState" },
+      { name: "signatureStart", type: "uint64" },
+      { name: "signatureEnd", type: "uint64" },
+      { name: "documentId", type: "uint256" },
+      { name: "uri", type: "string" },
+    ],
+  };
+  const signature = await (signer as VoidSigner)._signTypedData(domain, types, voucher);
+  const _voucher = {
+    ...voucher,
+    signature,
+  };
+  return _voucher;
 }
 
 export async function createUserId(

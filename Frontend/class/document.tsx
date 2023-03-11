@@ -34,3 +34,8 @@ export type Signer = {
     signature: string;
     status: string;
 }
+
+export type UriData = {
+    file: string,
+    fileName: string,
+}

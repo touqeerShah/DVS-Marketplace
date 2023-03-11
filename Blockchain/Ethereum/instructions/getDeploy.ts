@@ -2,7 +2,7 @@ import { BigNumber } from "ethers";
 import { artifacts, ethers } from "hardhat";
 import { contractAddressFile } from "../helper-hardhat-config"
 import * as fs from "fs";
-import { OrcaleUrlProvider, MockOracle, GovernorContract, FigurePrintOracle, UserIdentityNFT, LinkToken, DocumentSignature, TimeLock } from "../typechain-types"
+import { OrcaleUrlProvider, MockOracle, GovernorContract, FigurePrintOracle, UserIdentityNFT, LinkToken, DocumentSignature, TimeLock, Test1 } from "../typechain-types"
 
 export async function getMockOracle(): Promise<MockOracle> {
   let contractAddress = JSON.parse(fs.readFileSync(contractAddressFile, "utf8"))
@@ -42,5 +42,11 @@ export async function getTimeLock(): Promise<TimeLock> {
 export async function getGovernorContract(): Promise<GovernorContract> {
   let contractAddress = JSON.parse(fs.readFileSync(contractAddressFile, "utf8"))
   let governorContract = await ethers.getContractAt("GovernorContract", contractAddress["GovernorContract"]);
+  return governorContract;
+}
+
+export async function getTest1(): Promise<Test1> {
+  let contractAddress = JSON.parse(fs.readFileSync(contractAddressFile, "utf8"))
+  let governorContract = await ethers.getContractAt("Test1", contractAddress["Test1"]);
   return governorContract;
 }

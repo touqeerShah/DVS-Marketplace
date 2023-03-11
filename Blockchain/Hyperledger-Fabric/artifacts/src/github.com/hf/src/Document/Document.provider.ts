@@ -1,5 +1,5 @@
 import { Context } from "fabric-contract-api";
-import { DocumentEntity, Signer } from "./Document.entity";
+import { DocumentEntity, Signer, DocumentCount } from "./Document.entity";
 import { DocumentRepository } from "./Document.repository";
 import { DocumentValidators } from "./Document.validator";
 import { BadRequestError } from "../core/eror/bad-request-error";
@@ -60,7 +60,8 @@ export class DocumentProvider {
      * @param document 
      * @returns 
      */
-    public async createDocument(documentId: string,
+    public async createDocument(
+        documentId: string,
         documentName: string,
         purpose: string,
         uri: string,
@@ -68,13 +69,17 @@ export class DocumentProvider {
         expirationDate: string,
         startBlock: string,
         endBlock: string,
-        creator: string, // A -> B ->C
+        creator: string,
+        creatorTokenId: string, // A -> B ->C
         ownerSignature: string,
         parties: number[]): Promise<DocumentEntity | string> {
         // let location = new Location();
         let signer: Signer[] = [];
+        let mspID = this.documentRepository.getMSPID();
+
         for (let index = 0; index < parties.length; index++) {
             const element = parties[index];
+            await this.documentRepository.updateDocumentCount(element.toString(), "forMeSignature", "Document" + mspID)
             signer.push({ tokenId: element, signature: "", status: "pending" })
         }
         let document = new DocumentEntity()
@@ -102,8 +107,8 @@ export class DocumentProvider {
         }
         let documentData: DocumentEntity = document
         console.log("After Validation", documentData)
-        let mspID = this.documentRepository.getMSPID();
         // return document;
+        await this.documentRepository.updateDocumentCount(creatorTokenId, "createdByMe", "Document" + mspID)
         return await this.documentRepository.create(documentData, "Document" + mspID);
     }
     /**
@@ -118,6 +123,8 @@ export class DocumentProvider {
     ): Promise<DocumentEntity | string> {
         // let location = new Location();
         var response = await this.getDocumentDetails(documentId);
+        let mspID = this.documentRepository.getMSPID();
+
         if (typeof response === 'string') {
             // 👇️ myVar has type string here
             return response;
@@ -126,17 +133,23 @@ export class DocumentProvider {
         let documentData: DocumentEntity = response;
         for (let index = 0; index < documentData.singers.length; index++) {
             const element: Signer = documentData.singers[index];
-            if (element.tokenId === signer) {
-                element.signature == signature
+            console.log("element.tokenId === signer", element.tokenId, signer, "  :   ", element.tokenId == signer);
+
+            if (element.tokenId == signer) {
+                element.signature = signature
+                element.status = "active"
                 documentData.singers[index] = element
+                await this.documentRepository.updateDocumentCount(signer.toString(), "signByMe", "Document" + mspID)
+
             }
         }
+        console.log("documentData", documentData);
+
         response = await this.documentValidators.addSignatureDocument(documentData);
         if (typeof response === 'string') {
             // 👇️ myVar has type string here
             return response;
         }
-        let mspID = this.documentRepository.getMSPID();
         return await this.documentRepository.update(documentData, "Document" + mspID);
     }
 
@@ -159,6 +172,11 @@ export class DocumentProvider {
 
         let documentData: DocumentEntity = response;
         documentData.status = status
+        for (let index = 0; index < documentData.singers.length; index++) {
+            const element: Signer = documentData[index];
+            element.status = status
+            documentData[index] = element;
+        }
         response = await this.documentValidators.addSignatureDocument(documentData);
         if (typeof response === 'string') {
             // 👇️ myVar has type string here

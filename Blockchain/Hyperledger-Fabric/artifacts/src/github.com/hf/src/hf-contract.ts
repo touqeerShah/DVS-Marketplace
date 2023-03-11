@@ -219,6 +219,7 @@ export class HFContract extends Contract {
             requestJson.startBlock,
             requestJson.endBlock,
             requestJson.creator, // A -> B ->C
+            requestJson.creatorTokenId, // A -> B ->C
             requestJson.ownerSignature,
             requestJson.parties);
         console.log("requestJson", creationResponse);

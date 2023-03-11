@@ -3,7 +3,7 @@ import { ContextProvider } from "../context/context.provider";
 import { BadRequestError } from "../eror/bad-request-error";
 import { NotFoundError } from "../eror/not-found-error";
 import { ErrorStatusCode } from "../eror/base-error"
-import { DocumentEntity } from "../../Document/Document.entity";
+import { DocumentEntity, DocumentCount } from "../../Document/Document.entity";
 
 
 // const crypto = require('crypto')
@@ -112,6 +112,34 @@ export class BaseRepository<T extends DocumentEntity> {
         await this.contextProvider.put(key, document.toBuffer(), privateCollection);
 
         return document;
+    }
+    /**
+   * this fucntion will add extra values to transaction when it is going to create which are more common which should add into
+   * transction before add into blockchain
+   */
+    public async updateDocumentCount(id: string, functionName: string, privateCollection: string) {
+        const bufferData = await this.contextProvider.get(id, privateCollection);
+        let documentCount: DocumentCount;
+        if (bufferData.length === 0) {
+            documentCount = { createdByMe: 0, forMeSignature: 0, signByMe: 0 }
+
+        } else {
+            documentCount = JSON.parse(bufferData.toString())
+        }
+        if (functionName == "createdByMe") {
+            documentCount.createdByMe = documentCount.createdByMe + 1
+        } else if (functionName == "forMeSignature") {
+            documentCount.forMeSignature = documentCount.forMeSignature + 1
+        } else if (functionName == "signByMe") {
+            documentCount.forMeSignature = documentCount.forMeSignature - 1
+            documentCount.signByMe = documentCount.signByMe + 1
+        }
+        // const documentCount: DocumentCount = JSON.parse(bufferData.toString())
+        let buffer = Buffer.from(JSON.stringify(JSON.stringify(documentCount)));
+
+        // here we call function to put data into blockchain
+        await this.contextProvider.put(id, buffer, privateCollection);
+
     }
 
     /**

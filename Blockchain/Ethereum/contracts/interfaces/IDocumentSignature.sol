@@ -26,11 +26,11 @@ interface IDocumentSignature {
         uint64 signatureEnd;
         uint256 documentId;
         string uri;
-        bytes[] signatures;
     }
     struct Party {
         uint256 tokenId;
         SignatureStatus status;
+        bytes signatures;
     }
     enum SignatureStatus {
         Deafult,
@@ -65,7 +65,6 @@ interface IDocumentSignature {
     error DocumentSignature__OnlyOwnerCanCall();
     error DocumentSignature__UserNotExist();
     error DocumentSignature__NotProcessBecauseNotInQueue();
-    error DocumentSignature__InvalidSignatureArrayLength();
 
     function createDocument(
         bytes memory name,

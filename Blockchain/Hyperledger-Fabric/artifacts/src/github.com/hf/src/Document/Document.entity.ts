@@ -21,3 +21,10 @@ export class Signer {
     signature: string;
     status: string;
 }
+
+
+export class DocumentCount {
+    createdByMe: number;
+    forMeSignature: number;
+    signByMe: number;
+}

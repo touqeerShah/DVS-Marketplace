@@ -10,44 +10,68 @@ import { StateType } from "../../config"
 import { DocumentEntity } from './../../class/document'
 import { useAppSelector } from "./../../redux/hooks"
 import { web3ProviderReduxState } from "./../../redux/reduces/web3ProviderRedux"
+
+import { REDEEM_USER_NFT } from "./../../lib/subgrapQueries"
+
 export default function CreateDocumentTable(props: any) {
   let web3ProviderState: StateType = useAppSelector(web3ProviderReduxState);
+  const subgraphClient = useApolloClient();
   const [myDocuments, setMyDocuments] = useState([])
   const [documentRequestType, setDocumentRequestType] = useState("Owner")
+  const [tokenId, setTokenId] = useState(0)
 
-  useEffect(() => {
-    const ownerFetchData = async () => {
-      if (web3ProviderState.web3Provider && web3ProviderState.address) {
-        console.log("call resutl");
+  let getDocumentData = async (documentRequestType: string) => {
+    if (web3ProviderState.web3Provider && web3ProviderState.address) {
+      let address: string = web3ProviderState.address
+      const isExist = await subgraphClient.query({
+        query: REDEEM_USER_NFT,
+        variables: {
+          userAddress: address.toString(),
+        },
+      });
+      let tokenId: number = isExist.data?.issueDigitalIdentities[0].tokenId
+      setTokenId(tokenId)
+      let query = {}
+      if (documentRequestType == "Owner") {
+        query = { "selector": { "creator": address } }
+      } else if (documentRequestType == "ForSignature") {
+        console.log("hereemksdmkaldmnkaldklaskd");
 
-        let address: string = web3ProviderState.address
-        let response = await post("get", {
-          data: JSON.stringify({
-            transactionCode: "002",
-            apiName: "getByQuery",
-            parameters: {
-              query: { "selector": { "creator": address } }
-            },
-            userId: "user1",
-            organization: "org1"
-          })
-        })
-        if (response.status == 200) {
-          console.log("response", response.data.slice(0, response.data.length - 1));
-
-          setMyDocuments(response.data.slice(0, response.data.length - 1))
-        }
-
+        query = { "selector": { "singers": { "$elemMatch": { "tokenId": parseInt(tokenId.toString()), "signature": "" } } } }
+      } else {
+        query = { "selector": { "singers": { "$elemMatch": { "tokenId": parseInt(tokenId.toString()), "signature": { "$gt": null } } } } }
       }
+      console.log(documentRequestType, "query", query);
+
+      let response = await post("get", {
+        data: JSON.stringify({
+          transactionCode: "002",
+          apiName: "getByQuery",
+          parameters: {
+            query: query
+          },
+          userId: "user1",
+          organization: "org1"
+        })
+      })
+      if (response.status == 200) {
+        console.log("response", response.data.slice(0, response.data.length - 1));
+
+        setMyDocuments(response.data.slice(0, response.data.length - 1))
+      }
+
     }
+  }
+  useEffect(() => {
+
     console.log('myDocuments', web3ProviderState);
 
-    if (myDocuments.length == 0 && documentRequestType === "Owner") {
+    if (myDocuments.length == 0) {
       console.log('myDocuments', myDocuments);
       // setMyDocuments([])
-      ownerFetchData()
+      getDocumentData(documentRequestType)
     }
-  }, [myDocuments.length == 0])
+  }, [web3ProviderState])
 
   return (
     <>
@@ -79,7 +103,11 @@ export default function CreateDocumentTable(props: any) {
               // onKeyDown={(e) => { _handleKeyDown(e, props.id) }}
 
               onChange={(e: React.FormEvent<HTMLSelectElement>) => {
-                // props.setEmail(e.currentTarget.value)
+                console.log("e.currentTarget.value", e.currentTarget.value);
+
+                setDocumentRequestType(e.currentTarget.value)
+                setMyDocuments([])
+                getDocumentData(e.currentTarget.value);
                 // handleChange(e, props.id)
               }}>
               <option value="Owner">Created By Me</option>
@@ -160,6 +188,9 @@ export default function CreateDocumentTable(props: any) {
                     documentDetails={item}
                     createdAt={item.createdAt}
                     web3ProviderState={web3ProviderState}
+                    setMyDocuments={setMyDocuments}
+                    documentRequestType={documentRequestType}
+                    tokenId={tokenId}
                     color={""} />
                 ))
               }
