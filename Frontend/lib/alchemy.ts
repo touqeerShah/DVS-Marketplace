@@ -25,8 +25,6 @@ export const getNftsForContract = async (contractAddress: string, pageSize: numb
 export async function getLatestBlockNumber() {
     const latestBlock = await alchemy.core.getBlockNumber();
     console.log("The latest block number is", latestBlock);
-    console.log(latestBlock);
-    console.log(latestBlock);
     return latestBlock;
 }
 

@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useApolloClient } from "@apollo/client";
+import { ethers, Signer } from "ethers";
+import { toast } from "react-toastify";
+
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import { create } from "ipfs-http-client";
-import { faFingerprint, faFile, faPlusCircle, faUpload } from "@fortawesome/free-solid-svg-icons";
+import { faFingerprint, faFile, faPlusCircle, faUpload, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import AddParameter from "../TextField/AddSingner"
 import { TypeDocumentSignerFields } from "../../class/document"
@@ -13,8 +16,6 @@ import { TypeDocumentSignerFields } from "../../class/document"
 
 import { UserIdVoucherStruct } from "../../class/typechain-types/contracts/core/UserIdentityNFT";
 
-import { ethers, Signer } from "ethers";
-import { toast } from "react-toastify";
 import { ContractAddress } from "../../config/"
 import { CHECK_SIGNER_EXIST } from "./../../lib/subgrapQueries"
 import { StateType } from "../../config"
@@ -31,7 +32,6 @@ import {
   INFURA_URL,
   INFURA_IPFS_PROJECJECT_ID,
   INFURA_IPFS_PROJECJECT_SECRET,
-  ETHERSCANAPIKEY
 } from "../../lib/config"
 
 import { getLatestBlockNumber } from "./../../lib/alchemy"
@@ -51,6 +51,7 @@ export default function CreateDocumentDetails(props: any) {
   const [purpose, setPurpose] = useState("")
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
+  let [spinnerProcess, setSpinnerProcess] = useState(false);
 
   var buffer = new ArrayBuffer(0);
 
@@ -96,14 +97,18 @@ export default function CreateDocumentDetails(props: any) {
 
   async function signDocument() {
     console.log("setPurpose");
+    setSpinnerProcess(true)
 
     if (web3ProviderState.provider == null && web3ProviderState.address) {
       console.log("error");
+      setSpinnerProcess(false)
 
       toast.error("Please Connect to your wallet First");
       return;
     }
     if (web3ProviderState.chainId != 5) {
+      setSpinnerProcess(false)
+
       toast.error("Please Change your network to Goerli");
       return;
     }
@@ -115,7 +120,7 @@ export default function CreateDocumentDetails(props: any) {
       var startDateSeconds = (new Date(startDate).getTime() - currentDate.getTime()) / 1000;
       var endDateSeconds = (new Date(endDate).getTime() - currentDate.getTime()) / 1000;
       var startBlock = latestBlockNumber + (startDateSeconds / AVERAGE_BLOCK_MINT_TIME)
-      var endBlock = startDateSeconds + (endDateSeconds / AVERAGE_BLOCK_MINT_TIME)
+      var endBlock = startBlock + (endDateSeconds / AVERAGE_BLOCK_MINT_TIME)
 
       const signer = await web3ProviderState.web3Provider.getSigner();
       let parties: TypeDocumentSignerFields[] = props.documentSignerFieldsState as TypeDocumentSignerFields[]
@@ -123,31 +128,6 @@ export default function CreateDocumentDetails(props: any) {
       let partiesId: number[] = []
       try {
 
-        // let getPartiesId = async (party: TypeDocumentSignerFields) => {
-        //   console.log(party);
-
-        //   if (party.userId != "" && userIdentityNFTContract) {
-        //     let tokenId: number = parseInt(party.userId)
-        //     console.log("tokenId", tokenId);
-        //     const isExist = await subgraphClient.query({
-        //       query: CHECK_SIGNER_EXIST,
-        //       variables: {
-        //         userAddress: tokenId.toString(),
-        //       },
-        //     });
-        //     console.log("isExist", isExist);
-        //     // issueDigitalIdentities
-
-        //     if (isExist.data?.issueDigitalIdentities.length > 0) {
-        //       //check from sub graph party token exist or not
-        //       partiesId.push(tokenId)
-        //     } else {
-        //       toast.error(`User Token ${tokenId} Not Exist`);
-        //       return;
-        //     }
-        //   }
-        // }
-        // await parties.filter(async (party: TypeDocumentSignerFields) => { await getPartiesId(party) })
 
         for (let index = 0; index < parties.length; index++) {
           const party: TypeDocumentSignerFields = parties[index];
@@ -178,11 +158,13 @@ export default function CreateDocumentDetails(props: any) {
 
       } catch (error) {
         console.log(error);
+        setSpinnerProcess(false)
 
         toast.error(`User Token &{tokenId} Not Exist`);
         return;
       }
       if (userIdentityNFTContract && 0 == await userIdentityNFTContract.balanceOf(web3ProviderState.address)) {
+        setSpinnerProcess(false)
 
         toast.error("Verify  Your Identity First");
         return;
@@ -278,13 +260,18 @@ export default function CreateDocumentDetails(props: any) {
             })
           });
           toast.success("Successfully Created Document " + _documentId.toString())
+          setSpinnerProcess(false)
 
         } catch (error: any) {
+          setSpinnerProcess(false)
+
           console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
           toast.error(error.message.substring(0, error.message.indexOf("(")))
         }
 
       } else {
+        setSpinnerProcess(false)
+
         toast.error("Atleast One Signer");
 
       }
@@ -502,6 +489,7 @@ export default function CreateDocumentDetails(props: any) {
                   <div className="relative  center mb-3">
                     <button className="border-0 px-3 px-2-5 my-4 placeholder-blueGray-300 text-blueGray-600 bg-white rounded border-2 text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                       type="submit">
+                      {spinnerProcess && <FontAwesomeIcon icon={faSpinner} className="animate-spin" />} &nbsp;&nbsp;
                       Create Document
                     </button>
                   </div>

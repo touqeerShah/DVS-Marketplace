@@ -58,7 +58,7 @@ contract DocumentSignature is Ownable, IDocumentSignature, EIP712, ERC721URIStor
 
         DocumentDetials storage _documentDetials = documentDetials[documentId];
         for (uint256 index = 0; index < partiesTokenId.length; index++) {
-            Party memory p = Party(partiesTokenId[index], SignatureStatus.Pending);
+            Party memory p = Party(partiesTokenId[index], SignatureStatus.Pending, new bytes(0));
             // _documentDetials.parties[partiesTokenId[index]] = SignatureStatus.Deafult;
             _documentDetials.parties.push(p);
         }
@@ -80,10 +80,7 @@ contract DocumentSignature is Ownable, IDocumentSignature, EIP712, ERC721URIStor
     ) public {
         // this.onlyDocumentOwner(documentDetials.creator);
         // here we get signature response but oracle from off-chain
-        if (
-            documentDetialsWithSigature.parties.length !=
-            documentDetialsWithSigature.signatures.length
-        ) revert DocumentSignature__InvalidSignatureArrayLength();
+
         DocumentState status = getStatusSignDocument(
             documentDetialsWithSigature.status,
             documentDetialsWithSigature.signatureStart,
@@ -95,20 +92,27 @@ contract DocumentSignature is Ownable, IDocumentSignature, EIP712, ERC721URIStor
                     documentDetialsWithSigature.creator,
                     documentDetialsWithSigature.documentId,
                     documentDetialsWithSigature.uri,
-                    documentDetialsWithSigature.signatures[i]
+                    documentDetialsWithSigature.parties[i].signatures
                 );
-                if (
-                    signer !=
-                    ERC721(userIdentityNFT).ownerOf(documentDetialsWithSigature.parties[i].tokenId)
-                ) {
-                    revert DocumentSignature__InValidSignature(
-                        documentDetialsWithSigature.parties[i].tokenId
-                    );
-                }
+                require(
+                    (signer ==
+                        ERC721(userIdentityNFT).ownerOf(
+                            documentDetialsWithSigature.parties[i].tokenId
+                        )),
+                    "User Signature is Invalid "
+                );
+                // if (
+                //     signer !=
+                //     ERC721(userIdentityNFT).ownerOf(documentDetialsWithSigature.parties[i].tokenId)
+                // ) {
+                //     revert DocumentSignature__InValidSignature(
+                //         documentDetialsWithSigature.parties[i].tokenId
+                //     );
+                // }
             }
-            uint256 tokenId = idCount.current();
+            // uint256 tokenId = idCount.current();
 
-            _safeMint(msg.sender, tokenId);
+            _safeMint(msg.sender, documentDetialsWithSigature.documentId);
             _setTokenURI(documentDetialsWithSigature.documentId, documentDetialsWithSigature.uri);
             // documentDetials.status = DocumentState.Succeeded;
             emit DocumentProcessWithSignature(
@@ -253,7 +257,7 @@ contract DocumentSignature is Ownable, IDocumentSignature, EIP712, ERC721URIStor
     function verifification(
         address creator,
         uint256 documentId,
-        string memory uri,
+        string calldata uri,
         bytes calldata signature
     ) public view returns (address) {
         bytes32 digest = _hash(creator, documentId, uri);
@@ -263,9 +267,12 @@ contract DocumentSignature is Ownable, IDocumentSignature, EIP712, ERC721URIStor
     function _hash(
         address creator,
         uint256 documentId,
-        string memory uri
+        string calldata uri
     ) internal view returns (bytes32) {
-        return _hashTypedDataV4(keccak256(abi.encode(CAST_VOTE, creator, documentId, uri)));
+        return
+            _hashTypedDataV4(
+                keccak256(abi.encode(CAST_VOTE, creator, documentId, keccak256(bytes(uri))))
+            );
     }
 
     function getDocumentId(

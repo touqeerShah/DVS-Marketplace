@@ -11,9 +11,12 @@ export interface DocumentEntityArg {
     startBlock: string;
     endBlock: string;
     creator: string; // A -> B ->C
+    creatorTokenId: string, // A -> B ->C
+
     ownerSignature: string;
     parties: number[]
-}export interface AddSignatureDocument {
+}
+export interface AddSignatureDocument {
     documentId: string,
     signature: string,
     signer: number,

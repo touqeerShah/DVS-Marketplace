@@ -179,16 +179,17 @@ Contract Address Testnet
 ```
 on-chain goerli
 {
-    "TimeLock": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
-    "GovernorContract": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+    "TimeLock": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+    "GovernorContract": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318",
     "OrcaleUrlProvider": "0x04B0601D72dAEEA5D88D5d3B3495854FEe6cCf36",
-    "FigurePrintOracle": "0x48c10b31964e158eAd1B50e15e77E344D56c2c77",
-    "UserIdentityNFT": "0x8413e46843ac0ADF81d0b1889dCa1EF01a03e679",
-    "DocumentSignature": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
-    "LinkToken": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-    "MockOracle": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+    "FigurePrintOracle": "0x105bB8edE0f4f7506549974D95C2709E8c173AA5",
+    "UserIdentityNFT": "0xAea0ED2303eB94d12b9952dd0fB647320577A494",
+    "DocumentSignature": "0x03D84562dE265D8585a030f182A7b426DB5DFB0e",
+    "LinkToken": "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
+    "MockOracle": "0x54e21D7edc7Dc890b024E2E61EcB7513C54e2e6f",
     "PTNFT": "0x90aBdd9f7519eB46B3aCaf8FFB40d2364e67d4b2"
 }
+
 ```
 
 # Thank you!

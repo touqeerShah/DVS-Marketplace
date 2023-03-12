@@ -56,27 +56,28 @@ describe("Document Signature", async function () {
     voucher = (await castVote(
       documentSignature,
       deployer,
-      1,
+      await deployer.getAddress(),
+      "https://ipfs.io/ipfs/QmYqybDx5JhWQXwbBVrKQ9KUUeA2PiEkxJKsyMCfjsExQG",
       documentId,
       DS_SIGNING_DOMAIN_NAME,
       DS_SIGNING_DOMAIN_VERSION
     ));
-    voucher2 = (await castVote(
-      documentSignature,
-      deployer2,
-      1,
-      documentId,
-      DS_SIGNING_DOMAIN_NAME,
-      DS_SIGNING_DOMAIN_VERSION
-    ));
-    voucher3 = (await castVote(
-      documentSignature,
-      deployer3,
-      1,
-      documentId,
-      DS_SIGNING_DOMAIN_NAME,
-      DS_SIGNING_DOMAIN_VERSION
-    ));
+    // voucher2 = (await castVote(
+    //   documentSignature,
+    //   deployer2,
+    //   1,
+    //   documentId,
+    //   DS_SIGNING_DOMAIN_NAME,
+    //   DS_SIGNING_DOMAIN_VERSION
+    // ));
+    // voucher3 = (await castVote(
+    //   documentSignature,
+    //   deployer3,
+    //   1,
+    //   documentId,
+    //   DS_SIGNING_DOMAIN_NAME,
+    //   DS_SIGNING_DOMAIN_VERSION
+    // ));
 
   });
 
@@ -95,6 +96,37 @@ describe("Document Signature", async function () {
         .to.revertedWithCustomError(documentSignature, "DocumentSignature__CreatorIdentityNotExit")
         .withArgs(address)
     });
+    it("DocumentSignature processDocumentWithSignature", async function () {
+      let tx = await userIdentityNFT.connect(deployer).createSimpleNFT();
+      await tx.wait(1)
+      signatureStartingPeriod = 4;
+      signatureEndingingPeriod = 4;
+      await moveBlock(5);
+      console.log("voucher", voucher);
+      console.log("await deployer.getAddress()", await deployer.getAddress());
+
+      console.log(await documentSignature.verifification(await deployer.getAddress(), documentId, "https://ipfs.io/ipfs/QmYqybDx5JhWQXwbBVrKQ9KUUeA2PiEkxJKsyMCfjsExQG", voucher));
+
+      console.log(await (documentSignature.connect(deployer).processDocumentWithSignature(
+        {
+          creator: await deployer.getAddress(),
+          description: "0x7468697320666f7220746573696e670000",
+          documentId: documentId,
+          name: "0x7465737400000000000000000000000000",
+          parties: [{
+            tokenId: 1,
+            signatures: voucher,
+            status: 1
+          }],
+          signatureEnd: "4",
+          signatureStart: "6",
+          status: 0,
+          uri: "https://ipfs.io/ipfs/QmYqybDx5JhWQXwbBVrKQ9KUUeA2PiEkxJKsyMCfjsExQG"
+        }
+      )))
+    });
+
+
     it("DocumentSignature Create Time of starting Signature and ending Signature will not some", async function () {
       let tx = await userIdentityNFT.connect(deployer).createSimpleNFT();
       await tx.wait(1)

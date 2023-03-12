@@ -2031,6 +2031,10 @@ left: 0px;
 .max-w-4xl {
   max-width: 56rem;
 }
+.max-w-5xl	{
+  max-width: 64rem; 
+
+}
 
 .max-w-full {
   max-width: 100%;
@@ -3362,6 +3366,18 @@ margin-bottom: 16rem; /* 256px */
     width: 75%;
   }
 }
+.animate-spin{
+  animation: spin 1s linear infinite;
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+}
 
 @media (min-width: 1280px) {
   .xl\:mb-0 {
@@ -3384,6 +3400,7 @@ margin-bottom: 16rem; /* 256px */
     width: 66.666667%;
   }
 }
+
 
 @media (min-width: 1536px) {
 }

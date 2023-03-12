@@ -1,16 +1,17 @@
 import { VoidSigner } from "@ethersproject/abstract-signer";
 import { BigNumber, Signer } from "ethers";
-import { DocumentSignature, UserIdentityNFT } from "../typechain-types";
+import { DocumentSignature, UserIdentityNFT, Test1 } from "../typechain-types";
 
 export async function castVote(
   documentSignature: DocumentSignature,
   signer: Signer,
-  tokenId: number,
+  creator: string,
+  uri: string,
   documentId: BigNumber,
   signingDomain: string,
   signatureVersion: string,
 ) {
-  const voucher = { tokenId, documentId };
+  const voucher = { creator, documentId, uri };
   const chainId = (await documentSignature.provider.getNetwork()).chainId;
   const domain = {
     name: signingDomain,
@@ -18,10 +19,13 @@ export async function castVote(
     verifyingContract: documentSignature.address,
     chainId,
   };
+  //      "createDocument(address creator,uint256 documentId,string uri)");
+
   const types = {
     createDocument: [
-      { name: "tokenId", type: "uint256" },
+      { name: "creator", type: "address" },
       { name: "documentId", type: "uint256" },
+      { name: "uri", type: "string" },
     ],
   };
   const signature = await (signer as VoidSigner)._signTypedData(domain, types, voucher);
@@ -67,3 +71,36 @@ export async function createUserId(
 }
 
 
+
+
+export async function test(
+  userIdentityNFT: Test1,
+  signer: Signer,
+  tokenId: Number,
+  status: Number,
+  signingDomain: string,
+  signatureVersion: string,
+) {
+  const voucher = { tokenId, status };
+  const chainId = (await userIdentityNFT.provider.getNetwork()).chainId;
+  const domain = {
+    name: signingDomain,
+    version: signatureVersion,
+    verifyingContract: userIdentityNFT.address,
+    chainId,
+  };
+  const types = {
+    createUserId: [
+      { name: "tokenId", type: "uint256" },
+      { name: "status", type: "uint256" },
+    ],
+  };
+  // console.log("types", types);
+
+  const signature = await (signer as VoidSigner)._signTypedData(domain, types, voucher);
+  const _voucher = {
+    ...voucher,
+    signature,
+  };
+  return _voucher;
+}
