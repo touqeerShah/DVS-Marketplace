@@ -15,7 +15,8 @@ export interface DocumentEntityArg {
 
     ownerSignature: string;
     parties: number[]
-}export interface AddSignatureDocument {
+}
+export interface AddSignatureDocument {
     documentId: string,
     signature: string,
     signer: number,
