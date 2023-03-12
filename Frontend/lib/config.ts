@@ -36,3 +36,4 @@ export const IPFS_SIMPLE = process.env.IPFS_SIMPLE || ""
 
 export const BACKEND_ENDPOINT = process.env.NEXT_PUBLIC_BACKEND_ENDPOINT
 
+

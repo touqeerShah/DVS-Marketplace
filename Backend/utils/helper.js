@@ -9,6 +9,7 @@ let responseObj = {};
 var client;
 async function getDataFromMongoDB(client, collectionName, findRequest, res) {
   var response = {};
+
   var apiConfig = await getCollection(
     client,
     configObj.MONGO_DB,
@@ -210,5 +211,8 @@ async function loadMongo() {
     ":" +
     configObj.MONGO_PORT
   );
+  return client;
 }
 loadMongo();
+
+module.exports = { getDataFromMongoDB, loadMongo }

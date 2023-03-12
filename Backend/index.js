@@ -3,19 +3,13 @@ var app = express(); // define our app using express
 var bodyParser = require("body-parser");
 var { configObj } = require("./config.js");
 var routes = require("./routes/blockchain");
+const routerAuth = require("./routes/auth")
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const server = require("http").createServer(app);
 var https = require("https");
 const cors = require("cors");
 
-/**
- * This are used for token verification of explorer if it was expored then get new token
- * again
- */
-const jwt = require("jsonwebtoken");
-const util = require("util");
-const jwtVerifyAsync = util.promisify(jwt.verify);
 /**
  * This used to store values in local storage  of server which help us
  */
@@ -90,6 +84,8 @@ app.use(function (req, res, next) {
 });
 
 app.use("/api", routes);
+app.use("/auth", routerAuth);
+
 
 /**
  * Enable server on https with local certificate and key

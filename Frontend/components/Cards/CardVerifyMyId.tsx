@@ -87,7 +87,7 @@ export default function CardVerifyMyId(props: any) {
       let resp = await post("get", {
         data: JSON.stringify({
           transactionCode: "002",
-          apiName: "getVerificationDetails",
+          apiName: "api/getVerificationDetails",
           parameters: {
             userId: userRecord?.userId,
           },
@@ -267,7 +267,7 @@ export default function CardVerifyMyId(props: any) {
             await post("addQueue", {
               data: JSON.stringify({
                 transactionCode: "002",
-                apiName: "createVerificationRecord",
+                apiName: "api/createVerificationRecord",
                 parameters: {
                   userId: voucher.userId,
                   creator: web3ProviderState.address,

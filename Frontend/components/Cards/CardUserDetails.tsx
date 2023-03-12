@@ -56,7 +56,7 @@ export default function CardUserDetails({ color, collection, userRecord, web3Pro
             await post("addQueue", {
               data: JSON.stringify({
                 transactionCode: "002",
-                apiName: "updateStatus",
+                apiName: "api/updateStatus",
                 parameters: {
                   userId: userRecord.userId,
                   status: "2"

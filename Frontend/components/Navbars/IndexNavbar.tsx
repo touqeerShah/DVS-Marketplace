@@ -1,13 +1,14 @@
 "use client"
 import React from "react";
 import { useRouter } from 'next/router'
-
+import { faBars, faBell } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 // components
 import { useCallback, useEffect, useState } from 'react'
 import Web3Modal from 'web3modal'
 import { Web3Provider } from "@ethersproject/providers"
-// import { providers } from "ethers";
+import { toast } from "react-toastify";
 
 
 import { getChainData } from '../../lib/utilities'
@@ -17,20 +18,22 @@ import { ellipseAddress } from '../../lib/utilities'
 import { StateType } from "../../config"
 import { useAppSelector, useAppDispatch } from "./../../redux/hooks"
 import { web3ProviderReduxState, connectState, disconnectState, changeAddress, changeChain, initialState } from "./../../redux/reduces/web3ProviderRedux"
-
+import { post } from "./../../utils"
 
 import IndexDropdown from "../Dropdowns/IndexDropdown";
 import NotificationMenu from "../Notification/NotificationMenu"
-import { faArrowAltCircleDown, faBars, faFileAlt, faBell } from "@fortawesome/free-solid-svg-icons";
-import { faFacebook, faGithub, faTwitter } from "@fortawesome/free-brands-svg-icons";
-
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import SetPin from "./../Pin/SetPin"
 
 
 export default function Navbar(props: any) {
   const router = useRouter()
+  const [getTokenCall, setGetTokenCall] = React.useState(false);
+  let isRequest = false;
 
   const [navbarOpen, setNavbarOpen] = React.useState(false);
+  const [showModal, setShowModal] = React.useState(false);
+  const [pin, setPin] = React.useState("");
+
   const [notificationMenuOpen, setNotificationMenuOpen] = React.useState(true);
   let web3Modal: Web3Modal | null;
   let chainData: any;
@@ -68,6 +71,8 @@ export default function Navbar(props: any) {
       chainData
     }
     dispatch(connectState(_state))
+    setGetTokenCall(true)
+    // await get("auth/checkUserExist", { "organization": "org1" })
     console.log("web3ProviderState", web3ProviderState);
 
 
@@ -93,12 +98,61 @@ export default function Navbar(props: any) {
     },
     [web3ProviderState.provider]
   )
+  const getToken = useCallback(async function () {
+    let res = await post("auth/get-message", { address: web3ProviderState.address, chainId: web3ProviderState.chainId })
+    if (web3ProviderState.web3Provider) {
+      const signer = await web3ProviderState.web3Provider.getSigner();
+      if (res.message) {
+        var signature = await signer.signMessage(res.message)
+        res = await post(`auth/verify-signature`, {
+          nonce: res.nonce,
+          issuedAt: res.issuedAt,
+          statement: res.statement,
+          address: web3ProviderState.address,
+          chainId: res.chainId,
+          uri: res.uri,
+          signature: signature
+        });
+        console.log("token", res.data);
 
-  // // // Auto connect to the cached provider
+      }
+    }
+  }, []);
   useEffect(() => {
 
     web3Modal = web3ModalSetup();
   }, [])
+  // // // Auto connect to the cached provider
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+
+
+        let res = await post("auth/checkUserExist", { "organization": "org1", "address": web3ProviderState.address })
+        if (res.status == 400) {
+          toast.error(res.message);
+        } else {
+          if (!res.data) {
+            setShowModal(true)
+          } else {
+            await getToken()
+          }
+
+        }
+      } catch (error: any) {
+        toast.error(error.message.substring(0, error.message.indexOf("(")))
+        return;
+
+      }
+    }
+    console.log("token- ", web3ProviderState.address, getTokenCall);
+
+    if (web3ProviderState.address && !isRequest) {
+
+      isRequest = true;
+      fetchData()
+    }
+  }, [getTokenCall])
 
 
   useEffect(() => {
@@ -238,6 +292,7 @@ export default function Navbar(props: any) {
             </ul>
           </div>
         </div>
+        <SetPin setShowModal={setShowModal} showModal={showModal} buttonLable={"Create Pin"} color="light" setPin={setPin} pin={pin} />
       </nav>
     </>
   );

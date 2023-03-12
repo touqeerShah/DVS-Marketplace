@@ -294,14 +294,13 @@ module.exports.registerUser = async function (
     const provider = wallet
       .getProviderRegistry()
       .getProvider(adminIdentityRes.data.key.type);
-    console.log(provider);
 
     const adminUser = await provider.getUserContext(
       adminIdentityRes.data.key,
       adminIdentityRes.data._id
     );
 
-    console.log("ccp.affiliation", ccp.keyCounchdb.affiliation);
+    // console.log("ccp.affiliation", ccp.keyCounchdb.affiliation);
     // Register the user, enroll the user, and import the new identity into the wallet.
     const secret = await ca.register(
       {
@@ -334,7 +333,6 @@ module.exports.registerUser = async function (
       },
       adminUser
     );
-    console.log("secret", secret);
     const enrollment = await ca.enroll({
       enrollmentID: userid,
       enrollmentSecret: secret,
@@ -362,7 +360,7 @@ module.exports.registerUser = async function (
       type: "spki",
     });
     //here we encrypt the new generated before store them into keystore
-    publicKey = keyEncrypt(publicKey, ccp.securet);
+    // publicKey = keyEncrypt(publicKey, ccp.securet);
     var encryptx509Identity = keyEncrypt(
       JSON.stringify(x509Identity),
       ccp.securet
@@ -616,11 +614,11 @@ async function connectCounchDB(ccp, userid) {
   adminIdentityRes.data.key = JSON.parse(
     keyDecrypt(adminIdentityRes.data.key, ccp.securet)
   );
-  adminIdentityRes.data.publicKey = keyDecrypt(
-    // here decrypt the key and send back
-    adminIdentityRes.data.publicKey,
-    ccp.securet
-  );
+  // adminIdentityRes.data.publicKey = keyDecrypt(
+  //   // here decrypt the key and send back
+  //   adminIdentityRes.data.publicKey,
+  //   ccp.securet
+  // );
   await wallet.put(adminIdentityRes.data._id, adminIdentityRes.data.key); // store key local volume
   adminIdentityRes.wallet = wallet; // we add wallet object with the response which is used to do remove key once done with use
 
