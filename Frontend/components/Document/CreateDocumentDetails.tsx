@@ -238,7 +238,7 @@ export default function CreateDocumentDetails(props: any) {
           console.log("url", url);
 
           console.log("voucher", voucher);
-          await post("addQueue", {
+          await post("api/addQueue", {
             data: JSON.stringify({
               transactionCode: "002",
               apiName: "createDocument",

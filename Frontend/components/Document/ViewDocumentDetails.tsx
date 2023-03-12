@@ -103,7 +103,7 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
         await post("addQueue", {
           data: JSON.stringify({
             transactionCode: "002",
-            apiName: "updateStatusDocument",
+            apiName: "api/updateStatusDocument",
             parameters: {
               documentId: documentDetails.documentId.toString(),
               status: "4"
@@ -169,7 +169,7 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
           await post("addQueue", {
             data: JSON.stringify({
               transactionCode: "002",
-              apiName: "addSignatureDocument",
+              apiName: "api/addSignatureDocument",
               parameters: {
                 documentId: documentDetails.documentId.toString(),
                 signature: voucher,

@@ -46,7 +46,7 @@ export default function CreateDocumentTable(props: any) {
       let response = await post("get", {
         data: JSON.stringify({
           transactionCode: "002",
-          apiName: "getByQuery",
+          apiName: "api/getByQuery",
           parameters: {
             query: query
           },
