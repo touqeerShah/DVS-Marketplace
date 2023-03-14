@@ -3,6 +3,8 @@ import React from "react";
 import { useRouter } from 'next/router'
 import { faBars, faBell } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import CryptoJS from 'crypto-js';
+
 import Link from "next/link";
 // components
 import { useCallback, useEffect, useState } from 'react'
@@ -17,7 +19,8 @@ import { ellipseAddress } from '../../lib/utilities'
 
 import { StateType } from "../../config"
 import { useAppSelector, useAppDispatch } from "./../../redux/hooks"
-import { web3ProviderReduxState, connectState, disconnectState, changeAddress, changeChain, initialState } from "./../../redux/reduces/web3ProviderRedux"
+import { web3ProviderReduxState, connectState, disconnectState, changeAddress, initialState } from "./../../redux/reduces/web3ProviderRedux"
+
 import { post } from "./../../utils"
 
 import IndexDropdown from "../Dropdowns/IndexDropdown";
@@ -33,11 +36,13 @@ export default function Navbar(props: any) {
   const [navbarOpen, setNavbarOpen] = React.useState(false);
   const [showModal, setShowModal] = React.useState(false);
   const [pin, setPin] = React.useState("");
-
+  const [checkPin, setCheckPin] = React.useState(false);
+  const [isUserExist, setIsUserExist] = React.useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = React.useState(true);
   let web3Modal: Web3Modal | null;
   let chainData: any;
   let web3ProviderState: StateType = useAppSelector(web3ProviderReduxState);
+
   // const [web3ProviderState, setCollapseShow] = useState("hidden");
 
   const dispatch = useAppDispatch();
@@ -98,31 +103,66 @@ export default function Navbar(props: any) {
     },
     [web3ProviderState.provider]
   )
-  const getToken = useCallback(async function () {
+  const getToken = useCallback(async function (pin: string) {
     let res = await post("auth/get-message", { address: web3ProviderState.address, chainId: web3ProviderState.chainId })
     if (web3ProviderState.web3Provider) {
+      console.log("res===>", res);
+
       const signer = await web3ProviderState.web3Provider.getSigner();
       if (res.message) {
-        var signature = await signer.signMessage(res.message)
-        res = await post(`auth/verify-signature`, {
-          nonce: res.nonce,
-          issuedAt: res.issuedAt,
-          statement: res.statement,
-          address: web3ProviderState.address,
-          chainId: res.chainId,
-          uri: res.uri,
-          signature: signature
-        });
-        console.log("token", res.data);
+        try {
+          var signature = await signer.signMessage(res.message)
+          setCheckPin(false)
+          setPin("")
+          res = await post(`auth/verify-signature`, {
+            nonce: res.nonce,
+            issuedAt: res.issuedAt,
+            statement: res.statement,
+            address: web3ProviderState.address,
+            chainId: res.chainId,
+            isUserExist: isUserExist,
+            pin: pin,
+            uri: res.uri,
+            signature: signature
+          });
+          console.log("token", res.data);
+        } catch (error) {
+          setCheckPin(false)
+          setPin("")
+          setShowModal(false)
+        }
+
 
       }
     }
-  }, []);
+  }, [web3ProviderState]);
+
+
   useEffect(() => {
 
     web3Modal = web3ModalSetup();
   }, [])
-  // // // Auto connect to the cached provider
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        console.log("sasa", CryptoJS.MD5("pin").toString());
+
+        await getToken(CryptoJS.MD5("pin").toString())
+
+      } catch (error: any) {
+        console.log(error);
+
+        return;
+
+      }
+    }
+    console.log("checkPin && pin.length == 6", checkPin && pin.length == 6, checkPin, pin.length == 6);
+
+    if (checkPin && pin.length == 6) {
+      fetchData()
+    }
+  }, [checkPin])
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -132,14 +172,12 @@ export default function Navbar(props: any) {
         if (res.status == 400) {
           toast.error(res.message);
         } else {
-          if (!res.data) {
-            setShowModal(true)
-          } else {
-            await getToken()
-          }
-
+          setIsUserExist(res.data)
+          setShowModal(true)
         }
       } catch (error: any) {
+        console.log("error", error);
+
         toast.error(error.message.substring(0, error.message.indexOf("(")))
         return;
 
@@ -147,7 +185,7 @@ export default function Navbar(props: any) {
     }
     console.log("token- ", web3ProviderState.address, getTokenCall);
 
-    if (web3ProviderState.address && !isRequest) {
+    if (web3ProviderState.web3Provider && !isRequest) {
 
       isRequest = true;
       fetchData()
@@ -292,7 +330,7 @@ export default function Navbar(props: any) {
             </ul>
           </div>
         </div>
-        <SetPin setShowModal={setShowModal} showModal={showModal} buttonLable={"Create Pin"} color="light" setPin={setPin} pin={pin} />
+        <SetPin setShowModal={setShowModal} showModal={showModal} buttonLable={"Create Pin"} color="light" setPin={setPin} pin={pin} setCheckPin={setCheckPin} />
       </nav>
     </>
   );

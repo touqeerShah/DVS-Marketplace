@@ -21,7 +21,7 @@ class TransactionsMQ {
         this.channel = await connection.createChannel();
     }
 
-    async transactions(uuid, routingKey, userId, data) {
+    async transactions(uuid, routingKey, userId, data, pinHash) {
         try {
             if (!this.channel) {
                 await this.createChannel();
@@ -35,6 +35,7 @@ class TransactionsMQ {
                 logType: routingKey,
                 userId: userId,
                 data: data,
+                pinHash: pinHash,
                 dateTime: new Date(),
             };
             await this.channel.publish(
@@ -128,7 +129,8 @@ async function consumeInvoke() {
                                 collrollerObject.apiConfig.data.contractName,
                                 collrollerObject.apiConfig.data.functionName,
                                 collrollerObject.requestData.parameters,
-                                collrollerObject.networkConfig.data
+                                collrollerObject.networkConfig.data,
+                                data.pinHash
                             )
                                 .then(async (value) => {
                                     console.log("value", value);
