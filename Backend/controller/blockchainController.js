@@ -19,7 +19,8 @@ module.exports.addQueue = async (req, res) => {
       uuid,
       "invoke",
       reqdata.userId,
-      req.body.data
+      req.body.data,
+      reqdata.pinHash
     );
     var dbResponse;
     if (response) {
@@ -56,13 +57,15 @@ module.exports.register = async (req, res) => {
   if (collrollerObject.status != 200) {
     res.send(collrollerObject);
   }
+  console.log("collrollerObject", collrollerObject);
   await registerUser(
     //here we used SDK to Connect to the CA of respective Organization Bucket and generate user PKI
     collrollerObject.requestData.userId,
     collrollerObject.apiConfig.data.isCreator,
     collrollerObject.requestData.organization,
     collrollerObject.requestData.companyId,
-    collrollerObject.networkConfig.data
+    collrollerObject.networkConfig.data,
+    collrollerObject.requestData.pinHash,
   )
     .then(async (value) => {
       if (value.status != 200) {
@@ -74,6 +77,28 @@ module.exports.register = async (req, res) => {
     .catch((err) => {
       res.send(err);
     });
+};
+
+/**
+ * This function is used to register user when we create user it will generate user Private key and Public Key and store them into KeyStore
+ * @param {*} req
+ * @param {*} res
+ */
+module.exports.registerWithSignature = async (req, res) => {
+  var collrollerObject = await init(req, res, "POST"); /// this function is connect to mongoDB,get API Defination  and Network config for that bucket
+  if (collrollerObject.status != 200) {
+    res.send(collrollerObject);
+  }
+  console.log("collrollerObject", collrollerObject);
+  return await registerUser(
+    //here we used SDK to Connect to the CA of respective Organization Bucket and generate user PKI
+    collrollerObject.requestData.userId,
+    collrollerObject.apiConfig.data.isCreator,
+    collrollerObject.requestData.organization,
+    collrollerObject.requestData.companyId,
+    collrollerObject.networkConfig.data,
+    collrollerObject.requestData.pinHash,
+  );
 };
 /**
  * This function is used to when we do transaction on Blockchain
@@ -93,7 +118,8 @@ module.exports.insert = async (req, res) => {
       collrollerObject.apiConfig.data.contractName,
       collrollerObject.apiConfig.data.functionName,
       collrollerObject.requestData.parameters,
-      collrollerObject.networkConfig.data
+      collrollerObject.networkConfig.data,
+      collrollerObject.requestData.pinHash
     )
       .then((value) => {
         res.send(value);

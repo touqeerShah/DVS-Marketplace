@@ -1,7 +1,8 @@
 const { Header, Payload, SIWWeb3 } = require("@web3auth/sign-in-with-web3");
 const jwt = require("jsonwebtoken");
-let { getDataFromMongoDB, loadMongo } = require("../utils/helper")
+let { getDataFromMongoDBExternal, loadMongo } = require("../utils/helper");
 const { getKeys } = require("../module/keyStore");
+const { registerWithSignature } = require("../controller/blockchainController.js");
 
 const domain = "localhost";
 const origin = "https://localhost/login";
@@ -70,13 +71,34 @@ const verify = async (req, res) => {
     }`);
     console.log("isVerified", isVerified);
     if (isVerified.success) {
+        let response = {};
+        if (!req.body.isUserExist) {
+            let userReq = {
+                "body": {
+                    "data": JSON.stringify({
+                        "transactionCode": "001",
+                        "apiName": "registerAdmin",
+                        "parameters": { "id": "10", "userRole": "test", "status": "pending" },
+                        "userId": "10",
+                        "companyId": "org1",
+                        "organization": "org1",
+                        "pinHash": req.body.pin,
+                    }),
+                },
+            };
+            console.log(userReq.body.data);
+            response = await registerWithSignature(userReq, res);
+
+            console.log("response", response);
+
+        }
         // if user is new
         // here we call register user function
         // also pass user pin hash for encryption
         // it will return public and we use it for token creation
         //else get public key only
         let verifiedAddress = req.body.address;
-        const token = jwt.sign({ verifiedAddress }, jwtSecret, { expiresIn: "1d" });
+        const token = jwt.sign({ verifiedAddress }, response.publicKey, { expiresIn: "1d" });
         res.send({ status: 200, data: token });
         console.log("Verified!");
     } else {
@@ -86,10 +108,9 @@ const verify = async (req, res) => {
     }
 };
 
-
 const checkUserExist = async (req, res) => {
-    let client = await loadMongo()
-    var networkConfig = await getDataFromMongoDB(
+    let client = await loadMongo();
+    var networkConfig = await getDataFromMongoDBExternal(
         client,
         "Network",
         { name: req.body.organization },
@@ -97,10 +118,9 @@ const checkUserExist = async (req, res) => {
     );
     // console.log(networkConfig.data);
     if (networkConfig.data.status != 200) {
-        res.send({ status: 400, message: "Error to connect Server Try again" })
+        res.send({ status: 400, message: "Error to connect Server Try again" });
         return networkConfig;
     } else {
-
         try {
             var getUser = {
                 // query to check user is not exist
@@ -115,20 +135,18 @@ const checkUserExist = async (req, res) => {
             );
             if (userIdentityRes.status == 200) {
                 userIdentityRes.message = "user key already Found";
-                res.send({ status: 200, message: "user exit", data: true })
+                res.send({ status: 200, message: "user exit", data: true });
                 return;
             } else {
-                res.send({ status: 404, message: "user not exit", data: false })
+                res.send({ status: 404, message: "user not exit", data: false });
 
                 return;
             }
         } catch (error) {
-
             // }
-        };
+        }
     }
-
-}
+};
 
 function authenticateToken(req, res, next) {
     const authHeader = req.headers["authorization"];
@@ -144,7 +162,7 @@ function authenticateToken(req, res, next) {
         if (err) return res.sendStatus(403);
 
         req.authData = authData;
-        res.send({ status: 200, message: authData })
+        res.send({ status: 200, message: authData });
         next();
     });
 }
@@ -152,5 +170,5 @@ module.exports = {
     createWeb3Message,
     verify,
     authenticateToken,
-    checkUserExist
+    checkUserExist,
 };

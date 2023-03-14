@@ -7,7 +7,7 @@ const Ajv = require("ajv");
 const ajv = new Ajv(); // options can be passed, e.g. {allErrors: true}
 let responseObj = {};
 var client;
-async function getDataFromMongoDB(client, collectionName, findRequest, res) {
+let getDataFromMongoDB = async (client, collectionName, findRequest, res) => {
   var response = {};
 
   var apiConfig = await getCollection(
@@ -46,6 +46,8 @@ async function validation(schema, data, res) {
   }
 }
 module.exports.init = async (req, res, mathodeType) => {
+  console.log("------> req.query.data", req);
+
   let collrollerObject = new CollrollerObject();
   try {
     if (mathodeType == "POST") {
@@ -200,7 +202,7 @@ module.exports.initQueue = async (data, res, mathodeType) => {
   }
 };
 
-async function loadMongo() {
+module.exports.loadMongo = async () => {
   client = await connectMongoDB(
     "mongodb://" +
     configObj.MONGO_USER +
@@ -213,6 +215,7 @@ async function loadMongo() {
   );
   return client;
 }
-loadMongo();
+// loadMongo();
 
-module.exports = { getDataFromMongoDB, loadMongo }
+module.exports.getDataFromMongoDBExternal = getDataFromMongoDB
+

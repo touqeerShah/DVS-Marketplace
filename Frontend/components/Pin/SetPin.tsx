@@ -3,7 +3,7 @@ import PinInput from 'react-pin-input';
 
 
 
-export default function SetPin({ showModal, color, setShowModal, buttonLable, setPin, pin }: any) {
+export default function SetPin({ showModal, color, setShowModal, buttonLable, setPin, pin, setCheckPin }: any) {
 
 
 
@@ -57,7 +57,7 @@ export default function SetPin({ showModal, color, setShowModal, buttonLable, se
                       secret
                       secretDelay={100}
                       onChange={(value, index) => {
-                        console.log(value);
+                        // console.log(value);
                         setPin(value)
                       }}
                       type="numeric"
@@ -80,6 +80,8 @@ export default function SetPin({ showModal, color, setShowModal, buttonLable, se
                     disabled={!(pin.length == 6)}
                     onClick={() => {
                       // console.log("ss", !(pin.length != 6));
+                      setShowModal(false)
+                      setCheckPin(true)
                     }}
                   >
                     {/* {spinnerProcess && <FontAwesomeIcon icon={faSpinner} className="animate-spin" />} */}

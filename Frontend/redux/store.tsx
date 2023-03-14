@@ -1,6 +1,7 @@
 
 import { configureStore } from "@reduxjs/toolkit"
 import web3ProviderReducer from "./reduces/web3ProviderRedux"
+
 import { getDefaultMiddleware } from '@reduxjs/toolkit';
 
 export const store = configureStore({

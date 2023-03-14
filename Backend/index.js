@@ -4,6 +4,7 @@ var bodyParser = require("body-parser");
 var { configObj } = require("./config.js");
 var routes = require("./routes/blockchain");
 const routerAuth = require("./routes/auth")
+const { loadMongo } = require("./utils/helper")
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const server = require("http").createServer(app);
@@ -94,6 +95,7 @@ app.use("/auth", routerAuth);
 
 const PORT = configObj.PORT || 8081;
 server.listen(PORT, () => {
+  loadMongo()
   console.info(
     `Please open web browser to access ：${protocol}://${configObj.host}:${PORT}/`
   );

@@ -30,7 +30,8 @@ module.exports.invoke = async function (
   chaincode_name,
   function_name,
   function_arguments,
-  ccp
+  ccp,
+  userSecret,
 ) {
   return_args = {};
 
@@ -39,7 +40,7 @@ module.exports.invoke = async function (
      *  we call fucntion who will connect to key-store get the used key and decrypt it
      *  it will return two values on key and other wallet module object
      */
-    var resConnectCounchDB = await connectCounchDB(ccp, userid); //
+    var resConnectCounchDB = await connectCounchDB(ccp, userid, userSecret); //
     // console.log("resConnectCounchDB", resConnectCounchDB);
     if (resConnectCounchDB.status == 404) {
       return resConnectCounchDB;
@@ -136,7 +137,7 @@ module.exports.query = async function (
      *  we call fucntion who will connect to key-store get the used key and decrypt it
      *  it will return two values on key and other wallet module object
      */
-    var resConnectCounchDB = await connectCounchDB(ccp, userid);
+    var resConnectCounchDB = await connectCounchDB(ccp, userid, "");
     if (resConnectCounchDB.status == 404) {
       return resConnectCounchDB;
     }
@@ -225,7 +226,7 @@ module.exports.registerUser = async function (
   isCreator,
   organization,
   companyId,
-  ccp
+  ccp, userSecret
 ) {
   return_args = {};
   /*
@@ -363,7 +364,7 @@ module.exports.registerUser = async function (
     // publicKey = keyEncrypt(publicKey, ccp.securet);
     var encryptx509Identity = keyEncrypt(
       JSON.stringify(x509Identity),
-      ccp.securet
+      userSecret
     );
     console.log("publicKey", publicKey);
 
@@ -380,6 +381,7 @@ module.exports.registerUser = async function (
     if (userRes.status == 404) {
       return userRes;
     }
+    userRes["publicKey"] = publicKey;
     console.log("userRes", userRes);
 
     await wallet.remove(adminIdentityRes.data._id); // remove key on local wallet path
@@ -591,7 +593,7 @@ blockchainevent = async function (
  * @param {*} userid user id which key we want to fetch from key store
  * @returns
  */
-async function connectCounchDB(ccp, userid) {
+async function connectCounchDB(ccp, userid, userSecret) {
   const walletPath = path.join(process.cwd(), "wallet"); // create wallet object
   const wallet = await Wallets.newFileSystemWallet(walletPath);
 
@@ -612,7 +614,7 @@ async function connectCounchDB(ccp, userid) {
     return adminIdentityRes;
   }
   adminIdentityRes.data.key = JSON.parse(
-    keyDecrypt(adminIdentityRes.data.key, ccp.securet)
+    keyDecrypt(adminIdentityRes.data.key, userSecret == "" ? ccp.securet : userSecret)
   );
   // adminIdentityRes.data.publicKey = keyDecrypt(
   //   // here decrypt the key and send back
