@@ -113,6 +113,22 @@ export class BaseRepository<T extends DocumentEntity> {
 
         return document;
     }
+
+    /**
+      * this fucntion will add extra values to transaction when it is going to create which are more common which should add into
+      * transction before add into blockchain
+      */
+    public async getDocumentCount(id: string, privateCollection: string): Promise<DocumentCount> {
+        const bufferData = await this.contextProvider.get(id, privateCollection);
+        let documentCount: DocumentCount;
+        if (bufferData.length === 0) {
+            documentCount = { createdByMe: 0, forMeSignature: 0, signByMe: 0 }
+
+        } else {
+            documentCount = JSON.parse(bufferData.toString())
+        }
+        return documentCount;
+    }
     /**
    * this fucntion will add extra values to transaction when it is going to create which are more common which should add into
    * transction before add into blockchain

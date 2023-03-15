@@ -17,9 +17,12 @@ import { getChainData } from '../../lib/utilities'
 import { web3ModalSetup } from "../../lib/Web3ModalSetup"
 import { ellipseAddress } from '../../lib/utilities'
 
-import { StateType } from "../../config"
+import { StateType, PinState, PinHash } from "../../config"
 import { useAppSelector, useAppDispatch } from "./../../redux/hooks"
 import { web3ProviderReduxState, connectState, disconnectState, changeAddress, initialState } from "./../../redux/reduces/web3ProviderRedux"
+import { pinStateReducerState, getState } from "./../../redux/reduces/pinRedux"
+import { setHash } from "./../../redux/reduces/pinhashRedux"
+import { store } from "./../../redux/store"
 
 import { post } from "./../../utils"
 
@@ -42,6 +45,7 @@ export default function Navbar(props: any) {
   let web3Modal: Web3Modal | null;
   let chainData: any;
   let web3ProviderState: StateType = useAppSelector(web3ProviderReduxState);
+  let pinState: PinState = useAppSelector(pinStateReducerState);
 
   // const [web3ProviderState, setCollapseShow] = useState("hidden");
 
@@ -106,6 +110,9 @@ export default function Navbar(props: any) {
     [web3ProviderState.provider]
   )
   const getToken = useCallback(async function (pin: string, isUserExist: boolean) {
+    console.log("pin", pin, pinState, store.getState().pinState);
+
+
     let res = await post("auth/get-message", { address: web3ProviderState.address, chainId: web3ProviderState.chainId })
     if (web3ProviderState.web3Provider) {
       console.log("res===>", res);
@@ -131,17 +138,10 @@ export default function Navbar(props: any) {
           });
           console.log("token", res.data);
           localStorage.setItem('token', res.data);
-
-          // const headers = {
-          //   'Content-Type': 'application/json',
-          //   'Authorization': "JWT " + res.data
-          // }
-          // res = await post(`auth/verify-token`, {
-          //   address: 11,
-          //   organization: "org1",
-
-          // }, { headers: headers });
-          // console.log("auth/verify-toke", res);
+          if (store.getState().pinState.toSavePin) {
+            // dispatch(changeState({ status: !pinState.status, toSavePin: false }))
+            dispatch(setHash({ pinhash: pin }))
+          }
         } catch (error) {
           setCheckPin(false)
           setPin("")
@@ -163,7 +163,7 @@ export default function Navbar(props: any) {
     const fetchData = async () => {
       try {
         // console.log("sasa", CryptoJS.MD5("pin").toString());
-        console.log("isUserExist", isUserExist);
+        // console.log("isUserExist", isUserExist);
 
         await getToken(CryptoJS.MD5("pin").toString(), isUserExist)
 
@@ -174,7 +174,7 @@ export default function Navbar(props: any) {
 
       }
     }
-    console.log("checkPin && pin.length == 6", checkPin && pin.length == 6, checkPin, pin.length == 6);
+    // console.log("checkPin && pin.length == 6", checkPin && pin.length == 6, checkPin, pin.length == 6);
 
     if (checkPin && pin.length == 6) {
       fetchData()
@@ -197,7 +197,7 @@ export default function Navbar(props: any) {
               'Authorization': "JWT " + localStorage.getItem("token")
             }
             res = await post(`auth/verify-token`, {
-              address: 11,
+              address: web3ProviderState.address,
               organization: "org1",
 
             }, { headers: headers });
@@ -225,7 +225,7 @@ export default function Navbar(props: any) {
       isRequest = true;
       fetchData()
     }
-  }, [getTokenCall])
+  }, [getTokenCall, pinState.status])
 
 
   useEffect(() => {
@@ -241,6 +241,8 @@ export default function Navbar(props: any) {
       const handleAccountsChanged = (accounts: string[]) => {
         // eslint-disable-next-line no-console
         console.log('accountsChanged', accounts)
+        localStorage.removeItem('token');
+        setGetTokenCall(false)
         dispatch(changeAddress(accounts[0]))
         // dispatch({
         //   type: 'SET_ADDRESS',
@@ -365,7 +367,7 @@ export default function Navbar(props: any) {
             </ul>
           </div>
         </div>
-        <SetPin setShowModal={setShowModal} showModal={showModal} buttonLable={"Create Pin"} color="light" setPin={setPin} pin={pin} setCheckPin={setCheckPin} />
+        <SetPin setShowModal={setShowModal} showModal={showModal} buttonLable={pinState.toSavePin || isUserExist ? "Enter Pin " : "Create Pin"} color="light" setPin={setPin} pin={pin} setCheckPin={setCheckPin} />
       </nav>
     </>
   );

@@ -11,6 +11,16 @@ export type StateType = {
 }
 
 
+export type PinState = {
+    status: boolean
+    toSavePin: boolean
+}
+
+export type PinHash = {
+    pinhash: string
+}
+
+
 
 export type ActionType =
     | {

@@ -31,7 +31,28 @@ import { DocumentEntityArg, AddSignatureDocument, UpdateStatusDocument } from ".
 @Info({ title: "HFContract", description: "HFContract" })
 export class HFContract extends Contract {
 
+    /**
+        * this function is get details of site
+        * siteObject = '{"siteid":"pharmaTrace_786"}'
+        * @param ctx 
+        * @param userObject  object contain site id
+        * @returns 
+        */
+    @Transaction()
+    public async getDocumentCount(
+        ctx: Context,
+        userObject: string,
+    ): Promise<boolean | string> {
+        let requestJson = JSON.parse(userObject);
 
+        const documentProvider = new DocumentProvider(ctx); // create object provider
+        requestJson = await documentProvider.getDocumentCount(requestJson.documentId);
+        if (typeof requestJson === 'string') {
+            // 👇️ myVar has type string here
+            return requestJson;
+        }
+        return requestJson;
+    }
     /**
      * this function is get details of site
      * siteObject = '{"siteid":"pharmaTrace_786"}'
@@ -47,7 +68,7 @@ export class HFContract extends Contract {
         let requestJson = JSON.parse(userObject);
 
         const documentProvider = new DocumentProvider(ctx); // create object provider
-        requestJson = await documentProvider.existsDocument(requestJson.userId);
+        requestJson = await documentProvider.existsDocument(requestJson.documentId);
         if (typeof requestJson === 'string') {
             // 👇️ myVar has type string here
             return requestJson;
@@ -72,7 +93,7 @@ export class HFContract extends Contract {
         let requestJson = JSON.parse(userObject);
 
         const documentProvider = new DocumentProvider(ctx); // create object provider
-        requestJson = await documentProvider.getDocumentDetails(requestJson.userId);
+        requestJson = await documentProvider.getDocumentDetails(requestJson.documentId);
         if (typeof requestJson === 'string') {
             // 👇️ myVar has type string here
             return requestJson;

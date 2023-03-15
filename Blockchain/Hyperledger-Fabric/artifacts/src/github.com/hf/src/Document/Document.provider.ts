@@ -54,6 +54,16 @@ export class DocumentProvider {
         return await this.documentRepository.get(query, "Document" + mspID);
     }
 
+    /**
+ * This function is  get detials of document
+ * @paramtransactionId 
+ * @returns 
+ */
+    public async getDocumentCount(documentId: string): Promise<DocumentCount | string> {
+        let mspID = this.documentRepository.getMSPID();
+        return await this.documentRepository.getDocumentCount(documentId, "Document" + mspID);
+    }
+
 
     /**
      * Create document first validate the object the passed it to add more attribut and store into blockchain
@@ -79,7 +89,7 @@ export class DocumentProvider {
 
         for (let index = 0; index < parties.length; index++) {
             const element = parties[index];
-            await this.documentRepository.updateDocumentCount(element.toString(), "forMeSignature", "Document" + mspID)
+            // await this.documentRepository.updateDocumentCount(element.toString(), "forMeSignature", "Document" + mspID)
             signer.push({ tokenId: element, signature: "", status: "pending" })
         }
         let document = new DocumentEntity()
@@ -108,7 +118,7 @@ export class DocumentProvider {
         let documentData: DocumentEntity = document
         console.log("After Validation", documentData)
         // return document;
-        await this.documentRepository.updateDocumentCount(creatorTokenId, "createdByMe", "Document" + mspID)
+        // await this.documentRepository.updateDocumentCount(creatorTokenId, "createdByMe", "Document" + mspID)
         return await this.documentRepository.create(documentData, "Document" + mspID);
     }
     /**
