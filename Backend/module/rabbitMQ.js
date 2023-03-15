@@ -108,7 +108,7 @@ async function consumeInvoke() {
             async (msg) => {
                 if (msg !== null) {
                     var data = JSON.parse(msg.content.toString());
-                    console.log("data.data", data.data);
+                    console.log("data.data", data);
                     var collrollerObject = await initQueue(data.data, {}, "POST"); /// this function is connect to mongoDB,get API Defination  and Network config for that bucket
                     console.log("1.collrollerObject ==>", collrollerObject);
                     console.log("isLoaded", isLoaded, data.uuid);

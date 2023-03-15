@@ -101,7 +101,7 @@ const verify = async (req, res) => {
             } else {
                 var getUser = {
                     // query to check user is not exist
-                    _id: 11,
+                    _id: req.body.address,
                 };
                 let userIdentityRes = await getKeys(
                     networkConfig.data.data.keyCounchdb.username,
@@ -128,7 +128,8 @@ const verify = async (req, res) => {
         // it will return public and we use it for token creation
         //else get public key only
         let verifiedAddress = req.body.address;
-        const token = jwt.sign({ verifiedAddress }, response.publicKey, { expiresIn: "1d", algorithm: 'ES256' });
+        let organization = req.body.organization;
+        const token = jwt.sign({ verifiedAddress, organization }, response.publicKey, { expiresIn: "1m", algorithm: 'ES256' });
         res.send({ status: 200, data: token });
         console.log("Verified!");
     } else {
@@ -184,12 +185,61 @@ const checkUserExist = async (req, res) => {
         }
     }
 };
+async function verifyPin(req, res, next) {
+    try {
 
+        const authHeader = req.headers["authorization"];
+        let token = authHeader.split(" ")[1];
+        var networkConfig = await getConfig(req.body.organization);
+        if (networkConfig.data.status != 200) {
+            res.send({ status: 400, message: "Error to connect Server Try again" });
+            return networkConfig;
+        } else {
+            let response = {}
+            var getUser = {
+                // query to check user is not exist
+                _id: req.body.address,
+            };
+            let userIdentityRes = await getKeys(
+                networkConfig.data.data.keyCounchdb.username,
+                networkConfig.data.data.keyCounchdb.password,
+                networkConfig.data.data.keyCounchdb.url,
+                networkConfig.data.data.keyCounchdb.db_name,
+                getUser
+            );
+            if (userIdentityRes.status != 200) {
+                userIdentityRes.message = "user key already Found";
+                res.send({ status: 401, message: "unregister user", data: true });
+            }
+            console.log("userIdentityRes", userIdentityRes.data.key);
+            response.key = JSON.parse(
+                keyDecrypt(userIdentityRes.data.key, req.body.pin)
+            );
+
+            jwt.verify(token, userIdentityRes.data.publicKey, { algorithm: 'ES256' }, (err, authData) => {
+                console.log("authData", authData);
+
+                if (err) return res.sendStatus(403);
+
+                req.authData = authData;
+                if (!authData) {
+                    res.send({ status: 404, message: authData });
+
+                }
+                res.send({ status: 200, message: authData });
+                next();
+            });
+
+        }
+    } catch (error) {
+        console.log("error", error);
+        res.send({ status: 404, message: "Not Valid" })
+    }
+
+}
 async function authenticateToken(req, res, next) {
     const authHeader = req.headers["authorization"];
-    console.log("  = > ", authHeader.split(" ")[1]);
     let token = authHeader.split(" ")[1];
-    console.log("  = > ", token);
     try {
 
         var networkConfig = await getConfig(req.body.organization);
@@ -214,21 +264,27 @@ async function authenticateToken(req, res, next) {
             } else {
                 if (token == null) return res.sendStatus(401);
                 // console.log("userIdentityRes", userIdentityRes);
-                const header = jwt.decode(token, { complete: true }).header;
-                console.log("header", header);
-                console.log("userIdentityRes.data.publicKey", userIdentityRes.data.publicKey);
+                // const header = jwt.decode(token, userIdentityRes.data.publicKey, { algorithm: true }).header;
+                // console.log("header", header);
+                // console.log("userIdentityRes.data.publicKey", userIdentityRes.data.publicKey);
+                // let decode=jwt.decode(token, userIdentityRes.data.publicKey, { algorithm: 'ES256' })
                 jwt.verify(token, userIdentityRes.data.publicKey, { algorithm: 'ES256' }, (err, authData) => {
-                    console.log(err, authData);
+                    console.log("authData", authData);
 
                     if (err) return res.sendStatus(403);
 
                     req.authData = authData;
+                    if (!authData) {
+                        res.send({ status: 404, message: authData });
+
+                    }
                     res.send({ status: 200, message: authData });
                     next();
                 });
             }
         }
     } catch (error) {
+        console.log(error);
         res.send({ status: 503, message: "Service Unavailable", data: true });
 
     }
@@ -239,4 +295,5 @@ module.exports = {
     verify,
     authenticateToken,
     checkUserExist,
+    verifyPin
 };
