@@ -90,6 +90,8 @@ export default function Navbar(props: any) {
       localStorage.clear();
 
       console.log(await web3Modal?.clearCachedProvider())
+      localStorage.removeItem('token');
+
       console.log("disconnect", await web3ProviderState.web3Provider?.detectNetwork());
 
       if (web3ProviderState.provider.disconnect && typeof web3ProviderState.provider.disconnect === 'function') {
@@ -103,7 +105,7 @@ export default function Navbar(props: any) {
     },
     [web3ProviderState.provider]
   )
-  const getToken = useCallback(async function (pin: string) {
+  const getToken = useCallback(async function (pin: string, isUserExist: boolean) {
     let res = await post("auth/get-message", { address: web3ProviderState.address, chainId: web3ProviderState.chainId })
     if (web3ProviderState.web3Provider) {
       console.log("res===>", res);
@@ -114,6 +116,7 @@ export default function Navbar(props: any) {
           var signature = await signer.signMessage(res.message)
           setCheckPin(false)
           setPin("")
+
           res = await post(`auth/verify-signature`, {
             nonce: res.nonce,
             issuedAt: res.issuedAt,
@@ -123,9 +126,22 @@ export default function Navbar(props: any) {
             isUserExist: isUserExist,
             pin: pin,
             uri: res.uri,
+            organization: "org1",
             signature: signature
           });
           console.log("token", res.data);
+          localStorage.setItem('token', res.data);
+
+          // const headers = {
+          //   'Content-Type': 'application/json',
+          //   'Authorization': "JWT " + res.data
+          // }
+          // res = await post(`auth/verify-token`, {
+          //   address: 11,
+          //   organization: "org1",
+
+          // }, { headers: headers });
+          // console.log("auth/verify-toke", res);
         } catch (error) {
           setCheckPin(false)
           setPin("")
@@ -146,9 +162,10 @@ export default function Navbar(props: any) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log("sasa", CryptoJS.MD5("pin").toString());
+        // console.log("sasa", CryptoJS.MD5("pin").toString());
+        console.log("isUserExist", isUserExist);
 
-        await getToken(CryptoJS.MD5("pin").toString())
+        await getToken(CryptoJS.MD5("pin").toString(), isUserExist)
 
       } catch (error: any) {
         console.log(error);
@@ -166,14 +183,32 @@ export default function Navbar(props: any) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-
-
         let res = await post("auth/checkUserExist", { "organization": "org1", "address": web3ProviderState.address })
         if (res.status == 400) {
           toast.error(res.message);
         } else {
+          let openPinModule = false
+          console.log("checkUserExist", res.data);
+
           setIsUserExist(res.data)
-          setShowModal(true)
+          if (localStorage.getItem("token")) {
+            const headers = {
+              'Content-Type': 'application/json',
+              'Authorization': "JWT " + localStorage.getItem("token")
+            }
+            res = await post(`auth/verify-token`, {
+              address: 11,
+              organization: "org1",
+
+            }, { headers: headers });
+            if (res.status != 200) {
+              openPinModule = true
+            }
+            console.log("auth/verify-toke", res);
+          } else {
+            openPinModule = true
+          }
+          setShowModal(openPinModule)
         }
       } catch (error: any) {
         console.log("error", error);

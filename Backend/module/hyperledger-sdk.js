@@ -381,7 +381,7 @@ module.exports.registerUser = async function (
     if (userRes.status == 404) {
       return userRes;
     }
-    userRes["publicKey"] = publicKey;
+    userRes["publicKey"] = x509Identity.credentials.privateKey;
     console.log("userRes", userRes);
 
     await wallet.remove(adminIdentityRes.data._id); // remove key on local wallet path
