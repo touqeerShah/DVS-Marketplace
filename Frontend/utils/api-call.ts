@@ -36,11 +36,11 @@ export async function get(api: string, params: any) {
  * @param {*} args
  * @returns
  */
-export async function post(api: string, args: any) {
+export async function post(api: string, args: any, header?: any) {
   var response: Partial<Response> = {};
 
   try {
-    const { data } = await axios.post(`${BACKEND_ENDPOINT}${api}`, args);
+    const { data } = await axios.post(`${BACKEND_ENDPOINT}${api}`, args, header);
     return data as Response;
   } catch (err: any) {
     console.log(err);

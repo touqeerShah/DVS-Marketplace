@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 let { getDataFromMongoDBExternal, loadMongo } = require("../utils/helper");
 const { getKeys } = require("../module/keyStore");
 const { registerWithSignature } = require("../controller/blockchainController.js");
+const { keyEncrypt, keyDecrypt } = require("../module/encryption");
 
 const domain = "localhost";
 const origin = "https://localhost/login";
@@ -49,6 +50,7 @@ async function verifyMessage(jsonPayload) {
 }
 
 const verify = async (req, res) => {
+    console.log("reqreqreq", req.body);
     const isVerified = await verifyMessage(`{
     "header":{
        "t":"eip191"
@@ -69,7 +71,6 @@ const verify = async (req, res) => {
      },
      "network": "ethereum"
     }`);
-    console.log("isVerified", isVerified);
     if (isVerified.success) {
         let response = {};
         if (!req.body.isUserExist) {
@@ -78,8 +79,8 @@ const verify = async (req, res) => {
                     "data": JSON.stringify({
                         "transactionCode": "001",
                         "apiName": "registerAdmin",
-                        "parameters": { "id": "10", "userRole": "test", "status": "pending" },
-                        "userId": "10",
+                        "parameters": { "id": req.body.address, "userRole": "test", "status": "pending" },
+                        "userId": req.body.address,
                         "companyId": "org1",
                         "organization": "org1",
                         "pinHash": req.body.pin,
@@ -89,8 +90,37 @@ const verify = async (req, res) => {
             console.log(userReq.body.data);
             response = await registerWithSignature(userReq, res);
 
-            console.log("response", response);
+            console.log("response111", response);
 
+        } else {
+            console.log("isUserExist", req.body.isUserExist);
+            var networkConfig = await getConfig(req.body.organization);
+            if (networkConfig.data.status != 200) {
+                res.send({ status: 400, message: "Error to connect Server Try again" });
+                return networkConfig;
+            } else {
+                var getUser = {
+                    // query to check user is not exist
+                    _id: 11,
+                };
+                let userIdentityRes = await getKeys(
+                    networkConfig.data.data.keyCounchdb.username,
+                    networkConfig.data.data.keyCounchdb.password,
+                    networkConfig.data.data.keyCounchdb.url,
+                    networkConfig.data.data.keyCounchdb.db_name,
+                    getUser
+                );
+                if (userIdentityRes.status != 200) {
+                    userIdentityRes.message = "user key already Found";
+                    res.send({ status: 401, message: "unregister user", data: true });
+                }
+                console.log("userIdentityRes", req.body.pin);
+                response.key = JSON.parse(
+                    keyDecrypt(userIdentityRes.data.key, req.body.pin)
+                );
+                console.log("response.key", response.key);
+                response.publicKey = response.key.credentials.privateKey
+            }
         }
         // if user is new
         // here we call register user function
@@ -98,7 +128,7 @@ const verify = async (req, res) => {
         // it will return public and we use it for token creation
         //else get public key only
         let verifiedAddress = req.body.address;
-        const token = jwt.sign({ verifiedAddress }, response.publicKey, { expiresIn: "1d" });
+        const token = jwt.sign({ verifiedAddress }, response.publicKey, { expiresIn: "1d", algorithm: 'ES256' });
         res.send({ status: 200, data: token });
         console.log("Verified!");
     } else {
@@ -108,14 +138,21 @@ const verify = async (req, res) => {
     }
 };
 
-const checkUserExist = async (req, res) => {
+async function getConfig(organization, res) {
     let client = await loadMongo();
     var networkConfig = await getDataFromMongoDBExternal(
         client,
         "Network",
-        { name: req.body.organization },
+        { name: organization },
         res
     );
+
+    return networkConfig;
+}
+
+const checkUserExist = async (req, res) => {
+    let client = await loadMongo();
+    var networkConfig = await getConfig(req.body.organization, res);
     // console.log(networkConfig.data);
     if (networkConfig.data.status != 200) {
         res.send({ status: 400, message: "Error to connect Server Try again" });
@@ -148,23 +185,54 @@ const checkUserExist = async (req, res) => {
     }
 };
 
-function authenticateToken(req, res, next) {
+async function authenticateToken(req, res, next) {
     const authHeader = req.headers["authorization"];
     console.log("  = > ", authHeader.split(" ")[1]);
     let token = authHeader.split(" ")[1];
     console.log("  = > ", token);
+    try {
 
-    if (token == null) return res.sendStatus(401);
+        var networkConfig = await getConfig(req.body.organization);
+        if (networkConfig.data.status != 200) {
+            res.send({ status: 400, message: "Error to connect Server Try again" });
+            return networkConfig;
+        } else {
+            var getUser = {
+                // query to check user is not exist
+                _id: req.body.address,
+            };
+            var userIdentityRes = await getKeys(
+                networkConfig.data.data.keyCounchdb.username,
+                networkConfig.data.data.keyCounchdb.password,
+                networkConfig.data.data.keyCounchdb.url,
+                networkConfig.data.data.keyCounchdb.db_name,
+                getUser
+            );
+            if (userIdentityRes.status != 200) {
+                userIdentityRes.message = "user key already Found";
+                res.send({ status: 401, message: "unregister user", data: true });
+            } else {
+                if (token == null) return res.sendStatus(401);
+                // console.log("userIdentityRes", userIdentityRes);
+                const header = jwt.decode(token, { complete: true }).header;
+                console.log("header", header);
+                console.log("userIdentityRes.data.publicKey", userIdentityRes.data.publicKey);
+                jwt.verify(token, userIdentityRes.data.publicKey, { algorithm: 'ES256' }, (err, authData) => {
+                    console.log(err, authData);
 
-    jwt.verify(token, jwtSecret, (err, authData) => {
-        console.log(err, authData);
+                    if (err) return res.sendStatus(403);
 
-        if (err) return res.sendStatus(403);
+                    req.authData = authData;
+                    res.send({ status: 200, message: authData });
+                    next();
+                });
+            }
+        }
+    } catch (error) {
+        res.send({ status: 503, message: "Service Unavailable", data: true });
 
-        req.authData = authData;
-        res.send({ status: 200, message: authData });
-        next();
-    });
+    }
+
 }
 module.exports = {
     createWeb3Message,
