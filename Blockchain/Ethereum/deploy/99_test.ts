@@ -13,6 +13,8 @@ const deployTimeLock: DeployFunction = async function (hre: HardhatRuntimeEnviro
         from: deployer,
         args: [],
         log: true,
+        value: ethers.utils.parseUnits("0.0001", "ether"),
+
         // we need to wait if on a live network so we can verify properly
         waitConfirmations: networkConfig[network.name].blockConfirmations || 1,
     })

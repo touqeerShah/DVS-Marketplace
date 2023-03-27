@@ -193,6 +193,22 @@ const supportedChains: IChainData[] = [
       balance: '',
     },
   },
+  {
+    name: 'mumbai',
+    short_name: 'bsc',
+    chain: 'smartchain',
+    network: 'mumbai',
+    chain_id: 80001,
+    network_id: 80001,
+    rpc_url: 'https://rpc-mumbai.maticvigil.com/',
+    native_currency: {
+      symbol: 'MATIC',
+      name: 'MATIC',
+      decimals: '18',
+      contractAddress: '',
+      balance: '',
+    },
+  }
 ]
 
 export default supportedChains

@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { ethers } from "ethers";
 import { toast } from "react-toastify";
+import { StateType, PinState, PinHash } from "../../config"
+import SetPin from "./../Pin/SetPin"
+
 import { faClockRotateLeft, faCheckCircle, faDownload, faSignature, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ellipseAddress } from '../../lib/utilities'
@@ -14,6 +17,10 @@ import { createDocument, processDocumentWithSignature } from "../../lib/createVo
 import { post } from "./../../utils"
 import { IDocumentSignature } from "../../class/typechain-types/contracts/core/DocumentSignature"
 import { getStringToBytes } from "../../lib/convert"
+import { useAppSelector, useAppDispatch } from "./../../redux/hooks"
+import { pinStateReducerState, changeState } from "./../../redux/reduces/pinRedux"
+import { pinHashReducerState, setHash } from "./../../redux/reduces/pinhashRedux"
+import { store } from "./../../redux/store"
 import {
   DS_SIGNING_DOMAIN_NAME,
   DS_SIGNING_DOMAIN_VERSION,
@@ -26,6 +33,9 @@ import { log } from "console";
 
 
 export default function ViewDocumentDetails({ showModal, color, setShowModal, documentDetails, web3ProviderState, setMyDocuments, documentRequestType, tokenId }: any) {
+  let pinState: PinState = useAppSelector(pinStateReducerState);
+  let pinHash: PinHash = useAppSelector(pinHashReducerState);
+  const dispatch = useAppDispatch();
 
   let [isSigner, setIsSigner] = useState(false);
   let [timeRemaining, setTimeRemaining] = useState("0s");
@@ -34,7 +44,12 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
   let [signatureDone, setSignatureDone] = useState(false);
   let [isDocumentOwner, setIsDocumentOwner] = useState(false);
   let [spinnerProcess, setSpinnerProcess] = useState(false);
+  const [checkPin, setCheckPin] = React.useState(false);
+  const [showPinModal, setPinShowModal] = React.useState(false);
+  const [submitFrom, setSubmitFrom] = React.useState("");
 
+  const [pin, setPin] = React.useState("");
+  let isRequest = false;
   let [uriData, setUriData] = useState<UriData>();
 
   const getStatusSignDocument = async () => {
@@ -46,18 +61,89 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
 
     return DocumentStatus;
   }
-  const ProcessDocument = async () => {
-    setSpinnerProcess(true)
-    if (web3ProviderState.provider == null && web3ProviderState.address) {
-      console.log("error");
+  // here we check token is not expired
+  const getVerifyToken = useCallback(async function (pin: string,) {
+    let openPinModule = false
+    console.log("getVerifyToken", pin);
 
-      toast.error("Please Connect to your wallet First");
-      return;
+    // if (pinState.toSavePin) {
+    //   dispatch(changeState({ status: !pinState.status, toSavePin: false }))
+    // }
+    if (web3ProviderState.web3Provider) {
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': "JWT " + localStorage.getItem("token")
+      }
+      let res = await post(`auth/verify-pin`, {
+        address: web3ProviderState.address,
+        organization: "org1",
+        pin: pin
+
+      }, { headers: headers });
+      console.log("res = = = = = = >", res);
+      if (res.status == 400) {
+        setCheckPin(false)
+        setPin("")
+        setPinShowModal(false)
+        dispatch(changeState({ status: !pinState.status, toSavePin: true }))
+        toast.info("Token Expire")
+      } else {
+        setPinShowModal(openPinModule)
+        if (submitFrom == "submitProcessDocument") {
+          await submitProcessDocument(pin)
+        } else if (submitFrom == "submitSignDocument") {
+          await submitSignDocument(pin)
+        }
+      }
     }
-    if (web3ProviderState.chainId != 5) {
-      toast.error("Please Change your network to Goerli");
-      return;
+  }, [web3ProviderState]);
+
+
+
+  // call when user provide Pin for verifications
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // console.log("sasa", CryptoJS.MD5("pin").toString());
+        await getVerifyToken(CryptoJS.MD5("pin").toString())
+      } catch (error: any) {
+        console.log(error);
+
+        return;
+
+      }
     }
+    console.log("checkPin && pin.length == 6", checkPin && pin.length == 6, checkPin, pin.length == 6);
+
+    if (checkPin && pin.length == 6 && !isRequest) {
+      isRequest = true
+      fetchData()
+    }
+  }, [checkPin])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (submitFrom == "submitProcessDocument") {
+          await submitProcessDocument(pin)
+        } else {
+          await submitSignDocument(pin)
+        }
+      } catch (error: any) {
+        console.log(error);
+
+        return;
+
+      }
+    }
+    console.log("storeDocument", pinState.toSavePin, pinHash.pinhash);
+
+    if (store.getState().pinState.status && store.getState().pinHash.pinhash != "") {
+      fetchData()
+    }
+  }, [pinHash])
+
+  const submitProcessDocument = useCallback(async function (pin: string,) {
 
     const signer = await web3ProviderState.web3Provider.getSigner();
     let documentContract: ethers.Contract = await getDocumentSignature(signer);
@@ -97,7 +183,7 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
           uri: documentDetails.uri
         }
 
-        // await documentContract.processDocumentWithSignature(documentDetialsWithSigatureStruct);
+        await documentContract.processDocumentWithSignature(documentDetialsWithSigatureStruct);
         setSpinnerProcess(false)
         setMyDocuments([])
         await post("addQueue", {
@@ -108,7 +194,8 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
               documentId: documentDetails.documentId.toString(),
               status: "4"
             },
-            userId: "user1",
+            pinHash: pin,
+            userId: web3ProviderState.address,
             organization: "org1"
           })
         });
@@ -128,19 +215,9 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
       return;
     }
 
-  }
-  const SignDocument = async () => {
+  }, []);
+  const submitSignDocument = useCallback(async function (pin: string,) {
     let voucher: string = "";
-    if (web3ProviderState.provider == null && web3ProviderState.address) {
-      console.log("error");
-
-      toast.error("Please Connect to your wallet First");
-      return;
-    }
-    if (web3ProviderState.chainId != 5) {
-      toast.error("Please Change your network to Goerli");
-      return;
-    }
 
     if (tokenId) {
 
@@ -166,16 +243,17 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
 
         try {
 
-          await post("addQueue", {
+          await post("api/addQueue", {
             data: JSON.stringify({
               transactionCode: "002",
-              apiName: "api/addSignatureDocument",
+              apiName: "addSignatureDocument",
               parameters: {
                 documentId: documentDetails.documentId.toString(),
                 signature: voucher,
                 signer: tokenId
               },
-              userId: "user1",
+              pinHash: pin,
+              userId: web3ProviderState.address,
               organization: "org1"
             })
           });
@@ -194,6 +272,51 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
       toast.error("No User Identity Record found")
       return
     }
+  }, []);
+  const ProcessDocument = async () => {
+    setSpinnerProcess(true)
+    setSubmitFrom("submitProcessDocument")
+    if (web3ProviderState.provider == null && web3ProviderState.address) {
+      console.log("error");
+
+      toast.error("Please Connect to your wallet First");
+      return;
+    }
+    if (web3ProviderState.chainId != 5) {
+      toast.error("Please Change your network to Goerli");
+      return;
+    }
+    setSpinnerProcess(true)
+    if (localStorage.getItem("token")) {
+      setShowModal(true)
+    } else {
+      console.log("pinState.status", pinState.status);
+      dispatch(changeState({ status: !pinState.status, toSavePin: true }))
+    }
+
+  }
+  const SignDocument = async () => {
+    setSubmitFrom("submitSignDocument")
+    setSpinnerProcess(true)
+
+    if (web3ProviderState.provider == null && web3ProviderState.address) {
+      console.log("error");
+
+      toast.error("Please Connect to your wallet First");
+      return;
+    }
+    if (web3ProviderState.chainId != 5) {
+      toast.error("Please Change your network to Goerli");
+      return;
+    }
+    if (localStorage.getItem("token")) {
+      setShowModal(true)
+    } else {
+      console.log("pinState.status", pinState.status);
+      dispatch(changeState({ status: !pinState.status, toSavePin: true }))
+    }
+
+
   }
 
   useEffect(() => {
@@ -479,7 +602,8 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
                     type="button"
                     onClick={() => SignDocument()}
                   >
-                    <FontAwesomeIcon icon={faSignature} />  Sign Document
+                    {spinnerProcess && <FontAwesomeIcon icon={faSpinner} className="animate-spin" />}
+                    Sign Document
                   </button>}
                   {documentRequestType == "Owner" && isDocumentOwner && signatureDone && <button
                     className="py-2.5  my-2 placeholder-blueGray-300 mx-4  text-blueGray-600 bg-white rounded border-2 text-sm shadow focus:outline-none focus:ring w-1/5 ease-linear transition-all duration-150"
@@ -495,6 +619,8 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
             </div>
           </div>
           <div className="fixed inset-0 z-40 bg-blueGray-2-00"></div>
+          <SetPin setShowModal={setPinShowModal} showModal={showPinModal} buttonLable={"Verify Pin"} color="light" setPin={setPin} pin={pin} setCheckPin={setCheckPin} />
+
         </>
       ) : null
       }

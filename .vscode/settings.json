@@ -1,5 +1,6 @@
 {
     "cSpell.words": [
         "Nofification"
-    ]
+    ],
+    "solidity-va.findAllReferences.enable": true
 }

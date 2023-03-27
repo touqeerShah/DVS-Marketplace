@@ -1,9 +1,8 @@
 import React from "react";
 import {
   faFingerprint,
-  faFile,
+  faSpinner,
   faIdCard,
-  faBell,
 } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 
@@ -15,14 +14,19 @@ import * as Yup from "yup";
 import { ethers, Signer } from "ethers";
 import { toast } from "react-toastify";
 import { create } from "ipfs-http-client";
-import { useEffect, useState } from "react";
+import { useEffect, useCallback, useState } from "react";
+import SetPin from "./../Pin/SetPin"
 
 import CardUserDetails from "../../components/Cards/CardUserDetails";
 import { UserIdVoucherStruct } from "../../class/typechain-types/contracts/core/UserIdentityNFT";
 import { ContractAddress } from "../../config/";
-import { StateType } from "../../config";
-import { useAppSelector } from "./../../redux/hooks";
+import { StateType, PinState, PinHash } from "../../config"
 import { web3ProviderReduxState } from "./../../redux/reduces/web3ProviderRedux";
+import { pinStateReducerState, changeState } from "./../../redux/reduces/pinRedux"
+import { pinHashReducerState, setHash } from "./../../redux/reduces/pinhashRedux"
+import { useAppSelector, useAppDispatch } from "./../../redux/hooks"
+import { store } from "./../../redux/store"
+
 import {
   getUserIdentityNFT,
   getFigurePrintOracle,
@@ -46,12 +50,18 @@ import { VerificationEntity } from "../../class/contract"
 
 export default function CardVerifyMyId(props: any) {
   let web3ProviderState: StateType = useAppSelector(web3ProviderReduxState);
+  let pinState: PinState = useAppSelector(pinStateReducerState);
+  let pinHash: PinHash = useAppSelector(pinHashReducerState);
   const validationSchema = Yup.object().shape({
     // image: Yup.string().required("NFG image is required"),
   });
 
   const subgraphClient = useApolloClient();
-
+  const [checkPin, setCheckPin] = React.useState(false);
+  const [showModal, setShowModal] = React.useState(false);
+  const [pin, setPin] = React.useState("");
+  let isRequest = false;
+  let [spinnerProcess, setSpinnerProcess] = useState(false);
   const formOptions = { resolver: yupResolver(validationSchema) };
   const { register, handleSubmit, formState } = useForm(formOptions);
   const [url, setURL] = useState("");
@@ -68,6 +78,7 @@ export default function CardVerifyMyId(props: any) {
   const [userLinkBalance, setUserLinkBalance] = useState(0);
   let [uri, setURI] = useState("")
   const [verificationEntity, setVerificationEntity] = useState<VerificationEntity>()
+  const dispatch = useAppDispatch();
 
   const projectIdAndSecret = `${INFURA_IPFS_PROJECJECT_ID}:${INFURA_IPFS_PROJECJECT_SECRET}`;
   const client = create({
@@ -84,10 +95,10 @@ export default function CardVerifyMyId(props: any) {
   useEffect(() => {
     const fetchData = async () => {
       // if (userRecord) {
-      let resp = await post("get", {
+      let resp = await post("api/get", {
         data: JSON.stringify({
           transactionCode: "002",
-          apiName: "api/getVerificationDetails",
+          apiName: "getVerificationDetails",
           parameters: {
             userId: userRecord?.userId,
           },
@@ -116,6 +127,7 @@ export default function CardVerifyMyId(props: any) {
     }
 
   }, [])
+
   useEffect(() => {
     const fetchData = async () => {
       if (web3ProviderState.web3Provider) {
@@ -173,6 +185,179 @@ export default function CardVerifyMyId(props: any) {
 
       fetchData();
     }
+  }, [web3ProviderState, localStorage.getItem("token"), pinHash]);
+
+  // here we check token is not expired
+  const getVerifyToken = useCallback(async function (pin: string,) {
+    let openPinModule = false
+    console.log("getVerifyToken", pin);
+
+    // if (pinState.toSavePin) {
+    //   dispatch(changeState({ status: !pinState.status, toSavePin: false }))
+    // }
+    if (web3ProviderState.web3Provider) {
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': "JWT " + localStorage.getItem("token")
+      }
+      let res = await post(`auth/verify-pin`, {
+        address: web3ProviderState.address,
+        organization: "org1",
+        pin: pin
+
+      }, { headers: headers });
+      console.log("res = = = = = = >", res);
+      if (res.status == 400) {
+        setCheckPin(false)
+        setPin("")
+        setShowModal(false)
+        dispatch(changeState({ status: !pinState.status, toSavePin: true }))
+        toast.info("Token Expire")
+      } else {
+        submitVerificationRequest(pin)
+        setShowModal(openPinModule)
+      }
+    }
+  }, [web3ProviderState]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // console.log("sasa", CryptoJS.MD5("pin").toString());
+        await getVerifyToken(CryptoJS.MD5("pin").toString())
+      } catch (error: any) {
+        console.log(error);
+
+        return;
+
+      }
+    }
+    console.log("checkPin && pin.length == 6", checkPin && pin.length == 6, checkPin, pin.length == 6);
+
+    if (checkPin && pin.length == 6 && !isRequest) {
+      isRequest = true
+      fetchData()
+    }
+  }, [checkPin])
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await submitVerificationRequest(pinHash.pinhash)
+      } catch (error: any) {
+        console.log(error);
+
+        return;
+
+      }
+    }
+    console.log("storeDocument", pinState.toSavePin, pinHash.pinhash);
+
+    if (store.getState().pinState.status && store.getState().pinHash.pinhash != "") {
+      fetchData()
+    }
+  }, [pinHash])
+
+  const submitVerificationRequest = useCallback(async function (pin: string) {
+    let voucher: Partial<UserIdVoucherStruct> = {};
+    //call login for pine code
+    if (web3ProviderState.web3Provider && web3ProviderState.chainId) {
+      const signer = await web3ProviderState.web3Provider.getSigner();
+      // let userIdentityNFTContract = await getUserIdentityNFT(signer)
+      // let figurePrintOracleContract = await getFigurePrintOracle(signer)
+      // console.log(await figurePrintOracleContract.getUserRecord(await signer.getAddress()));
+
+      const _userId = getStringToBytes(props.username);
+      const _fingurePrint = getStringToBytes(props.fingerPrintHash);
+      let imageObject = JSON.stringify({
+        image: "",
+        firstName: props.firstName,
+        lastName: props.lastName,
+        aboutMe: props.aboutMe,
+        username: props.username,
+      });
+      let uri: string = "";
+      try {
+        const added = await client.add(imageObject);
+        // ipfs = `${INFURA_GATEWAY_URL}${added.path}`;
+        uri = `https://ipfs.io/ipfs/${added.path}`;
+        console.log('uri', uri);
+
+        setURL(uri);
+      } catch (error) {
+        toast.error("something is wrong with IPFS");
+        return "";
+      }
+      try {
+        voucher = (await createUserId(
+          signer,
+          _userId,
+          uri,
+          _fingurePrint,
+          SIGNING_DOMAIN_NAME,
+          SIGNING_DOMAIN_VERSION,
+          web3ProviderState.chainId.toString(),
+          ContractAddress.UserIdentityNFT
+        )) as UserIdVoucherStruct;
+
+        console.log("url", url);
+
+        console.log("voucher", voucher);
+      } catch (error: any) {
+        console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
+        toast.error(error.message.substring(0, error.message.indexOf("(")));
+        return
+      }
+
+      try {
+        let isLinkTransfer = false;
+        console.log("userLinkBalance", userLinkBalance);
+
+        if (userLinkBalance < ethers.parseEther("0.1")) {
+          if (linkToken) {
+            // await linkToken.transfer(ContractAddress.UserIdentityNFT)
+            let tx = await linkToken.transferAndCall(
+              ContractAddress.FigurePrintOracle,
+              ethers.parseEther("0.1"),
+              _userId
+            );
+            // await tx.wait(1)
+            isLinkTransfer = true;
+          }
+        } else {
+          isLinkTransfer = true;
+        }
+        console.log("_userId", _userId, "_fingurePrint", _fingurePrint);
+        if (userIdentityNFTContract && isLinkTransfer) {
+          await userIdentityNFTContract.verifyFingerPrint(
+            _userId,
+            _fingurePrint
+          );
+          await post("addQueue", {
+            data: JSON.stringify({
+              transactionCode: "002",
+              apiName: "api/createVerificationRecord",
+              parameters: {
+                userId: voucher.userId,
+                creator: web3ProviderState.address,
+                uri: voucher.uri,
+                fingerPrint: voucher.fingerPrint,
+                status: "1",
+                signature: voucher.signature
+              },
+              pinHash: pin,
+              userId: web3ProviderState.address,
+              organization: "org1"
+            })
+          });
+        }
+
+      } catch (error: any) {
+        console.log(error);
+
+        console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
+        toast.error(error.message.substring(0, error.message.indexOf("(")));
+        return;
+      }
+    }
   }, [web3ProviderState]);
 
   async function RequestForVerification() {
@@ -190,114 +375,15 @@ export default function CardVerifyMyId(props: any) {
       userRecord?.status == 0 ||
       (userRecord?.status == 3 && userRecord?.numberTries < 3)
     ) {
-      let voucher: Partial<UserIdVoucherStruct> = {};
-
-      if (web3ProviderState.web3Provider) {
-        const signer = await web3ProviderState.web3Provider.getSigner();
-        // let userIdentityNFTContract = await getUserIdentityNFT(signer)
-        // let figurePrintOracleContract = await getFigurePrintOracle(signer)
-        // console.log(await figurePrintOracleContract.getUserRecord(await signer.getAddress()));
-
-        const _userId = getStringToBytes(props.username);
-        const _fingurePrint = getStringToBytes(props.fingerPrintHash);
-        let imageObject = JSON.stringify({
-          image: "",
-          firstName: props.firstName,
-          lastName: props.lastName,
-          aboutMe: props.aboutMe,
-          username: props.username,
-        });
-        let uri: string = "";
-        try {
-          const added = await client.add(imageObject);
-          // ipfs = `${INFURA_GATEWAY_URL}${added.path}`;
-          uri = `https://ipfs.io/ipfs/${added.path}`;
-          console.log('uri', uri);
-
-          setURL(uri);
-        } catch (error) {
-          toast.error("something is wrong with IPFS");
-          return "";
-        }
-        try {
-          voucher = (await createUserId(
-            signer,
-            _userId,
-            uri,
-            _fingurePrint,
-            SIGNING_DOMAIN_NAME,
-            SIGNING_DOMAIN_VERSION,
-            web3ProviderState.chainId.toString(),
-            ContractAddress.UserIdentityNFT
-          )) as UserIdVoucherStruct;
-
-          console.log("url", url);
-
-          console.log("voucher", voucher);
-        } catch (error: any) {
-          console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
-          toast.error(error.message.substring(0, error.message.indexOf("(")));
-          return
-        }
-
-        try {
-          let isLinkTransfer = false;
-          console.log("userLinkBalance", userLinkBalance);
-
-          if (userLinkBalance < ethers.parseEther("0.1")) {
-            if (linkToken) {
-              // await linkToken.transfer(ContractAddress.UserIdentityNFT)
-              let tx = await linkToken.transferAndCall(
-                ContractAddress.FigurePrintOracle,
-                ethers.parseEther("0.1"),
-                _userId
-              );
-              // await tx.wait(1)
-              isLinkTransfer = true;
-            }
-          } else {
-            isLinkTransfer = true;
-          }
-          console.log("_userId", _userId, "_fingurePrint", _fingurePrint);
-          if (userIdentityNFTContract && isLinkTransfer) {
-            await userIdentityNFTContract.verifyFingerPrint(
-              _userId,
-              _fingurePrint
-            );
-            await post("addQueue", {
-              data: JSON.stringify({
-                transactionCode: "002",
-                apiName: "api/createVerificationRecord",
-                parameters: {
-                  userId: voucher.userId,
-                  creator: web3ProviderState.address,
-                  uri: voucher.uri,
-                  fingerPrint: voucher.fingerPrint,
-                  status: "1",
-                  signature: voucher.signature
-                },
-                userId: "user1",
-                organization: "org1"
-              })
-            });
-          }
-
-          // "userId",
-          // "creator",
-          // "uri",
-          // "fingerPrint",
-          // "status",
-          // "signature"
-
-          // (await tx).wait();
-        } catch (error: any) {
-          console.log(error);
-
-          console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
-          toast.error(error.message.substring(0, error.message.indexOf("(")));
-          return;
-        }
+      console.log("setPurpose");
+      setSpinnerProcess(true)
+      if (localStorage.getItem("token")) {
+        setShowModal(true)
+      } else {
+        console.log("pinState.status", pinState.status);
+        dispatch(changeState({ status: !pinState.status, toSavePin: true }))
       }
+
     }
   }
   const myRef: React.LegacyRef<HTMLInputElement> = React.createRef();
@@ -600,6 +686,8 @@ export default function CardVerifyMyId(props: any) {
                         className="border-0 px-3 px-2-5 my-4 placeholder-blueGray-300 text-blueGray-600 bg-white rounded border-2 text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                         type="submit"
                       >
+                        {spinnerProcess && <FontAwesomeIcon icon={faSpinner} className="animate-spin" />} &nbsp;&nbsp;
+
                         Verify
                       </button>
                     </div>
@@ -609,6 +697,8 @@ export default function CardVerifyMyId(props: any) {
             </div>
           </>
         )}
+        <SetPin setShowModal={setShowModal} showModal={showModal} buttonLable={"Verify Pin"} color="light" setPin={setPin} pin={pin} setCheckPin={setCheckPin} />
+
       </div>}
     </>
   );

@@ -89,7 +89,7 @@ export class DocumentProvider {
 
         for (let index = 0; index < parties.length; index++) {
             const element = parties[index];
-            // await this.documentRepository.updateDocumentCount(element.toString(), "forMeSignature", "Document" + mspID)
+            await this.documentRepository.updateDocumentCount(element.toString(), "forMeSignature", "Document" + mspID)
             signer.push({ tokenId: element, signature: "", status: "pending" })
         }
         let document = new DocumentEntity()
@@ -118,7 +118,7 @@ export class DocumentProvider {
         let documentData: DocumentEntity = document
         console.log("After Validation", documentData)
         // return document;
-        // await this.documentRepository.updateDocumentCount(creatorTokenId, "createdByMe", "Document" + mspID)
+        await this.documentRepository.updateDocumentCount(creatorTokenId, "createdByMe", "Document" + mspID)
         return await this.documentRepository.create(documentData, "Document" + mspID);
     }
     /**

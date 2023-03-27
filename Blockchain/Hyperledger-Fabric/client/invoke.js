@@ -8,7 +8,7 @@ const { Gateway, Wallets } = require("fabric-network");
 const fs = require("fs");
 const path = require("path");
 
-async function main() {
+async function main(arr) {
   try {
     // load the network configuration
     const ccpPath = path.resolve(
@@ -26,7 +26,7 @@ async function main() {
     console.log(`Wallet path: ${walletPath}`);
 
     // Check to see if we've already enrolled the user.
-    const identity = await wallet.get("system1");
+    const identity = await wallet.get("system2");
     if (!identity) {
       console.log(
         'An identity for the user "system" does not exist in the wallet'
@@ -39,7 +39,7 @@ async function main() {
     const gateway = new Gateway();
     await gateway.connect(ccp, {
       wallet,
-      identity: "system1",
+      identity: "system2",
       discovery: { enabled: true, asLocalhost: true },
     });
 
@@ -50,48 +50,11 @@ async function main() {
     const myOrgPeers = network.getChannel().getEndorsers(mspId);
     // console.log(myOrgPeers);
     // Get the contract from the network.
-    const contract = network.getContract("company-registration");
-    // Submit the specified transaction.
-    //For Usere management Contract
-    // var arr = `"system5","created"`
-    // var arr = '{"id":"system5","userRole":"wearhouse","status":"pending"}'
-    // console.log("--->",contract.createTransaction("updateUserStatus").setEndorsingPeers(myOrgPeers));
-    // await contract.createTransaction("createUser").setEndorsingPeers(myOrgPeers).submit(arr)
+    const contract = network.getContract("hf");
 
-    //For Company Registration Contract
-
-    // var arr =
-    //   '{"companyId":"dvs","companyName":"evonik","address":"786","status":"activated"}';
-    // await contract
-    //   .createTransaction("createCompany")
-    //   .setEndorsingPeers(myOrgPeers)
-    //   .submit(arr);
-
-    // createLot;
-    var arr =
-      '{"lotId":"pharmaTrace1-lot4","productId":"786","drugId":"test","lotNumber": "pharmatrace","batchLotData": "hello","expirationDate": "01-02-1995","manufacturingDate": "manufacturingDate","manufacturingSite": "manufacturingSite"}';
-    // var arr =
-    //   '{"transactionId":"pharmaTrace1-lot9","productId":"786","drugId":"test"}';
-    // updateLotLocation;
-    //updateLotRecallLocation
-    // var arr =
-    //   '{"transactionId":"pharmaTrace1-lot4","newLocation":"test3","isChangeStatus":true}';
-    // updateLotLocationStatus
-    // var arr =
-    //   '{"transactionId":"pharmaTrace1-lot4","location":"test3","status":"deactivate"}';
-    // updateItemLocation;
-    // var arr =
-    //   '{"transactionId":"pharmaTrace1-lot9","newlocation":"karachi","items":["item6"]}';
-    // // updateItemStatus
-    // var arr =
-    //   '{"transactionId":"pharmaTrace1-lot4","status":"deactivate","items":["test1"]}';
-    // // updateItemStatus
-    // var arr = '{"lotId":"pharmaTrace1-lot9","itemsId":["item6","item7"]}';
-    // // updateMetaData
-    // var arr = '{"lotId":"pharmaTrace1-lot9","batchLotData":{"type":"test"}}';
 
     let result = await contract
-      .createTransaction("createLot")
+      .createTransaction("createDocument")
       .setEndorsingPeers(myOrgPeers)
       .submit(arr);
     console.log("result", result);
@@ -110,41 +73,6 @@ async function main() {
         response_object
       )}`
     );
-    // var arr = '{"companyid":"pharmaTrace_786","newStatus":"activated"}'
-    // await contract.createTransaction("updateCompanyStatus").setEndorsingPeers(myOrgPeers).submit("pharmaTrace_786","activated")
-
-    // var arr = '{"transactionId":"1234567222","encryptedData":"askjbdksjabdjsabjdbsajkdbsabdjksdjsbjdsakdsjdjskaj","status":"created","allowToView":[{"userId":"system1","encryptedData":"sahbdjahsbdhjsbdhjsabhjsbdhj"},{"userId":"system2","encryptedData":"idjowijdijncjjrbfj vskjndsc2882un3e282he"}]}'
-    // await contract.createTransaction("createTransaction").setEndorsingPeers(myOrgPeers).submit(arr)
-
-    // var arr = '{"transactionId":"1234567222","allowToView":["system1"]}'
-    // await contract.createTransaction("addAllowToView").setEndorsingPeers(myOrgPeers).submit(arr)
-
-    // var arr = '{"transactionId":"12345678","permissionUserId":"system1"}'
-    // await contract.createTransaction("suspendAllowToView").setEndorsingPeers(myOrgPeers).submit(arr)
-
-    // var arr = '{"transactionId":"12345678","permissionUserId":"system1"}'
-    // await contract.createTransaction("activateAllowToView").setEndorsingPeers(myOrgPeers).submit(arr)
-
-    // Testing company-evonik-nft contract
-    //mintNFT
-    // var arr = '{"tokenId":"1234567223","fileName":"askjbdksjabdjsabjdbsajkdbsabdjksdjsbjdsakdsjdjskaj","hash":"adasdasdqwdqw23e312wd3rs1d24fr4dcwcwe","ipfsPath":"ipfs://adasdasdqwdqw23e312wd3rs1d24fr4dcwcwe/test","comments":"thesing purpose"}'
-    // await contract.createTransaction("mintNFT").setEndorsingPeers(myOrgPeers).submit(arr)
-
-    // //activeNFT
-    // var arr = '{"tokenId":"1234567222"}'
-    // await contract.createTransaction("activeNFT").setEndorsingPeers(myOrgPeers).submit(arr)
-
-    // setOption
-    // var arr = '{"name":"Evonik","symbol": "$"}'
-    // await contract.createTransaction("setOption").setEndorsingPeers(myOrgPeers).submit(arr)
-
-    //setApprovalForAll
-    // var arr = '{"tokenId":"1234567222","operator": "system2"}'
-    // await contract.createTransaction("setApprovalForAll").setEndorsingPeers(myOrgPeers).submit(arr)
-
-    //setApprovalForAll
-    // var arr = '{"tokenId":"1234567222"}'
-    // await contract.createTransaction("burn").setEndorsingPeers(myOrgPeers).submit(arr)
 
     console.log("Transaction has been submitted");
 
@@ -170,4 +98,15 @@ async function main() {
   }
 }
 
-main();
+
+check()
+async function check() {
+
+  for (let index = 40; index < 60; index++) {
+    var arr =
+      '{"documentId": "documentId.toString()' + index + '","documentName": "documentName","purpose": "purpose","uri": "uri","startData": "1","expirationDate": "1","startBlock": "1","endBlock": "1","creator": "web3ProviderState.address","ownerSignature": "voucher","parties": [1,2]}';
+
+    await main(arr);
+
+  }
+}

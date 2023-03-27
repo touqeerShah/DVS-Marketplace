@@ -31,7 +31,7 @@ module.exports.invoke = async function (
   function_name,
   function_arguments,
   ccp,
-  userSecret,
+  userSecret
 ) {
   return_args = {};
 
@@ -158,7 +158,10 @@ module.exports.query = async function (
 
     // Get the contract from the network.
     const contract = network.getContract(chaincode_name);
-    console.log("JSON.stringify(function_arguments)", JSON.stringify(function_arguments));
+    console.log(
+      "JSON.stringify(function_arguments)",
+      JSON.stringify(function_arguments)
+    );
     const result = await contract.evaluateTransaction(
       function_name,
       JSON.stringify(function_arguments)
@@ -206,7 +209,6 @@ module.exports.query = async function (
       }
     } catch (error) {
       return { status: 400 };
-
     }
     return response_object;
   }
@@ -226,7 +228,8 @@ module.exports.registerUser = async function (
   isCreator,
   organization,
   companyId,
-  ccp, userSecret
+  ccp,
+  userSecret
 ) {
   return_args = {};
   /*
@@ -234,7 +237,8 @@ module.exports.registerUser = async function (
    */
   try {
     // Create a new CA client for interacting with the CA.
-    const caURL = ccp.certificateAuthorities["ca." + organization + ".example.com"].url; // here we get CA url to connect with it
+    const caURL =
+      ccp.certificateAuthorities["ca." + organization + ".example.com"].url; // here we get CA url to connect with it
     console.log(caURL);
     const ca = new FabricCAServices(caURL);
     const walletPath = path.join(process.cwd(), "wallet"); // here we need wallet object
@@ -339,7 +343,7 @@ module.exports.registerUser = async function (
       enrollmentSecret: secret,
     });
 
-    console.log("enrollment", enrollment);
+    // console.log("enrollment", enrollment);
     const x509Identity = {
       credentials: {
         certificate: enrollment.certificate,
@@ -348,7 +352,7 @@ module.exports.registerUser = async function (
       mspId: adminIdentityRes.data.key.mspId,
       type: adminIdentityRes.data.key.type,
     };
-    console.log("x509Identity", x509Identity);
+    // console.log("x509Identity", x509Identity);
 
     const pubKeyObject = crypto.createPublicKey({
       // create public key from user private
@@ -389,8 +393,8 @@ module.exports.registerUser = async function (
 
     console.log(
       'Successfully registered and enrolled admin user "' +
-      userid +
-      '" and imported it into the wallet'
+        userid +
+        '" and imported it into the wallet'
     );
 
     return userRes; // response back to API call
@@ -427,7 +431,8 @@ module.exports.enroll = async (companyId, ccp) => {
     }
     // console.log("ccp===>", ccp);
     // Create a new CA client for interacting with the CA.
-    const caInfo = ccp.certificateAuthorities["ca." + companyId + ".example.com"];
+    const caInfo =
+      ccp.certificateAuthorities["ca." + companyId + ".example.com"];
     const MSP = ccp.adminIdentity.mspId; // here we get CA url to connect with it
     // console.log("caInfo===>", caInfo);
 
@@ -496,10 +501,12 @@ module.exports.enroll = async (companyId, ccp) => {
       publicKey,
     };
 
-    console.log(ccp.keyCounchdb.username,
+    console.log(
+      ccp.keyCounchdb.username,
       ccp.keyCounchdb.password,
       ccp.keyCounchdb.url,
-      ccp.keyCounchdb.db_name);
+      ccp.keyCounchdb.db_name
+    );
     //Store keys in key-store
     var userRes = await setKeys(
       ccp.keyCounchdb.username,
@@ -516,8 +523,8 @@ module.exports.enroll = async (companyId, ccp) => {
 
     console.log(
       'Successfully registered and enrolled admin user "' +
-      ccp.keyCounchdb.username +
-      '" and imported it into the wallet'
+        ccp.keyCounchdb.username +
+        '" and imported it into the wallet'
     );
     return userRes;
   } catch (error) {
@@ -614,7 +621,10 @@ async function connectCounchDB(ccp, userid, userSecret) {
     return adminIdentityRes;
   }
   adminIdentityRes.data.key = JSON.parse(
-    keyDecrypt(adminIdentityRes.data.key, userSecret == "" ? ccp.securet : userSecret)
+    keyDecrypt(
+      adminIdentityRes.data.key,
+      userSecret == "" ? ccp.securet : userSecret
+    )
   );
   // adminIdentityRes.data.publicKey = keyDecrypt(
   //   // here decrypt the key and send back

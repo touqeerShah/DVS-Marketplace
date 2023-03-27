@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useRouter } from 'next/router'
+
 import { useApolloClient } from "@apollo/client";
 import { ethers, Signer } from "ethers";
 import { toast } from "react-toastify";
@@ -42,6 +44,8 @@ import {
 import { getLatestBlockNumber } from "./../../lib/alchemy"
 export default function CreateDocumentDetails(props: any) {
   // console.log("props =>", props);
+  const router = useRouter()
+
   let web3ProviderState: StateType = useAppSelector(web3ProviderReduxState);
   let pinState: PinState = useAppSelector(pinStateReducerState);
   let pinHash: PinHash = useAppSelector(pinHashReducerState);
@@ -77,8 +81,6 @@ export default function CreateDocumentDetails(props: any) {
   const [documentSignatureContract, setDocumentSignatureContract] = useState<ethers.Contract>()
   const [userIdentityNFTContract, setUserIdentityNFTContract] = useState<ethers.Contract>()
 
-
-
   const projectIdAndSecret = `${INFURA_IPFS_PROJECJECT_ID}:${INFURA_IPFS_PROJECJECT_SECRET}`;
   const client = create({
     host: INFURA_URL,
@@ -90,14 +92,17 @@ export default function CreateDocumentDetails(props: any) {
       )}`,
     },
   });
-  useEffect(() => {
-    const fetchData = async () => {
 
+  // setup contract address
+  const init = useCallback(async () => {
+    const fetchData = async () => {
       if (web3ProviderState.web3Provider) {
         const signer = await web3ProviderState.web3Provider.getSigner();
         let documentSignatureContract = await getDocumentSignature(signer)
-        setDocumentSignatureContract(documentSignatureContract)
         let userIdentityNFTContract = await getUserIdentityNFT(signer)
+        console.log('documentSignatureContract ==>', documentSignatureContract);
+
+        setDocumentSignatureContract(documentSignatureContract)
         setUserIdentityNFTContract(userIdentityNFTContract)
       }
     }
@@ -107,8 +112,9 @@ export default function CreateDocumentDetails(props: any) {
 
       fetchData()
     }
-  }, [web3ProviderState])
+  }, [])
 
+  // here we check token is not expired
   const getVerifyToken = useCallback(async function (pin: string,) {
     let openPinModule = false
     console.log("getVerifyToken", pin);
@@ -133,13 +139,17 @@ export default function CreateDocumentDetails(props: any) {
         setPin("")
         setShowModal(false)
         dispatch(changeState({ status: !pinState.status, toSavePin: true }))
-        toast.error("Token Expire")
+        toast.info("Token Expire")
       } else {
-        storeDocument(pin)
         setShowModal(openPinModule)
+        await storeDocument(pin)
       }
     }
   }, [web3ProviderState]);
+
+
+
+  // call when user provide Pin for verifications
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -180,7 +190,7 @@ export default function CreateDocumentDetails(props: any) {
 
 
   const storeDocument = useCallback(async function (pin: string) {
-
+    await init()
     console.log("storeDocument", web3ProviderState.web3Provider, web3ProviderState.address, documentSignatureContract);
 
     if (web3ProviderState.provider == null && web3ProviderState.address) {
@@ -233,7 +243,7 @@ export default function CreateDocumentDetails(props: any) {
               //check from sub graph party token exist or not
               partiesId.push(tokenId)
             } else {
-              toast.error(`User Token ${tokenId} Not Exist`);
+              toast.info(`User Token ${tokenId} Not Exist`);
               return;
             }
           }
@@ -244,7 +254,7 @@ export default function CreateDocumentDetails(props: any) {
         console.log(error);
         setSpinnerProcess(false)
 
-        toast.error(`User Token &{tokenId} Not Exist`);
+        toast.info(`User Token Not Exist`);
         return;
       }
 
@@ -326,7 +336,7 @@ export default function CreateDocumentDetails(props: any) {
           console.log("url", url);
 
           console.log("voucher", voucher);
-          await post("api/addQueue", {
+          let res = await post("api/addQueue", {
             data: JSON.stringify({
               transactionCode: "002",
               apiName: "createDocument",
@@ -348,8 +358,12 @@ export default function CreateDocumentDetails(props: any) {
               organization: "org1"
             })
           });
+          console.log("res", res);
+
           toast.success("Successfully Created Document " + _documentId.toString())
           setSpinnerProcess(false)
+          router.push("/user/listDocument")
+
 
         } catch (error: any) {
           setSpinnerProcess(false)
@@ -368,6 +382,8 @@ export default function CreateDocumentDetails(props: any) {
 
     }
   }, [web3ProviderState]);
+
+
   async function signDocument() {
     console.log("setPurpose");
     setSpinnerProcess(true)
@@ -375,190 +391,8 @@ export default function CreateDocumentDetails(props: any) {
       setShowModal(true)
     } else {
       console.log("pinState.status", pinState.status);
-
       dispatch(changeState({ status: !pinState.status, toSavePin: true }))
     }
-
-    // if (web3ProviderState.provider == null && web3ProviderState.address) {
-    //   console.log("error");
-    //   setSpinnerProcess(false)
-
-    //   toast.error("Please Connect to your wallet First");
-    //   return;
-    // }
-    // if (web3ProviderState.chainId != 5) {
-    //   setSpinnerProcess(false)
-
-    //   toast.error("Please Change your network to Goerli");
-    //   return;
-    // }
-    // let voucher: string;
-
-    // if (web3ProviderState.web3Provider && web3ProviderState.address && documentSignatureContract) {
-    //   let latestBlockNumber = await getLatestBlockNumber()
-    //   var currentDate = new Date("2023-03-04");
-    //   var startDateSeconds = (new Date(startDate).getTime() - currentDate.getTime()) / 1000;
-    //   var endDateSeconds = (new Date(endDate).getTime() - currentDate.getTime()) / 1000;
-    //   var startBlock = latestBlockNumber + (startDateSeconds / AVERAGE_BLOCK_MINT_TIME)
-    //   var endBlock = startBlock + (endDateSeconds / AVERAGE_BLOCK_MINT_TIME)
-
-    //   const signer = await web3ProviderState.web3Provider.getSigner();
-    //   let parties: TypeDocumentSignerFields[] = props.documentSignerFieldsState as TypeDocumentSignerFields[]
-    //   console.log("parties", parties);
-    //   let partiesId: number[] = []
-    //   try {
-
-
-    //     for (let index = 0; index < parties.length; index++) {
-    //       const party: TypeDocumentSignerFields = parties[index];
-    //       console.log(party);
-
-    //       if (party.userId != "" && userIdentityNFTContract) {
-    //         let tokenId: number = parseInt(party.userId)
-    //         console.log("tokenId", tokenId.toString());
-    //         const isExist = await subgraphClient.query({
-    //           query: CHECK_SIGNER_EXIST,
-    //           variables: {
-    //             tokenId: tokenId.toString(),
-    //           },
-    //         });
-    //         console.log("isExist", isExist);
-    //         // issueDigitalIdentities
-
-    //         if (isExist.data?.issueDigitalIdentities.length > 0) {
-    //           //check from sub graph party token exist or not
-    //           partiesId.push(tokenId)
-    //         } else {
-    //           toast.error(`User Token ${tokenId} Not Exist`);
-    //           return;
-    //         }
-    //       }
-    //     }
-    //     console.log("partiesId", partiesId);
-
-    //   } catch (error) {
-    //     console.log(error);
-    //     setSpinnerProcess(false)
-
-    //     toast.error(`User Token &{tokenId} Not Exist`);
-    //     return;
-    //   }
-    //   if (userIdentityNFTContract && 0 == await userIdentityNFTContract.balanceOf(web3ProviderState.address)) {
-    //     setSpinnerProcess(false)
-
-    //     toast.error("Verify  Your Identity First");
-    //     return;
-    //   }
-
-    //   if (partiesId.length > 0) {
-    //     const type = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length)
-    //     console.log("type", type);
-
-    //     const base64data = Buffer.from(fileBuffer).toString('base64')
-    //     const file: string = `data:${type};base64,` + base64data
-    //     let _documentId: any = 0;
-    //     // console.log(file);
-
-    //     if (documentId == "") {
-    //       console.log("documentIddocumentIddocumentId", documentId);
-
-    //       try {
-    //         const _documentName = getStringToBytes(documentName)
-    //         const _purpose = getStringToBytes(purpose)
-
-    //         _documentId = await documentSignatureContract.getDocumentId(web3ProviderState.address, _documentName, _purpose, partiesId)
-    //         console.log("documentId", _documentId);
-
-    //         setDocumentId(_documentId.toString())
-    //       } catch (error: any) {
-    //         console.log("getDocumentId error ", error);
-    //         toast.error(error.message.substring(0, error.message.indexOf("(")))
-    //         return;
-    //       }
-    //     } else {
-    //       _documentId = (documentId)
-    //     }
-
-    //     let imageObject = JSON.stringify({
-    //       documentId: _documentId.toString(),
-    //       documentName,
-    //       purpose,
-    //       file: file,
-    //       fileName,
-    //       startBlock,
-    //       endBlock,
-    //       creator: web3ProviderState.address,
-    //       signer: partiesId,
-    //     })
-    //     let uri: string = ""
-    //     try {
-    //       const added = await client.add(imageObject);
-
-    //       uri = `https://ipfs.io/ipfs/${added.path}`
-    //       console.log("uri", uri);
-
-    //       setURL(uri)
-    //     } catch (error) {
-    //       toast.error("something is wrong with IPFS")
-    //       return "";
-    //     }
-    //     try {
-
-    //       voucher = (await createDocument(
-    //         signer,
-    //         web3ProviderState.address,
-    //         uri,
-    //         _documentId,
-    //         DS_SIGNING_DOMAIN_NAME,
-    //         DS_SIGNING_DOMAIN_VERSION,
-    //         web3ProviderState.chainId.toString(),
-    //         ContractAddress.UserIdentityNFT
-    //       )) as string;
-
-    //       console.log("url", url);
-
-    //       console.log("voucher", voucher);
-    //       await post("api/addQueue", {
-    //         data: JSON.stringify({
-    //           transactionCode: "002",
-    //           apiName: "createDocument",
-    //           parameters: {
-    //             documentId: _documentId.toString(),
-    //             documentName: documentName,
-    //             purpose: purpose,
-    //             uri: uri,
-    //             startData: startDate,
-    //             expirationDate: endDate,
-    //             startBlock: startBlock.toString(),
-    //             endBlock: endBlock.toString(),
-    //             creator: web3ProviderState.address,
-    //             ownerSignature: voucher,
-    //             parties: partiesId
-    //           },
-    //           userId: "user1",
-    //           organization: "org1"
-    //         })
-    //       });
-    //       toast.success("Successfully Created Document " + _documentId.toString())
-    //       setSpinnerProcess(false)
-
-    //     } catch (error: any) {
-    //       setSpinnerProcess(false)
-
-    //       console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
-    //       toast.error(error.message.substring(0, error.message.indexOf("(")))
-    //     }
-
-    //   } else {
-    //     setSpinnerProcess(false)
-
-    //     toast.error("Atleast One Signer");
-
-    //   }
-
-
-    // }
-
 
   }
   const myRef: React.LegacyRef<HTMLInputElement> = React.createRef();
