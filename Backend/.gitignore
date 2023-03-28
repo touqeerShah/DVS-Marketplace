@@ -19,7 +19,7 @@
 /artifacts/channel/crypto-config
 /mongo-compose
 /pg-compose/db
-/pg-rabbitMQ
+/pg-rabbitMQ/db/*
 /wallet
 
 # misc

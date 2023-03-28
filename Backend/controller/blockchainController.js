@@ -14,7 +14,7 @@ module.exports.addQueue = async (req, res) => {
   try {
     var uuid = uuidv4();
     console.log("req.body", req.body);
-    let reqdata = JSON.parse(req.body.data)
+    let reqdata = JSON.parse(req.body.data);
     var response = await transactionsMQ.transactions(
       uuid,
       "invoke",
@@ -46,7 +46,7 @@ module.exports.addQueue = async (req, res) => {
   } catch (error) {
     console.log("error in routes", error);
   }
-}
+};
 /**
  * This function is used to register user when we create user it will generate user Private key and Public Key and store them into KeyStore
  * @param {*} req
@@ -65,7 +65,7 @@ module.exports.register = async (req, res) => {
     collrollerObject.requestData.organization,
     collrollerObject.requestData.companyId,
     collrollerObject.networkConfig.data,
-    collrollerObject.requestData.pinHash,
+    collrollerObject.requestData.pinHash
   )
     .then(async (value) => {
       if (value.status != 200) {
@@ -97,7 +97,7 @@ module.exports.registerWithSignature = async (req, res) => {
     collrollerObject.requestData.organization,
     collrollerObject.requestData.companyId,
     collrollerObject.networkConfig.data,
-    collrollerObject.requestData.pinHash,
+    collrollerObject.requestData.pinHash
   );
 };
 /**
@@ -144,7 +144,10 @@ module.exports.get = async (req, res) => {
 
     res.send(collrollerObject);
   } else {
-    console.log("collrollerObject.requestData.parameters", collrollerObject.requestData.parameters);
+    console.log(
+      "collrollerObject.requestData.parameters",
+      collrollerObject.requestData.parameters
+    );
     await query(
       // here we call query SDK of Hyperledger Fabric
       collrollerObject.requestData.userId, // the user who want to do transaction
@@ -155,7 +158,6 @@ module.exports.get = async (req, res) => {
       collrollerObject.networkConfig.data // this will contain Network config which Peer , CA and which org is doing transaction
     )
       .then((value) => {
-
         console.log("value", value);
         res.send(value);
       })

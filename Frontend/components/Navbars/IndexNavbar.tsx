@@ -202,10 +202,14 @@ export default function Navbar(props: any) {
 
             }, { headers: headers });
             if (res.status != 200) {
+              localStorage.removeItem("token")
               openPinModule = true
             }
             console.log("auth/verify-toke", res);
           } else {
+            localStorage.removeItem("token")
+            dispatch(setHash({ pinhash: "" }))
+
             openPinModule = true
           }
           setShowModal(openPinModule)

@@ -26,16 +26,16 @@ async function main() {
     const caURL = ccp.certificateAuthorities["ca.org1.example.com"].url;
     const ca = new FabricCAServices(caURL);
 
-    // Create a new file system1 based wallet for managing identities.
+    // Create a new file system2 based wallet for managing identities.
     const walletPath = path.join(process.cwd(), "wallet");
     const wallet = await Wallets.newFileSystemWallet(walletPath);
     console.log(`Wallet path: ${walletPath}`);
 
     // Check to see if we've already enrolled the user.
-    const userIdentity = await wallet.get("system1");
+    const userIdentity = await wallet.get("system2");
     if (userIdentity) {
       console.log(
-        'An identity for the user "system1" already exists in the wallet'
+        'An identity for the user "system2" already exists in the wallet'
       );
       return;
     }
@@ -60,12 +60,12 @@ async function main() {
     const secret = await ca.register(
       {
         affiliation: "org1.department1",
-        enrollmentID: "system1",
+        enrollmentID: "system2",
         role: "client",
         attrs: [
           {
             name: "userid",
-            value: "system1",
+            value: "system2",
             ecert: true,
           },
           {
@@ -88,7 +88,7 @@ async function main() {
       adminUser
     );
     const enrollment = await ca.enroll({
-      enrollmentID: "system1",
+      enrollmentID: "system2",
       enrollmentSecret: secret,
     });
 
@@ -100,12 +100,12 @@ async function main() {
       mspId: "Org1MSP",
       type: "X.509",
     };
-    await wallet.put("system1", x509Identity);
+    await wallet.put("system2", x509Identity);
     console.log(
-      'Successfully registered and enrolled admin user "system1" and imported it into the wallet'
+      'Successfully registered and enrolled admin user "system2" and imported it into the wallet'
     );
   } catch (error) {
-    console.error(`Failed to register user "system1": ${error}`);
+    console.error(`Failed to register user "system2": ${error}`);
     process.exit(1);
   }
 }
