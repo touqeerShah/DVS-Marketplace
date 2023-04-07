@@ -1,21 +1,53 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { QRCodeCanvas } from "qrcode.react";
 
 // components
 
 export default function CardVerifyProfile(props: any) {
+  // const qrRef = useRef(); // include this: call the useRef function
+  const qrRef: React.LegacyRef<HTMLInputElement> = React.createRef();
+
+  const qrcode = (
+    <QRCodeCanvas
+      id="qrCode"
+      value={props?.fingerPrintHash}
+      // size={300}
+      // bgColor={"#00ff00"}
+      level={"H"}
+      className="shadow-xl  h-auto align-middle border-none absolute -m-16 -ml-20 lg:-ml-16 max-w-150-px"
+
+    />
+  );
+  useEffect(() => {
+    if (props?.fingerPrintHash) {
+      let canvas = qrRef.current?.querySelector("canvas");
+      let image = canvas?.toDataURL("image/png");
+      // console.log("data:image/svg+xml;base64,", image);
+      props.setQRCodeSvg(image)
+    }
+
+  }, [props?.fingerPrintHash])
+
   return (
     <>
       <div className="relative border-2 flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-xl rounded-lg mt-16">
         <div className="px-6">
           <div className="flex flex-wrap justify-center">
             <div className="w-full px-4 flex justify-center">
-              <div className="relative">
-                <img
-                  alt="..."
-                  src="/img/team-2-800x800.jpg"
-                  className="shadow-xl rounded-full h-auto align-middle border-none absolute -m-16 -ml-20 lg:-ml-16 max-w-150-px"
-                />
-              </div>
+              {props?.fingerPrintHash && props?.qrCodeSvg && <div className="relative">
+                <div ref={qrRef}>{qrcode}</div> {/* include this */}
+
+              </div>}
+              {!props?.qrCodeSvg && <div className="relative">
+                <div ref={qrRef}>
+                  <>
+                    <img alt=""
+                      className="shadow-xl  h-auto align-middle border-none absolute -m-16 -ml-20 lg:-ml-16 max-w-150-px"
+                      src={props.qrCodeSvg} />
+                    {/* {props.qrCodeSvg} */}
+                  </></div> {/* include this */}
+
+              </div>}
             </div>
             <div className="w-full px-4 text-center items-center justify-center  mt-20">
               <div className="flex justify-center py-4 lg:pt-4 pt-8">
@@ -33,7 +65,8 @@ export default function CardVerifyProfile(props: any) {
                 </div>
                 <div className="lg:mr-4 p-3 text-center">
                   <span className="text-xl font-bold block uppercase tracking-wide text-blueGray-600">
-                    89
+                    {props?.noDoc}
+
                   </span>
                   <span className="text-sm text-blueGray-400">Sign Doc</span>
                 </div>
@@ -78,7 +111,7 @@ export default function CardVerifyProfile(props: any) {
             </div>
           </div>
         </div>
-      </div>
+      </div >
     </>
   );
 }

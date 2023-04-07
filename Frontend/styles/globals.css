@@ -16,7 +16,7 @@ Use a better box model (opinionated).
 *::after {
   box-sizing: border-box;
 }
-w-3/12
+/* w-3/12 */
 /**
 Use a more readable tab size (opinionated).
 */
@@ -2400,6 +2400,9 @@ padding-bottom: 0.625rem; /* 10px */
 
 .top-0 {
   top: 0px;
+}
+.top-8{
+  top: 2rem; 
 }
 
 .right-0 {
