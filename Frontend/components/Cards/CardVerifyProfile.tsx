@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { QRCodeCanvas } from "qrcode.react";
+import { getStringToBytes } from "../../lib/convert";
 
 // components
 
@@ -10,7 +11,7 @@ export default function CardVerifyProfile(props: any) {
   const qrcode = (
     <QRCodeCanvas
       id="qrCode"
-      value={props?.fingerPrintHash}
+      value={getStringToBytes(props?.fingerPrintHash)}
       // size={300}
       // bgColor={"#00ff00"}
       level={"H"}
@@ -34,7 +35,7 @@ export default function CardVerifyProfile(props: any) {
         <div className="px-6">
           <div className="flex flex-wrap justify-center">
             <div className="w-full px-4 flex justify-center">
-              {props?.fingerPrintHash && props?.qrCodeSvg && <div className="relative">
+              {props?.fingerPrintHash && <div className="relative">
                 <div ref={qrRef}>{qrcode}</div> {/* include this */}
 
               </div>}

@@ -6,6 +6,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import CryptoJS from 'crypto-js';
+import { useRouter } from 'next/router'
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useApolloClient } from "@apollo/client";
@@ -51,7 +52,8 @@ import { post } from "../../utils/";
 import { VerificationEntity } from "../../class/contract"
 
 export default function CardVerifyMyId(props: any) {
-  console.log("CardVerifyMyId", props);
+  // console.log("CardVerifyMyId", props);
+  const router = useRouter()
 
   let web3ProviderState: StateType = useAppSelector(web3ProviderReduxState);
   let pinState: PinState = useAppSelector(pinStateReducerState);
@@ -102,6 +104,7 @@ export default function CardVerifyMyId(props: any) {
   });
 
   useEffect(() => {
+
     const fetchData = async () => {
       // if (userRecord) {
       let resp = await post("api/get", {
@@ -116,7 +119,7 @@ export default function CardVerifyMyId(props: any) {
         })
       })
       if (resp.status == 200) {
-        // console.log("resp.data", resp.data);
+        console.log("resp.data", resp.data);
         const { data } = await axios.get(`${resp.data.uri}`);
         // console.log("data =>", data);
         props.setFirstName(data.firstName);
@@ -132,13 +135,34 @@ export default function CardVerifyMyId(props: any) {
       // console.log("resp", resp);
 
     }
-    if (userRecord) {
+
+    console.log("ahjbdjkasbjcbasjbjksbcjka", verificationEntity);
+    init()
+    if (userRecord && verificationEntity) {
       fetchData()
     }
 
   }, [])
-
   useEffect(() => {
+
+    const fetchData = async () => {
+      // if (userRecord) {
+      await init()
+
+      // console.log("resp", resp);
+
+    }
+
+    console.log("ahjbdjkasbjcbasjbjksbcjka");
+    if (!figurePrintOracleContract && web3ProviderState.chainId) {
+      // console.log("figurePrintOracleContract", figurePrintOracleContract);
+      fetchData();
+    }
+
+  }, [web3ProviderState])
+  const init = useCallback(async function () {
+    console.log("init");
+
     const fetchData = async () => {
       if (web3ProviderState.provider == null && web3ProviderState.address) {
         console.log("error");
@@ -146,7 +170,7 @@ export default function CardVerifyMyId(props: any) {
         toast.error("Please Connect to your wallet First");
         return;
       }
-      if (web3ProviderState.chainId != 5) {
+      if (web3ProviderState.chainId != 11155111) {
         toast.error("Please Change your network to Goerli");
         return;
       }
@@ -162,35 +186,39 @@ export default function CardVerifyMyId(props: any) {
         let userRecord: any = await figurePrintOracleContract.getUserRecord(
           web3ProviderState.address
         );
-        // console.log("userRecord", userRecord);
+        console.log("userRecord 2", userRecord);
+        try {
+          const idVerifedAndIssuedResponse = await subgraphClient.query({
+            query: GET_MY_VERIFICATION_REQUEST_DATA,
+            variables: {
+              userAddress: web3ProviderState.address,
+            },
+          });
+          if (idVerifedAndIssuedResponse.data?.idVerifedAndIssueds.length > 0) {
+            setIdVerifedAndIssuedResponse(
+              idVerifedAndIssuedResponse.data?.idVerifedAndIssueds[0]
+            );
+            props.setTransactionHash(idVerifedAndIssuedResponse.data?.idVerifedAndIssueds[0].transactionHash)
+          }
+          const issueDigitalIdentity = await subgraphClient.query({
+            query: REDEEM_USER_NFT,
+            variables: {
+              userAddress: web3ProviderState.address,
+            },
+          });
+          // console.log("issueDigitalIdentity.data?.", issueDigitalIdentity.data);
 
-        const idVerifedAndIssuedResponse = await subgraphClient.query({
-          query: GET_MY_VERIFICATION_REQUEST_DATA,
-          variables: {
-            userAddress: web3ProviderState.address,
-          },
-        });
-        if (idVerifedAndIssuedResponse.data?.idVerifedAndIssueds.length > 0) {
-          setIdVerifedAndIssuedResponse(
-            idVerifedAndIssuedResponse.data?.idVerifedAndIssueds[0]
-          );
-          props.setTransactionHash(idVerifedAndIssuedResponse.data?.idVerifedAndIssueds[0].transactionHash)
-        }
-        const issueDigitalIdentity = await subgraphClient.query({
-          query: REDEEM_USER_NFT,
-          variables: {
-            userAddress: web3ProviderState.address,
-          },
-        });
-        // console.log("issueDigitalIdentity.data?.", issueDigitalIdentity.data);
+          if (issueDigitalIdentity.data?.issueDigitalIdentities.length > 0) {
+            setIssueDigitalIdentity(
+              issueDigitalIdentity.data?.issueDigitalIdentities[0]
+            );
+          }
+        } catch (error) {
 
-        if (issueDigitalIdentity.data?.issueDigitalIdentities.length > 0) {
-          setIssueDigitalIdentity(
-            issueDigitalIdentity.data?.issueDigitalIdentities[0]
-          );
         }
+
         let userLinkBalance = await figurePrintOracleContract.getLinkBalance()
-        // console.log("userLinkBalance", userLinkBalance);
+        console.log("userLinkBalance 1 => ", userLinkBalance);
 
         // console.log("userRecord?.status", userRecord["2"].toString(), userRecord["2"].toString() === "0");
 
@@ -269,6 +297,7 @@ export default function CardVerifyMyId(props: any) {
     const fetchData = async () => {
       try {
         console.log("props.username", props.username);
+        dispatch(changeState({ status: false, toSavePin: true }))
 
         await submitVerificationRequest(pinHash.pinhash, props)
       } catch (error: any) {
@@ -288,6 +317,7 @@ export default function CardVerifyMyId(props: any) {
 
   const submitVerificationRequest = useCallback(async function (pin: string, props: any) {
     console.log("submitVerificationRequest");
+    await init()
 
     let voucher: Partial<UserIdVoucherStruct> = {};
     //call login for pine code
@@ -343,52 +373,69 @@ export default function CardVerifyMyId(props: any) {
 
       try {
         let isLinkTransfer = false;
-        // console.log("userLinkBalance", userLinkBalance);
+        console.log("userLinkBalance 2 =>", userLinkBalance);
 
-        if (userLinkBalance < ethers.parseEther("0.1")) {
-          if (linkToken) {
-            // await linkToken.transfer(ContractAddress.UserIdentityNFT)
-            let tx = await linkToken.transferAndCall(
-              ContractAddress.FigurePrintOracle,
-              ethers.parseEther("0.1"),
-              _userId
-            );
-            // await tx.wait(1)
-            isLinkTransfer = true;
-          }
-        } else {
+        // if (userLinkBalance < ethers.parseEther("0.1")) {
+        if (linkToken) {
+          // await linkToken.transfer(ContractAddress.UserIdentityNFT)
+
+
+          let tx = await linkToken.transferAndCall(
+            ContractAddress.FigurePrintOracle,
+            ethers.parseEther("0.1"),
+            _userId
+          )
+          await linkToken.on("Transfer", (from, to, value, event) => {
+            let transferEvent = {
+              from: from,
+              to: to,
+              value: value,
+              eventData: event,
+            }
+            console.log(JSON.stringify(transferEvent, null, 4))
+          })
+          // console.log("recepite 1", typeof tx, tx);,
+
+          let recepite = await tx.wait()
+          console.log("recepite", tx);
+
           isLinkTransfer = true;
         }
-        // console.log("_userId", _userId, "_fingurePrint", _fingurePrint);
+        // } else {
+        //   isLinkTransfer = true;
+        // }
+        console.log("_userId", _userId, "_fingurePrint", _fingurePrint, "isLinkTransfer", isLinkTransfer);
         if (userIdentityNFTContract && isLinkTransfer) {
-          await userIdentityNFTContract.verifyFingerPrint(
-            _userId,
-            _fingurePrint
-          );
-          await post("api/addQueue", {
-            data: JSON.stringify({
-              transactionCode: "002",
-              apiName: "createVerificationRecord",
-              parameters: {
-                userId: voucher.userId,
-                creator: web3ProviderState.address,
-                uri: voucher.uri,
-                fingerPrint: voucher.fingerPrint,
-                status: "1",
-                signature: voucher.signature
-              },
-              pinHash: pin,
-              userId: web3ProviderState.address,
-              organization: "org1"
-            })
-          });
+          // await userIdentityNFTContract.verifyFingerPrint(
+          //   _userId,
+          //   _fingurePrint
+          // );
+          // await post("api/addQueue", {
+          //   data: JSON.stringify({
+          //     transactionCode: "002",
+          //     apiName: "createVerificationRecord",
+          //     parameters: {
+          //       userId: voucher.userId,
+          //       creator: web3ProviderState.address,
+          //       uri: voucher.uri,
+          //       fingerPrint: voucher.fingerPrint,
+          //       status: "1",
+          //       signature: voucher.signature
+          //     },
+          //     pinHash: pin,
+          //     userId: web3ProviderState.address,
+          //     organization: "org1"
+          //   })
+          // });
+          // router.push("/user/verifyMyId")
         }
 
       } catch (error: any) {
-        // console.log(error);
+        console.log(error);
 
         // console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
-        toast.error(error.message.substring(0, error.message.indexOf("(")));
+        // toast.error(error.message.substring(0, error.message.indexOf("(")));
+
         return;
       }
     }
@@ -403,16 +450,18 @@ export default function CardVerifyMyId(props: any) {
       toast.error("Please Connect to your wallet First");
       return;
     }
-    if (web3ProviderState.chainId != 5) {
+    if (web3ProviderState.chainId != 11155111) {
       toast.error("Please Change your network to Goerli");
       return;
     }
+
     if (
-      userRecord?.status == 1 ||
+      userRecord?.status == 0 ||
       (userRecord?.status == 3 && userRecord?.numberTries < 3)
     ) {
       // console.log("setPurpose");
       // console.log("props1 == >", props);
+      console.log("userRecord 1", userRecord);
 
       setSpinnerProcess(true)
       if (localStorage.getItem("token")) {

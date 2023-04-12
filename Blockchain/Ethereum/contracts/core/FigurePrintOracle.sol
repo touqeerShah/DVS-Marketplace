@@ -125,6 +125,8 @@ contract FigurePrintOracle is
             )
         );
         req.add("path", "verficationResponse"); //resposnse from api
+        int256 timesAmount = 10 ** 18;
+        req.addInt("times", timesAmount);
 
         // // // Sends the request
         bytes32 requestId = sendChainlinkRequest(req, fee);

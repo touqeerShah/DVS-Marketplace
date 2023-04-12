@@ -200,7 +200,7 @@ export default function CreateDocumentDetails(props: any) {
       toast.error("Please Connect to your wallet First");
       return;
     }
-    if (web3ProviderState.chainId != 5) {
+    if (web3ProviderState.chainId != 11155111) {
       setSpinnerProcess(false)
 
       toast.error("Please Change your network to Goerli");

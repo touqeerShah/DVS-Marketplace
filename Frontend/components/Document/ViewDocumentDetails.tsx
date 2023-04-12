@@ -282,7 +282,7 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
       toast.error("Please Connect to your wallet First");
       return;
     }
-    if (web3ProviderState.chainId != 5) {
+    if (web3ProviderState.chainId != 11155111) {
       toast.error("Please Change your network to Goerli");
       return;
     }
@@ -305,7 +305,7 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
       toast.error("Please Connect to your wallet First");
       return;
     }
-    if (web3ProviderState.chainId != 5) {
+    if (web3ProviderState.chainId != 11155111) {
       toast.error("Please Change your network to Goerli");
       return;
     }

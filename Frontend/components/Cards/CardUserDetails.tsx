@@ -127,7 +127,7 @@ export default function CardUserDetails({ color, collection, userRecord, web3Pro
       toast.error("Please Connect to your wallet First");
       return;
     }
-    if (web3ProviderState.chainId != 5) {
+    if (web3ProviderState.chainId != 11155111) {
       toast.error("Please Change your network to Goerli");
       return;
     }
@@ -183,7 +183,7 @@ export default function CardUserDetails({ color, collection, userRecord, web3Pro
       toast.error("Please Connect to your wallet First");
       return;
     }
-    if (web3ProviderState.chainId != 5) {
+    if (web3ProviderState.chainId != 11155111) {
       toast.error("Please Change your network to Goerli");
       return;
     }
@@ -281,7 +281,7 @@ export default function CardUserDetails({ color, collection, userRecord, web3Pro
                   (color === "light"
                     ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                     : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
-                  Transaction Signature : {verificationEntity?.signature}
+                  Transaction Signature :  {ellipseAddress(verificationEntity?.signature)}
                 </td>
                 <td className={
                   "px-6 align-middle border border-solid py-3 text-xs  border-l-0 border-r-0 whitespace-nowrap  text-left font-bold " +
