@@ -46,7 +46,7 @@ contract UserIdentityNFT is ERC721URIStorage, ReentrancyGuard, ERC721Votes, IUse
     }
 
     /// @notice Redeems an NFTVoucher for an actual NFT, creating it in the process.
-
+    // all user to issue NFT of his idenetity
     function redeem(UserIdVoucher calldata voucher) public {
         VerficationStatus status = IFigurePrintOracle(figureprintOracle).getUserStatusRecord(
             msg.sender

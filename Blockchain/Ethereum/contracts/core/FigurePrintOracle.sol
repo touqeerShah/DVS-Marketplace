@@ -88,6 +88,7 @@ contract FigurePrintOracle is
     /**
      * Create a Chainlink request to retrieve API response, find the target
      * data, then multiply by 1000000000000000000 (to remove decimal places from data).
+     * this fucntion help to request the Private Blockchain to get details
      */
     function verifyFingerPrint(
         address userAddress,
@@ -140,8 +141,6 @@ contract FigurePrintOracle is
         return requestId;
     }
 
-    //0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
-    //0x04FE0F4C91F8e55c9E4BE7f4353C509DaD066CD5
     /**
      * @notice Fulfillment function for multiple parameters in a single request
      * @dev This is called by the oracle. recordChainlinkFulfillment must be used.
