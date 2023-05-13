@@ -4,6 +4,7 @@ import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import { StateType, PinState, PinHash } from "../../config"
 import SetPin from "./../Pin/SetPin"
+import { Contract } from "@ethersproject/contracts";
 
 import { faClockRotateLeft, faCheckCircle, faDownload, faSignature, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -53,13 +54,15 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
   let [uriData, setUriData] = useState<UriData>();
 
   const getStatusSignDocument = async () => {
-    const signer = await web3ProviderState.web3Provider.getSigner();
-    let documentContract: ethers.Contract = await getDocumentSignature(signer);
-    // console.log(Number(await documentContract.getStatusSignDocument(0, documentDetails.startBlock, documentDetails.endBlock)));
-    let DocumentStatus: number = Number(await documentContract.getStatusSignDocument(0, documentDetails.startBlock, documentDetails.endBlock))
-    console.log(documentDetails.documentName, "DocumentStatus", DocumentStatus, documentDetails.startBlock, documentDetails.endBlock);
 
-    return DocumentStatus;
+    let documentContract: Contract | undefined = await getDocumentSignature(web3ProviderState.library);
+    // console.log(Number(await documentContract.getStatusSignDocument(0, documentDetails.startBlock, documentDetails.endBlock)));
+    if (documentContract) {
+      let DocumentStatus: number = Number(await documentContract.getStatusSignDocument(0, documentDetails.startBlock, documentDetails.endBlock))
+      console.log(documentDetails.documentName, "DocumentStatus", DocumentStatus, documentDetails.startBlock, documentDetails.endBlock);
+
+      return DocumentStatus;
+    }
   }
   // here we check token is not expired
   const getVerifyToken = useCallback(async function (pin: string,) {
@@ -69,13 +72,13 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
     // if (pinState.toSavePin) {
     //   dispatch(changeState({ status: !pinState.status, toSavePin: false }))
     // }
-    if (web3ProviderState.web3Provider) {
+    if (web3ProviderState.active) {
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': "JWT " + localStorage.getItem("token")
       }
       let res = await post(`auth/verify-pin`, {
-        address: web3ProviderState.address,
+        address: web3ProviderState.account,
         organization: "org1",
         pin: pin
 
@@ -145,74 +148,75 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
 
   const submitProcessDocument = useCallback(async function (pin: string,) {
 
-    const signer = await web3ProviderState.web3Provider.getSigner();
-    let documentContract: ethers.Contract = await getDocumentSignature(signer);
-    console.log(await signer.getAddress());
+
+    let documentContract: Contract | undefined = await getDocumentSignature(web3ProviderState.library);
 
     // console.log(Number(await documentContract.getStatusSignDocument(0, documentDetails.startBlock, documentDetails.endBlock)));
-    let DocumentStatus: number = Number(await documentContract.getStatusSignDocument(0, documentDetails.startBlock, documentDetails.endBlock))
-    if (DocumentStatus == 5) {
-      try {
-        let singers: IDocumentSignature.PartyStruct[] = []
-        for (let index = 0; index < documentDetails.singers.length; index++) {
-          const element: Signer = documentDetails.singers[index];
-          let owner = await getNftMetadataForExplorer(ContractAddress.UserIdentityNFT, element.tokenId)
-          console.log("owner", owner.owners[0], web3ProviderState.address);
-          let _signer = await documentContract.verifification(web3ProviderState.address, documentDetails.documentId, documentDetails.uri, element.signature)
-          console.log("_signer", _signer);
+    if (documentContract) {
+      let DocumentStatus: number = Number(await documentContract.getStatusSignDocument(0, documentDetails.startBlock, documentDetails.endBlock))
+      if (DocumentStatus == 5) {
+        try {
+          let singers: IDocumentSignature.PartyStruct[] = []
+          for (let index = 0; index < documentDetails.singers.length; index++) {
+            const element: Signer = documentDetails.singers[index];
+            let owner = await getNftMetadataForExplorer(ContractAddress.UserIdentityNFT, element.tokenId)
+            console.log("owner", owner.owners[0], web3ProviderState.account);
+            let _signer = await documentContract.verifification(web3ProviderState.account, documentDetails.documentId, documentDetails.uri, element.signature)
+            console.log("_signer", _signer);
 
-          if (owner.owners[0] != _signer.toLowerCase()) {
-            toast.error("Document is Compromise Invalid User Signature , " + element.tokenId)
-            return;
+            if (owner.owners[0] != _signer.toLowerCase()) {
+              toast.error("Document is Compromise Invalid User Signature , " + element.tokenId)
+              return;
+            }
+            singers.push({
+              tokenId: element.tokenId,
+              signatures: element.signature,
+              status: 0
+            })
           }
-          singers.push({
-            tokenId: element.tokenId,
-            signatures: element.signature,
-            status: 0
-          })
+          let documentDetialsWithSigatureStruct: IDocumentSignature.DocumentDetialsWithSigatureStruct = {
+            creator: web3ProviderState.account,
+            name: getStringToBytes(documentDetails.documentName),
+            description: getStringToBytes(documentDetails.purpose),
+            parties: singers,
+            status: 0,
+            signatureStart: documentDetails.startBlock,
+            signatureEnd: documentDetails.endBlock,
+            documentId: documentDetails.documentId,
+            uri: documentDetails.uri
+          }
+
+          await documentContract.processDocumentWithSignature(documentDetialsWithSigatureStruct);
+          setSpinnerProcess(false)
+          setMyDocuments([])
+          await post("addQueue", {
+            data: JSON.stringify({
+              transactionCode: "002",
+              apiName: "api/updateStatusDocument",
+              parameters: {
+                documentId: documentDetails.documentId.toString(),
+                status: "4"
+              },
+              pinHash: pin,
+              userId: web3ProviderState.account,
+              organization: "org1"
+            })
+          });
+          toast.success("Successfully Process Document " + ellipseAddress(documentDetails.documentId))
+
+        } catch (error: any) {
+          setSpinnerProcess(false)
+          console.log("error", error);
+
+          toast.error(error.message.substring(0, error.message.indexOf("(")))
+          return;
+
+
         }
-        let documentDetialsWithSigatureStruct: IDocumentSignature.DocumentDetialsWithSigatureStruct = {
-          creator: web3ProviderState.address,
-          name: getStringToBytes(documentDetails.documentName),
-          description: getStringToBytes(documentDetails.purpose),
-          parties: singers,
-          status: 0,
-          signatureStart: documentDetails.startBlock,
-          signatureEnd: documentDetails.endBlock,
-          documentId: documentDetails.documentId,
-          uri: documentDetails.uri
-        }
-
-        await documentContract.processDocumentWithSignature(documentDetialsWithSigatureStruct);
-        setSpinnerProcess(false)
-        setMyDocuments([])
-        await post("addQueue", {
-          data: JSON.stringify({
-            transactionCode: "002",
-            apiName: "api/updateStatusDocument",
-            parameters: {
-              documentId: documentDetails.documentId.toString(),
-              status: "4"
-            },
-            pinHash: pin,
-            userId: web3ProviderState.address,
-            organization: "org1"
-          })
-        });
-        toast.success("Successfully Process Document " + ellipseAddress(documentDetails.documentId))
-
-      } catch (error: any) {
-        setSpinnerProcess(false)
-        console.log("error", error);
-
-        toast.error(error.message.substring(0, error.message.indexOf("(")))
+      } else {
+        toast.info("Please Wait document in status change to Queue")
         return;
-
-
       }
-    } else {
-      toast.info("Please Wait document in status change to Queue")
-      return;
     }
 
   }, []);
@@ -221,52 +225,56 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
 
     if (tokenId) {
 
-      const signer = await web3ProviderState.web3Provider.getSigner();
-      if (documentDetails) {
-        try {
-          voucher = (await createDocument(
-            signer,
-            web3ProviderState.address,
-            documentDetails.uri,
-            documentDetails.documentId,
-            DS_SIGNING_DOMAIN_NAME,
-            DS_SIGNING_DOMAIN_VERSION,
-            web3ProviderState.chainId.toString(),
-            ContractAddress.DocumentSignature
-          )) as string;
+      let signer = web3ProviderState.library?.getSigner()
+      if (signer) {
+        if (documentDetails) {
+          try {
+            voucher = (await createDocument(
+              signer,
+              web3ProviderState.account,
+              documentDetails.uri,
+              documentDetails.documentId,
+              DS_SIGNING_DOMAIN_NAME,
+              DS_SIGNING_DOMAIN_VERSION,
+              web3ProviderState.chainId.toString(),
+              ContractAddress.DocumentSignature
+            )) as string;
 
-        } catch (error: any) {
-          console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
-          toast.error(error.message.substring(0, error.message.indexOf("(")))
-          return;
+          } catch (error: any) {
+            console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
+            toast.error(error.message.substring(0, error.message.indexOf("(")))
+            return;
+          }
+
+          try {
+
+            await post("api/addQueue", {
+              data: JSON.stringify({
+                transactionCode: "002",
+                apiName: "addSignatureDocument",
+                parameters: {
+                  documentId: documentDetails.documentId.toString(),
+                  signature: voucher,
+                  signer: tokenId
+                },
+                pinHash: pin,
+                userId: web3ProviderState.account,
+                organization: "org1"
+              })
+            });
+            setShowModal(false)
+            setMyDocuments([])
+            toast.success("Successfully Sign Document " + ellipseAddress(documentDetails.documentId))
+
+          } catch (error) {
+            console.log("error", error);
+            toast.error("Hyperledger Node Have Issues")
+            return;
+
+          }
         }
-
-        try {
-
-          await post("api/addQueue", {
-            data: JSON.stringify({
-              transactionCode: "002",
-              apiName: "addSignatureDocument",
-              parameters: {
-                documentId: documentDetails.documentId.toString(),
-                signature: voucher,
-                signer: tokenId
-              },
-              pinHash: pin,
-              userId: web3ProviderState.address,
-              organization: "org1"
-            })
-          });
-          setShowModal(false)
-          setMyDocuments([])
-          toast.success("Successfully Sign Document " + ellipseAddress(documentDetails.documentId))
-
-        } catch (error) {
-          console.log("error", error);
-          toast.error("Hyperledger Node Have Issues")
-          return;
-
-        }
+      } else {
+        toast.error("Signer Account Not Found")
       }
     } else {
       toast.error("No User Identity Record found")
@@ -276,13 +284,13 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
   const ProcessDocument = async () => {
     setSpinnerProcess(true)
     setSubmitFrom("submitProcessDocument")
-    if (web3ProviderState.provider == null && web3ProviderState.address) {
+    if (!web3ProviderState.active == null && web3ProviderState.account) {
       console.log("error");
 
       toast.error("Please Connect to your wallet First");
       return;
     }
-    if (web3ProviderState.chainId != 11155111) {
+    if (web3ProviderState.chainId != 5) {
       toast.error("Please Change your network to Goerli");
       return;
     }
@@ -299,13 +307,13 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
     setSubmitFrom("submitSignDocument")
     setSpinnerProcess(true)
 
-    if (web3ProviderState.provider == null && web3ProviderState.address) {
+    if (!web3ProviderState.active == null && web3ProviderState.account) {
       console.log("error");
 
       toast.error("Please Connect to your wallet First");
       return;
     }
-    if (web3ProviderState.chainId != 11155111) {
+    if (web3ProviderState.chainId != 5) {
       toast.error("Please Change your network to Goerli");
       return;
     }
@@ -331,33 +339,36 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
 
         }
       }
-      if (web3ProviderState.web3Provider) {
-        setDocumentStatus(await getStatusSignDocument())
-        setIsDocumentOwner(web3ProviderState.address.toLowerCase() == documentDetails.creator.toLowerCase())
-        let blockDifference: number = documentDetails.endBlock - await getLatestBlockNumber();
-        console.log(documentDetails.documentName, "blockDifference", blockDifference);
+      if (web3ProviderState.active) {
+        let documentStatus = await getStatusSignDocument()
+        if (documentStatus) {
+          setDocumentStatus(documentStatus)
+          setIsDocumentOwner(web3ProviderState.account.toLowerCase() == documentDetails.creator.toLowerCase())
+          let blockDifference: number = documentDetails.endBlock - await getLatestBlockNumber();
+          console.log(documentDetails.documentName, "blockDifference", blockDifference);
 
-        if (blockDifference > 0) {
-          let result = secondsConverter(blockDifference)
-          setTimeRemaining(result)
-        }
-        let count = 0
-        for (let index = 0; index < documentDetails.singers.length; index++) {
-          const element: Signer = documentDetails.singers[index];
-          console.log("here ", element);
-
-          let owner = await getNftMetadataForExplorer(ContractAddress.UserIdentityNFT, element.tokenId)
-          console.log("owner", owner.owners[0], web3ProviderState.address);
-          if (element.signature != "") {
-            count++;
+          if (blockDifference > 0) {
+            let result = secondsConverter(blockDifference)
+            setTimeRemaining(result)
           }
-          if (owner.owners[0] == web3ProviderState.address.toLowerCase()) {
+          let count = 0
+          for (let index = 0; index < documentDetails.singers.length; index++) {
+            const element: Signer = documentDetails.singers[index];
+            console.log("here ", element);
 
-            setIsSigner(true)
+            let owner = await getNftMetadataForExplorer(ContractAddress.UserIdentityNFT, element.tokenId)
+            console.log("owner", owner.owners[0], web3ProviderState.account);
+            if (element.signature != "") {
+              count++;
+            }
+            if (owner.owners[0] == web3ProviderState.account.toLowerCase()) {
+
+              setIsSigner(true)
+            }
           }
-        }
-        if (documentDetails.singers.length == count) {
-          setSignatureDone(true)
+          if (documentDetails.singers.length == count) {
+            setSignatureDone(true)
+          }
         }
       }
     }

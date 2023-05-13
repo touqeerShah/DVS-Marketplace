@@ -1,5 +1,7 @@
 import React, { useCallback } from "react";
 import PropTypes from "prop-types";
+import { useRouter } from 'next/router'
+
 import { faClockRotateLeft, faBan, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast } from "react-toastify";
@@ -9,6 +11,7 @@ import { post } from "../../utils"
 import { UserIdVoucherStruct } from "../../class/typechain-types/contracts/core/UserIdentityNFT";
 import { pinHashReducerState, setHash } from "./../../redux/reduces/pinhashRedux"
 import { store } from "./../../redux/store"
+import CryptoJS from 'crypto-js';
 
 // components
 import SetPin from "./../Pin/SetPin"
@@ -19,6 +22,8 @@ import { StateType, PinState, PinHash } from "../../config"
 
 
 export default function CardUserDetails({ color, collection, userRecord, web3ProviderState, userIdentityNFTContract, idVerifedAndIssuedResponse, issueDigitalIdentity, verificationEntity }: any) {
+  const router = useRouter()
+
   let pinState: PinState = useAppSelector(pinStateReducerState);
   let pinHash: PinHash = useAppSelector(pinHashReducerState);
 
@@ -52,13 +57,13 @@ export default function CardUserDetails({ color, collection, userRecord, web3Pro
     // if (pinState.toSavePin) {
     //   dispatch(changeState({ status: !pinState.status, toSavePin: false }))
     // }
-    if (web3ProviderState.web3Provider) {
+    if (web3ProviderState.active) {
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': "JWT " + localStorage.getItem("token")
       }
       let res = await post(`auth/verify-pin`, {
-        address: web3ProviderState.address,
+        address: web3ProviderState.account,
         organization: "org1",
         pin: pin
 
@@ -93,7 +98,7 @@ export default function CardUserDetails({ color, collection, userRecord, web3Pro
 
       }
     }
-    // console.log("checkPin && pin.length == 6", checkPin && pin.length == 6, checkPin, pin.length == 6);
+    console.log("checkPin && pin.length == 6", checkPin && pin.length == 6, checkPin, pin.length == 6);
 
     if (checkPin && pin.length == 6 && !isRequest) {
       isRequest = true
@@ -103,7 +108,6 @@ export default function CardUserDetails({ color, collection, userRecord, web3Pro
   useEffect(() => {
     const fetchData = async () => {
       try {
-
         await submitCreateUserNFTRequest(pinHash.pinhash, userRecord)
       } catch (error: any) {
         console.log(error);
@@ -112,40 +116,46 @@ export default function CardUserDetails({ color, collection, userRecord, web3Pro
 
       }
     }
-    console.log("storeDocument =>>>", pinState.toSavePin, pinHash.pinhash);
+    console.log("storeDocument =>>>", store.getState().pinState.status, pinHash.pinhash);
 
     if (store.getState().pinState.status && store.getState().pinHash.pinhash != "" && userRecord.userId != "") {
+      dispatch(changeState({ status: false, toSavePin: true }))
       fetchData()
     }
   }, [pinHash])
 
   async function submitCreateUserNFTRequest(pin: string, userRecord: any) {
+    // console.log("submitCreateUserNFTRequest");
 
-    if (web3ProviderState.provider == null && web3ProviderState.address) {
+    if (!web3ProviderState.active == null && web3ProviderState.account) {
       console.log("error");
 
       toast.error("Please Connect to your wallet First");
       return;
     }
-    if (web3ProviderState.chainId != 11155111) {
+    if (web3ProviderState.chainId != 5) {
       toast.error("Please Change your network to Goerli");
       return;
     }
     if (userRecord?.status == 2) {
 
-      if (web3ProviderState.web3Provider) {
-        const signer = await web3ProviderState.web3Provider.getSigner();
+      if (web3ProviderState.active) {
         // let userIdentityNFTContract = await getUserIdentityNFT(signer)
         // let figurePrintOracleContract = await getFigurePrintOracle(signer)
         // console.log(await figurePrintOracleContract.getUserRecord(await signer.getAddress()));
 
         try {
           // console.log("_userId", _userId, "_fingurePrint", _fingurePrint);
+          // console.log("userIdentityNFTContract", userIdentityNFTContract);
+
           if (userIdentityNFTContract && verificationEntity) {
             let voucher: UserIdVoucherStruct = { uri: verificationEntity.uri, userId: userRecord.userId, fingerPrint: verificationEntity.fingerPrint, signature: verificationEntity.signature }
             console.log("voucher", voucher);
 
-            await userIdentityNFTContract.redeem(voucher);
+            let tx = await userIdentityNFTContract.redeem(voucher);
+            let recepite = await tx.wait()
+            console.log("recepite", tx);
+
             await post("api/addQueue", {
               data: JSON.stringify({
                 transactionCode: "002",
@@ -155,11 +165,12 @@ export default function CardUserDetails({ color, collection, userRecord, web3Pro
                   status: "2"
                 },
                 pinHash: pin,
-                userId: web3ProviderState.address,
+                userId: web3ProviderState.account,
                 organization: "org1"
               })
             });
           }
+          router.push("/user/verifyMyId")
 
           // (await tx).wait();
 
@@ -175,21 +186,20 @@ export default function CardUserDetails({ color, collection, userRecord, web3Pro
 
   }
   async function createUserNFT() {
-    console.log("RequestForVerification");
+    console.log("RequestForVerification", userRecord?.status);
 
-    if (web3ProviderState.provider == null && web3ProviderState.address) {
+    if (!web3ProviderState.active == null && web3ProviderState.account) {
       // console.log("error");
 
       toast.error("Please Connect to your wallet First");
       return;
     }
-    if (web3ProviderState.chainId != 11155111) {
+    if (web3ProviderState.chainId != 5) {
       toast.error("Please Change your network to Goerli");
       return;
     }
     if (
-      userRecord?.status == 1 ||
-      (userRecord?.status == 3 && userRecord?.numberTries < 3)
+      userRecord?.status == 2
     ) {
       // console.log("setPurpose");
       // console.log("props1 == >", props);

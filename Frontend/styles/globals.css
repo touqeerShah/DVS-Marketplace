@@ -2810,7 +2810,9 @@ padding-bottom: 0.625rem; /* 10px */
 }
 .w-6 {
   width: 1.5rem; /* 24px */}
-
+.w-c{
+  width: 180px;
+}
 .w-8 {
   width: 2rem;
 }

@@ -14,7 +14,7 @@ export const pinSlice = createSlice({
     reducers: {
         changeState: (state: PinState, action: PayloadAction<PinState>) => {
             const _state = action.payload;
-            console.log("_state", _state);
+            console.log("_state == >", _state);
 
             state.status = _state.status;
             state.toSavePin = _state.toSavePin;

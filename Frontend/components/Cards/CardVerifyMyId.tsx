@@ -7,6 +7,9 @@ import {
 import axios from "axios";
 import CryptoJS from 'crypto-js';
 import { useRouter } from 'next/router'
+import { useWeb3React } from '@web3-react/core'
+import { Web3Provider } from '@ethersproject/providers'
+import { Contract } from "@ethersproject/contracts";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useApolloClient } from "@apollo/client";
@@ -50,10 +53,12 @@ import { IdVerifedAndIssuedResponse, IssueDigitalIdentity } from "./../../class/
 import { GET_MY_VERIFICATION_REQUEST_DATA, REDEEM_USER_NFT } from "./../../lib/subgrapQueries";
 import { post } from "../../utils/";
 import { VerificationEntity } from "../../class/contract"
+import { log } from "console";
 
 export default function CardVerifyMyId(props: any) {
   // console.log("CardVerifyMyId", props);
   const router = useRouter()
+  const { account, active, library } = useWeb3React<Web3Provider>()
 
   let web3ProviderState: StateType = useAppSelector(web3ProviderReduxState);
   let pinState: PinState = useAppSelector(pinStateReducerState);
@@ -81,10 +86,10 @@ export default function CardVerifyMyId(props: any) {
   const [issueDigitalIdentity, setIssueDigitalIdentity] =
     useState<IssueDigitalIdentity>();
   const [userIdentityNFTContract, setUserIdentityNFTContract] =
-    useState<ethers.Contract>();
+    useState<Contract | undefined>();
   const [figurePrintOracleContract, setFigurePrintOracleContract] =
-    useState<ethers.Contract>();
-  const [linkToken, setLinkToken] = useState<ethers.Contract>();
+    useState<Contract | undefined>();
+  const [linkToken, setLinkToken] = useState<Contract | undefined>();
   const [userRecord, setUserRecord] = useState<VerifcaitonRecord>();
   const [userLinkBalance, setUserLinkBalance] = useState(0);
   let [uri, setURI] = useState("")
@@ -107,6 +112,7 @@ export default function CardVerifyMyId(props: any) {
 
     const fetchData = async () => {
       // if (userRecord) {
+      await init()
       let resp = await post("api/get", {
         data: JSON.stringify({
           transactionCode: "002",
@@ -121,7 +127,7 @@ export default function CardVerifyMyId(props: any) {
       if (resp.status == 200) {
         console.log("resp.data", resp.data);
         const { data } = await axios.get(`${resp.data.uri}`);
-        // console.log("data =>", data);
+        console.log("data =>", data);
         props.setFirstName(data.firstName);
         props.setLastName(data.lastName);
         props.setAboutMe(data.aboutMe);
@@ -132,17 +138,22 @@ export default function CardVerifyMyId(props: any) {
         props.setQRCodeSvg(data?.image)
         setVerificationEntity(resp.data)
       }
-      // console.log("resp", resp);
+      console.log("resp", resp);
 
     }
 
-    console.log("ahjbdjkasbjcbasjbjksbcjka", verificationEntity);
-    init()
-    if (userRecord && verificationEntity) {
+    console.log("ahjbdjkasbjcbasjbjksbcjka", verificationEntity, userRecord?.status == 1, verificationEntity);
+
+    if (userRecord?.status !== 0 && !verificationEntity && !isSubmitted) {
+      if (userRecord?.userId !== undefined) {
+        setIsSubmitted(true)
+      }
+      console.log("in =>", verificationEntity, userRecord);
+
       fetchData()
     }
 
-  }, [])
+  }, [userRecord])
   useEffect(() => {
 
     const fetchData = async () => {
@@ -159,39 +170,39 @@ export default function CardVerifyMyId(props: any) {
       fetchData();
     }
 
-  }, [web3ProviderState])
+  }, [web3ProviderState.active])
   const init = useCallback(async function () {
     console.log("init");
 
     const fetchData = async () => {
-      if (web3ProviderState.provider == null && web3ProviderState.address) {
+      if (!web3ProviderState.active == null && web3ProviderState.account) {
         console.log("error");
 
         toast.error("Please Connect to your wallet First");
         return;
       }
-      if (web3ProviderState.chainId != 11155111) {
+      if (web3ProviderState.chainId != 5) {
         toast.error("Please Change your network to Goerli");
         return;
       }
-      if (web3ProviderState.web3Provider) {
-        const signer = await web3ProviderState.web3Provider.getSigner();
-        let userIdentityNFTContract = await getUserIdentityNFT(signer);
-        let figurePrintOracleContract = await getFigurePrintOracle(signer);
-        let linkToken = await getLinkToken(signer);
+      console.log("web3ProviderState.active", web3ProviderState.active);
+
+      if (web3ProviderState.active) {
+        let userIdentityNFTContract = await getUserIdentityNFT(web3ProviderState.library);
+        let figurePrintOracleContract = await getFigurePrintOracle(web3ProviderState.library);
+        let linkToken = await getLinkToken(web3ProviderState.library);
+        console.log("linkToken 1=>linkToken", linkToken);
+
         setLinkToken(linkToken);
         setFigurePrintOracleContract(figurePrintOracleContract);
         setUserIdentityNFTContract(userIdentityNFTContract);
 
-        let userRecord: any = await figurePrintOracleContract.getUserRecord(
-          web3ProviderState.address
-        );
-        console.log("userRecord 2", userRecord);
+
         try {
           const idVerifedAndIssuedResponse = await subgraphClient.query({
             query: GET_MY_VERIFICATION_REQUEST_DATA,
             variables: {
-              userAddress: web3ProviderState.address,
+              userAddress: web3ProviderState.account,
             },
           });
           if (idVerifedAndIssuedResponse.data?.idVerifedAndIssueds.length > 0) {
@@ -203,7 +214,7 @@ export default function CardVerifyMyId(props: any) {
           const issueDigitalIdentity = await subgraphClient.query({
             query: REDEEM_USER_NFT,
             variables: {
-              userAddress: web3ProviderState.address,
+              userAddress: web3ProviderState.account,
             },
           });
           // console.log("issueDigitalIdentity.data?.", issueDigitalIdentity.data);
@@ -217,19 +228,27 @@ export default function CardVerifyMyId(props: any) {
 
         }
 
-        let userLinkBalance = await figurePrintOracleContract.getLinkBalance()
-        console.log("userLinkBalance 1 => ", userLinkBalance);
+        if (figurePrintOracleContract) {
+          let userRecord: any = await figurePrintOracleContract.getUserRecord(
+            web3ProviderState.account
+          );
+          console.log("userRecord 2", userRecord);
+          let userLinkBalance = await figurePrintOracleContract.getLinkBalance()
 
-        // console.log("userRecord?.status", userRecord["2"].toString(), userRecord["2"].toString() === "0");
+          console.log("userLinkBalance 1 => ", userLinkBalance);
 
-        setUserLinkBalance(userLinkBalance);
-        setUserRecord({
-          userId: userRecord["0"].toString(),
-          numberTries: parseInt(userRecord["1"].toString()), //no more the 3 request if case of Rejection
-          status: parseInt(userRecord["2"].toString()), //
-        });
+          // console.log("userRecord?.status", userRecord["2"].toString(), userRecord["2"].toString() === "0");
+
+          setUserLinkBalance(userLinkBalance);
+          setUserRecord({
+            userId: userRecord["0"].toString(),
+            numberTries: parseInt(userRecord["1"].toString()), //no more the 3 request if case of Rejection
+            status: parseInt(userRecord["2"].toString()), //
+          });
+        }
       }
     };
+    console.log("web3ProviderState.chainId", web3ProviderState.chainId);
 
     if (!figurePrintOracleContract && web3ProviderState.chainId) {
       // console.log("figurePrintOracleContract", figurePrintOracleContract);
@@ -245,13 +264,13 @@ export default function CardVerifyMyId(props: any) {
     // if (pinState.toSavePin) {
     //   dispatch(changeState({ status: !pinState.status, toSavePin: false }))
     // }
-    if (web3ProviderState.web3Provider) {
+    if (web3ProviderState.active) {
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': "JWT " + localStorage.getItem("token")
       }
       let res = await post(`auth/verify-pin`, {
-        address: web3ProviderState.address,
+        address: web3ProviderState.account,
         organization: "org1",
         pin: pin
 
@@ -321,15 +340,14 @@ export default function CardVerifyMyId(props: any) {
 
     let voucher: Partial<UserIdVoucherStruct> = {};
     //call login for pine code
-    if (web3ProviderState.web3Provider && web3ProviderState.chainId) {
-      const signer = await web3ProviderState.web3Provider.getSigner();
+    if (web3ProviderState.active && web3ProviderState.chainId) {
       // let userIdentityNFTContract = await getUserIdentityNFT(signer)
       // let figurePrintOracleContract = await getFigurePrintOracle(signer)
       // console.log(await figurePrintOracleContract.getUserRecord(await signer.getAddress()));
 
       const _userId = getStringToBytes(props.username);
       const _fingurePrint = getStringToBytes(props.fingerPrintHash);
-      console.log("_userId", useridRef, "_fingurePrint", _fingurePrint, "props == >", props);
+      // console.log("_userId", useridRef, "_fingurePrint", _fingurePrint, "props == >", props);
 
       let imageObject = JSON.stringify({
         image: props.qrCodeSvg,
@@ -338,11 +356,13 @@ export default function CardVerifyMyId(props: any) {
         aboutMe: props.aboutMe,
         username: props.username,
       });
+      // console.log("props.qrCodeSvg", props.qrCodeSvg);
+
       let uri: string = "";
       try {
         const added = await client.add(imageObject);
         // ipfs = `${INFURA_GATEWAY_URL}${added.path}`;
-        uri = `https://ipfs.io/ipfs/${added.path}`;
+        uri = `https://ai-nft.infura-ipfs.io/ipfs/${added.path}`;
         // console.log('uri', uri);
 
         setURL(uri);
@@ -350,93 +370,106 @@ export default function CardVerifyMyId(props: any) {
         toast.error("something is wrong with IPFS");
         return "";
       }
-      try {
-        voucher = (await createUserId(
-          signer,
-          _userId,
-          uri,
-          _fingurePrint,
-          SIGNING_DOMAIN_NAME,
-          SIGNING_DOMAIN_VERSION,
-          web3ProviderState.chainId.toString(),
-          ContractAddress.UserIdentityNFT
-        )) as UserIdVoucherStruct;
+      let signer = web3ProviderState.library?.getSigner()
+      if (signer) {
+        try {
+          voucher = (await createUserId(
+            signer,
+            _userId,
+            uri,
+            _fingurePrint,
+            SIGNING_DOMAIN_NAME,
+            SIGNING_DOMAIN_VERSION,
+            web3ProviderState.chainId.toString(),
+            ContractAddress.UserIdentityNFT
+          )) as UserIdVoucherStruct;
 
-        // console.log("url", url);
+          // console.log("url", url);
 
-        // console.log("voucher", voucher);
-      } catch (error: any) {
-        // console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
-        toast.error(error.message.substring(0, error.message.indexOf("(")));
-        return
-      }
+          // console.log("voucher", voucher);
+        } catch (error: any) {
+          // console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
+          toast.error(error.message.substring(0, error.message.indexOf("(")));
+          return
+        }
 
-      try {
-        let isLinkTransfer = false;
-        console.log("userLinkBalance 2 =>", userLinkBalance);
+        try {
+          let linkToken = await getLinkToken(web3ProviderState.library);
+          let figurePrintOracleContract = await getFigurePrintOracle(web3ProviderState.library);
+          let userIdentityNFTContract = await getUserIdentityNFT(web3ProviderState.library);
+          let userLinkBalance = 0;
+          if (figurePrintOracleContract)
+            userLinkBalance = await figurePrintOracleContract.getLinkBalance()
 
-        // if (userLinkBalance < ethers.parseEther("0.1")) {
-        if (linkToken) {
-          // await linkToken.transfer(ContractAddress.UserIdentityNFT)
+          let isLinkTransfer = false;
+          console.log("userLinkBalance 2 =>", userLinkBalance, linkToken);
 
+          if (userLinkBalance < ethers.parseEther("0.1")) {
+            if (linkToken) {
+              // await linkToken.transfer(ContractAddress.UserIdentityNFT)
 
-          let tx = await linkToken.transferAndCall(
-            ContractAddress.FigurePrintOracle,
-            ethers.parseEther("0.1"),
-            _userId
-          )
-          await linkToken.on("Transfer", (from, to, value, event) => {
-            let transferEvent = {
-              from: from,
-              to: to,
-              value: value,
-              eventData: event,
+              const data = getStringToBytes("")
+
+              let tx = await linkToken.transferAndCall(
+                ContractAddress.FigurePrintOracle,
+                ethers.parseEther("0.1"),
+                data
+              )
+
+              // const fromMe = linkToken.filters.Transfer(web3ProviderState.account, null)
+              // await linkToken.on(fromMe, (from, to, amount, event) => {
+              //   console.log('Transfer|sent', { from, to, amount, event })
+              // })
+              // console.log("recepite 1", typeof tx, tx);,
+
+              let recepite = await tx.wait(1)
+              console.log("recepite", tx);
+              if (figurePrintOracleContract) {
+                let balance = await figurePrintOracleContract.getLinkBalance()
+                console.log("balance ==>", balance);
+              }
+              isLinkTransfer = true;
             }
-            console.log(JSON.stringify(transferEvent, null, 4))
-          })
-          // console.log("recepite 1", typeof tx, tx);,
+          } else {
+            isLinkTransfer = true;
+          }
+          console.log("_userId", _userId, "_fingurePrint", _fingurePrint, "isLinkTransfer", isLinkTransfer, userIdentityNFTContract);
+          if (userIdentityNFTContract && isLinkTransfer) {
+            let tx = await userIdentityNFTContract.verifyFingerPrint(
+              _userId,
+              _fingurePrint
+            );
+            let recepite = await tx.wait(1)
+            await post("api/addQueue", {
+              data: JSON.stringify({
+                transactionCode: "002",
+                apiName: "createVerificationRecord",
+                parameters: {
+                  userId: voucher.userId,
+                  creator: web3ProviderState.account,
+                  uri: voucher.uri,
+                  fingerPrint: voucher.fingerPrint,
+                  status: "1",
+                  signature: voucher.signature
+                },
+                pinHash: pin,
+                userId: web3ProviderState.account,
+                organization: "org1"
+              })
+            });
+            router.reload()
+          }
 
-          let recepite = await tx.wait()
-          console.log("recepite", tx);
+        } catch (error: any) {
+          console.log(error);
 
-          isLinkTransfer = true;
+          // console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
+          toast.error(error.message.substring(0, error.message.indexOf("(")));
+
+          return;
         }
-        // } else {
-        //   isLinkTransfer = true;
-        // }
-        console.log("_userId", _userId, "_fingurePrint", _fingurePrint, "isLinkTransfer", isLinkTransfer);
-        if (userIdentityNFTContract && isLinkTransfer) {
-          // await userIdentityNFTContract.verifyFingerPrint(
-          //   _userId,
-          //   _fingurePrint
-          // );
-          // await post("api/addQueue", {
-          //   data: JSON.stringify({
-          //     transactionCode: "002",
-          //     apiName: "createVerificationRecord",
-          //     parameters: {
-          //       userId: voucher.userId,
-          //       creator: web3ProviderState.address,
-          //       uri: voucher.uri,
-          //       fingerPrint: voucher.fingerPrint,
-          //       status: "1",
-          //       signature: voucher.signature
-          //     },
-          //     pinHash: pin,
-          //     userId: web3ProviderState.address,
-          //     organization: "org1"
-          //   })
-          // });
-          // router.push("/user/verifyMyId")
-        }
-
-      } catch (error: any) {
-        console.log(error);
-
-        // console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
-        // toast.error(error.message.substring(0, error.message.indexOf("(")));
-
-        return;
+      } else {
+        toast.error("Signer Account Not Found")
       }
     }
   }, [web3ProviderState]);
@@ -444,20 +477,20 @@ export default function CardVerifyMyId(props: any) {
   async function RequestForVerification() {
     console.log("RequestForVerification");
 
-    if (web3ProviderState.provider == null && web3ProviderState.address) {
+    if (!web3ProviderState.active == null && web3ProviderState.account) {
       // console.log("error");
 
       toast.error("Please Connect to your wallet First");
       return;
     }
-    if (web3ProviderState.chainId != 11155111) {
+    if (web3ProviderState.chainId != 5) {
       toast.error("Please Change your network to Goerli");
       return;
     }
 
     if (
-      userRecord?.status == 0 ||
-      (userRecord?.status == 3 && userRecord?.numberTries < 3)
+      userRecord?.status === 0 ||
+      (userRecord?.status === 3 && userRecord?.numberTries < 3)
     ) {
       // console.log("setPurpose");
       // console.log("props1 == >", props);

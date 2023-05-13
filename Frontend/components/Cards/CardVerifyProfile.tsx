@@ -22,8 +22,10 @@ export default function CardVerifyProfile(props: any) {
   useEffect(() => {
     if (props?.fingerPrintHash) {
       let canvas = qrRef.current?.querySelector("canvas");
+      console.log("canvas", canvas);
+
       let image = canvas?.toDataURL("image/png");
-      // console.log("data:image/svg+xml;base64,", image);
+      console.log("data:image/svg+xml;base64,", image);
       props.setQRCodeSvg(image)
     }
 
@@ -36,18 +38,19 @@ export default function CardVerifyProfile(props: any) {
           <div className="flex flex-wrap justify-center">
             <div className="w-full px-4 flex justify-center">
               {props?.fingerPrintHash && <div className="relative">
-                <div ref={qrRef}>{qrcode}</div> {/* include this */}
+                <div onChange={() => {
+                  console.log("here");
+
+                }} ref={qrRef}>{qrcode}</div> {/* include this */}
 
               </div>}
               {!props?.qrCodeSvg && <div className="relative">
-                <div ref={qrRef}>
+                <div >
                   <>
                     <img alt=""
                       className="shadow-xl  h-auto align-middle border-none absolute -m-16 -ml-20 lg:-ml-16 max-w-150-px"
                       src={props.qrCodeSvg} />
-                    {/* {props.qrCodeSvg} */}
-                  </></div> {/* include this */}
-
+                  </></div>
               </div>}
             </div>
             <div className="w-full px-4 text-center items-center justify-center  mt-20">

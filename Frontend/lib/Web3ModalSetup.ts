@@ -1,6 +1,6 @@
 import WalletConnectProvider from '@walletconnect/web3-provider'
 import Head from 'next/head'
-import { useCallback, useEffect, useReducer } from 'react'
+import { useCallback, useEffect } from 'react'
 import WalletLink from 'walletlink'
 import Web3Modal from 'web3modal'
 

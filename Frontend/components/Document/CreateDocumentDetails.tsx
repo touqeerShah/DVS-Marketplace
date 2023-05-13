@@ -14,6 +14,7 @@ import { faFingerprint, faFile, faPlusCircle, faUpload, faSpinner } from "@forta
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import AddParameter from "../TextField/AddSingner"
 import { TypeDocumentSignerFields } from "../../class/document"
+import { Contract } from "@ethersproject/contracts";
 
 // components
 
@@ -78,8 +79,8 @@ export default function CreateDocumentDetails(props: any) {
 
 
 
-  const [documentSignatureContract, setDocumentSignatureContract] = useState<ethers.Contract>()
-  const [userIdentityNFTContract, setUserIdentityNFTContract] = useState<ethers.Contract>()
+  const [documentSignatureContract, setDocumentSignatureContract] = useState<Contract>()
+  const [userIdentityNFTContract, setUserIdentityNFTContract] = useState<Contract>()
 
   const projectIdAndSecret = `${INFURA_IPFS_PROJECJECT_ID}:${INFURA_IPFS_PROJECJECT_SECRET}`;
   const client = create({
@@ -96,10 +97,10 @@ export default function CreateDocumentDetails(props: any) {
   // setup contract address
   const init = useCallback(async () => {
     const fetchData = async () => {
-      if (web3ProviderState.web3Provider) {
-        const signer = await web3ProviderState.web3Provider.getSigner();
-        let documentSignatureContract = await getDocumentSignature(signer)
-        let userIdentityNFTContract = await getUserIdentityNFT(signer)
+      if (web3ProviderState.active) {
+        // const signer = await web3ProviderState.active.getSigner();
+        let documentSignatureContract = await getDocumentSignature(web3ProviderState.library)
+        let userIdentityNFTContract = await getUserIdentityNFT(web3ProviderState.library)
         console.log('documentSignatureContract ==>', documentSignatureContract);
 
         setDocumentSignatureContract(documentSignatureContract)
@@ -122,13 +123,13 @@ export default function CreateDocumentDetails(props: any) {
     // if (pinState.toSavePin) {
     //   dispatch(changeState({ status: !pinState.status, toSavePin: false }))
     // }
-    if (web3ProviderState.web3Provider) {
+    if (web3ProviderState.active) {
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': "JWT " + localStorage.getItem("token")
       }
       let res = await post(`auth/verify-pin`, {
-        address: web3ProviderState.address,
+        address: web3ProviderState.account,
         organization: "org1",
         pin: pin
 
@@ -191,16 +192,16 @@ export default function CreateDocumentDetails(props: any) {
 
   const storeDocument = useCallback(async function (pin: string) {
     await init()
-    console.log("storeDocument", web3ProviderState.web3Provider, web3ProviderState.address, documentSignatureContract);
+    console.log("storeDocument", web3ProviderState.active, web3ProviderState.account, documentSignatureContract);
 
-    if (web3ProviderState.provider == null && web3ProviderState.address) {
+    if (!web3ProviderState.active == null && web3ProviderState.account) {
       console.log("error");
       setSpinnerProcess(false)
 
       toast.error("Please Connect to your wallet First");
       return;
     }
-    if (web3ProviderState.chainId != 11155111) {
+    if (web3ProviderState.chainId != 5) {
       setSpinnerProcess(false)
 
       toast.error("Please Change your network to Goerli");
@@ -208,7 +209,7 @@ export default function CreateDocumentDetails(props: any) {
     }
     let voucher: string;
 
-    if (web3ProviderState.web3Provider && web3ProviderState.address && documentSignatureContract) {
+    if (web3ProviderState.active && web3ProviderState.account && documentSignatureContract) {
       let latestBlockNumber = await getLatestBlockNumber()
       var currentDate = new Date("2023-03-04");
       var startDateSeconds = (new Date(startDate).getTime() - currentDate.getTime()) / 1000;
@@ -216,7 +217,7 @@ export default function CreateDocumentDetails(props: any) {
       var startBlock = latestBlockNumber + (startDateSeconds / AVERAGE_BLOCK_MINT_TIME)
       var endBlock = startBlock + (endDateSeconds / AVERAGE_BLOCK_MINT_TIME)
 
-      const signer = await web3ProviderState.web3Provider.getSigner();
+      // const signer = await web3ProviderState.active.getSigner();
       let parties: TypeDocumentSignerFields[] = props.documentSignerFieldsState as TypeDocumentSignerFields[]
       console.log("parties", parties);
       let partiesId: number[] = []
@@ -259,8 +260,8 @@ export default function CreateDocumentDetails(props: any) {
       }
 
 
-      if (userIdentityNFTContract && 0 == await userIdentityNFTContract.balanceOf(web3ProviderState.address)) {
-        console.log("await userIdentityNFTContract.balanceOf(web3ProviderState.address", web3ProviderState.address, await userIdentityNFTContract.balanceOf(web3ProviderState.address));
+      if (userIdentityNFTContract && 0 == await userIdentityNFTContract.balanceOf(web3ProviderState.account)) {
+        console.log("await userIdentityNFTContract.balanceOf(web3ProviderState.account", web3ProviderState.account, await userIdentityNFTContract.balanceOf(web3ProviderState.account));
 
         setSpinnerProcess(false)
 
@@ -284,7 +285,7 @@ export default function CreateDocumentDetails(props: any) {
             const _documentName = getStringToBytes(documentName)
             const _purpose = getStringToBytes(purpose)
 
-            _documentId = await documentSignatureContract.getDocumentId(web3ProviderState.address, _documentName, _purpose, partiesId)
+            _documentId = await documentSignatureContract.getDocumentId(web3ProviderState.account, _documentName, _purpose, partiesId)
             console.log("documentId", _documentId);
 
             setDocumentId(_documentId.toString())
@@ -305,7 +306,7 @@ export default function CreateDocumentDetails(props: any) {
           fileName,
           startBlock,
           endBlock,
-          creator: web3ProviderState.address,
+          creator: web3ProviderState.account,
           signer: partiesId,
         })
         let uri: string = ""
@@ -320,56 +321,62 @@ export default function CreateDocumentDetails(props: any) {
           toast.error("something is wrong with IPFS")
           return "";
         }
-        try {
+        let signer = web3ProviderState.library?.getSigner()
 
-          voucher = (await createDocument(
-            signer,
-            web3ProviderState.address,
-            uri,
-            _documentId,
-            DS_SIGNING_DOMAIN_NAME,
-            DS_SIGNING_DOMAIN_VERSION,
-            web3ProviderState.chainId.toString(),
-            ContractAddress.UserIdentityNFT
-          )) as string;
+        if (signer) {
+          try {
 
-          console.log("url", url);
+            voucher = (await createDocument(
+              signer,
+              web3ProviderState.account,
+              uri,
+              _documentId,
+              DS_SIGNING_DOMAIN_NAME,
+              DS_SIGNING_DOMAIN_VERSION,
+              web3ProviderState.chainId.toString(),
+              ContractAddress.UserIdentityNFT
+            )) as string;
 
-          console.log("voucher", voucher);
-          let res = await post("api/addQueue", {
-            data: JSON.stringify({
-              transactionCode: "002",
-              apiName: "createDocument",
-              parameters: {
-                documentId: _documentId.toString(),
-                documentName: documentName,
-                purpose: purpose,
-                uri: uri,
-                startData: startDate,
-                expirationDate: endDate,
-                startBlock: startBlock.toString(),
-                endBlock: endBlock.toString(),
-                creator: web3ProviderState.address,
-                ownerSignature: voucher,
-                parties: partiesId
-              },
-              pinHash: pin,
-              userId: web3ProviderState.address,
-              organization: "org1"
-            })
-          });
-          console.log("res", res);
+            console.log("url", url);
 
-          toast.success("Successfully Created Document " + _documentId.toString())
-          setSpinnerProcess(false)
-          router.push("/user/listDocument")
+            console.log("voucher", voucher);
+            let res = await post("api/addQueue", {
+              data: JSON.stringify({
+                transactionCode: "002",
+                apiName: "createDocument",
+                parameters: {
+                  documentId: _documentId.toString(),
+                  documentName: documentName,
+                  purpose: purpose,
+                  uri: uri,
+                  startData: startDate,
+                  expirationDate: endDate,
+                  startBlock: startBlock.toString(),
+                  endBlock: endBlock.toString(),
+                  creator: web3ProviderState.account,
+                  ownerSignature: voucher,
+                  parties: partiesId
+                },
+                pinHash: pin,
+                userId: web3ProviderState.account,
+                organization: "org1"
+              })
+            });
+            console.log("res", res);
+
+            toast.success("Successfully Created Document " + _documentId.toString())
+            setSpinnerProcess(false)
+            router.push("/user/listDocument")
 
 
-        } catch (error: any) {
-          setSpinnerProcess(false)
+          } catch (error: any) {
+            setSpinnerProcess(false)
 
-          console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
-          toast.error(error.message.substring(0, error.message.indexOf("(")))
+            console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
+            toast.error(error.message.substring(0, error.message.indexOf("(")))
+          }
+        } else {
+          toast.error("Signer Account Not Found")
         }
 
       } else {
