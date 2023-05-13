@@ -7,7 +7,6 @@ export type TypeContractAddress = {
     DocumentSignature: string
     LinkToken: string
     MockOracle: string
-    PTNFT: string
 }
 
 export type VerifcaitonRecord = {

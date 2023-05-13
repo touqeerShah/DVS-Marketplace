@@ -170,7 +170,7 @@ export default function CardVerifyMyId(props: any) {
         toast.error("Please Connect to your wallet First");
         return;
       }
-      if (web3ProviderState.chainId != 11155111) {
+      if (web3ProviderState.chainId != 5) {
         toast.error("Please Change your network to Goerli");
         return;
       }
@@ -373,61 +373,65 @@ export default function CardVerifyMyId(props: any) {
 
       try {
         let isLinkTransfer = false;
-        console.log("userLinkBalance 2 =>", userLinkBalance);
+        // console.log("userLinkBalance 2 =>", userLinkBalance);
+        let figurePrintOracleContract = await getFigurePrintOracle(signer);
 
-        // if (userLinkBalance < ethers.parseEther("0.1")) {
-        if (linkToken) {
-          // await linkToken.transfer(ContractAddress.UserIdentityNFT)
+        let userLinkBalance = await figurePrintOracleContract.getLinkBalance()
+        console.log("userLinkBalance 1 => ", userLinkBalance);
+
+        if (userLinkBalance < ethers.parseEther("0.1")) {
+          if (linkToken) {
+            // await linkToken.transfer(ContractAddress.UserIdentityNFT)
 
 
-          let tx = await linkToken.transferAndCall(
-            ContractAddress.FigurePrintOracle,
-            ethers.parseEther("0.1"),
-            _userId
-          )
-          await linkToken.on("Transfer", (from, to, value, event) => {
-            let transferEvent = {
-              from: from,
-              to: to,
-              value: value,
-              eventData: event,
-            }
-            console.log(JSON.stringify(transferEvent, null, 4))
-          })
-          // console.log("recepite 1", typeof tx, tx);,
+            let tx = await linkToken.transferAndCall(
+              ContractAddress.FigurePrintOracle,
+              ethers.parseEther("0.1"),
+              _userId
+            )
+            await linkToken.on("Transfer", (from, to, value, event) => {
+              let transferEvent = {
+                from: from,
+                to: to,
+                value: value,
+                eventData: event,
+              }
+              console.log(JSON.stringify(transferEvent, null, 4))
+            })
+            // console.log("recepite 1", typeof tx, tx);,
 
-          let recepite = await tx.wait()
-          console.log("recepite", tx);
+            let recepite = await tx.wait()
+            console.log("recepite", tx);
 
+            isLinkTransfer = true;
+          }
+        } else {
           isLinkTransfer = true;
         }
-        // } else {
-        //   isLinkTransfer = true;
-        // }
         console.log("_userId", _userId, "_fingurePrint", _fingurePrint, "isLinkTransfer", isLinkTransfer);
         if (userIdentityNFTContract && isLinkTransfer) {
-          // await userIdentityNFTContract.verifyFingerPrint(
-          //   _userId,
-          //   _fingurePrint
-          // );
-          // await post("api/addQueue", {
-          //   data: JSON.stringify({
-          //     transactionCode: "002",
-          //     apiName: "createVerificationRecord",
-          //     parameters: {
-          //       userId: voucher.userId,
-          //       creator: web3ProviderState.address,
-          //       uri: voucher.uri,
-          //       fingerPrint: voucher.fingerPrint,
-          //       status: "1",
-          //       signature: voucher.signature
-          //     },
-          //     pinHash: pin,
-          //     userId: web3ProviderState.address,
-          //     organization: "org1"
-          //   })
-          // });
-          // router.push("/user/verifyMyId")
+          await userIdentityNFTContract.verifyFingerPrint(
+            _userId,
+            _fingurePrint
+          );
+          await post("api/addQueue", {
+            data: JSON.stringify({
+              transactionCode: "002",
+              apiName: "createVerificationRecord",
+              parameters: {
+                userId: voucher.userId,
+                creator: web3ProviderState.address,
+                uri: voucher.uri,
+                fingerPrint: voucher.fingerPrint,
+                status: "1",
+                signature: voucher.signature
+              },
+              pinHash: pin,
+              userId: web3ProviderState.address,
+              organization: "org1"
+            })
+          });
+          router.reload()
         }
 
       } catch (error: any) {
@@ -450,7 +454,7 @@ export default function CardVerifyMyId(props: any) {
       toast.error("Please Connect to your wallet First");
       return;
     }
-    if (web3ProviderState.chainId != 11155111) {
+    if (web3ProviderState.chainId != 5) {
       toast.error("Please Change your network to Goerli");
       return;
     }
