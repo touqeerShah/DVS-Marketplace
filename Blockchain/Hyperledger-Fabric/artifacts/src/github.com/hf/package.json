@@ -12,7 +12,7 @@
     "lint": "tslint -c tslint.json 'src/**/*.ts'",
     "pretest": "npm run lint",
     "test": "nyc mocha -r ts-node/register src/**/*.spec.ts",
-    "start": "fabric-chaincode-node server --chaincode-address   hf.org1.example.com:9999 --chaincode-id hf_2.0:bddf186ca9c15248bfc201a4a54cae212f76386fea396bc19bfb81260db67749",
+    "start": "fabric-chaincode-node server --chaincode-address   hf.org1.example.com:9999 --chaincode-id hf_1.0:cafaee47ebca5221a65340f1336d63b22fd13d35395de37f7c1a2cd0b4c77f4c",
     "build": "tsc",
     "build:watch": "tsc -w",
     "prepublishOnly": "npm run build"

@@ -1,0 +1,734 @@
+{
+    "channel" : "mychannel",
+    "functionName" : "",
+    "schema" : {
+        "type" : "object",
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            },
+            "apiName" : {
+                "type" : "string"
+            },
+            "parameters" : {
+                "type" : "object"
+            },
+            "organization" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "transactionCode",
+            "apiName",
+            "parameters",
+            "organization"
+        ],
+        "additionalProperties" : true
+    },
+    "parameters" : {
+        "type" : "object",
+        "properties" : {
+            "id" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "id"
+        ],
+        "additionalProperties" : false
+    },
+    "apiName" : "enrollAdmin",
+    "contractName" : "",
+    "name" : "org1"
+},{
+    "_id" : ObjectId("628cd3b5c402d62d4e82866e"),
+    "channel" : "mychannel",
+    "functionName" : "createUser",
+    "isCreator" : "true",
+    "schema" : {
+        "type" : "object",
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            },
+            "apiName" : {
+                "type" : "string"
+            },
+            "parameters" : {
+                "type" : "object"
+            },
+            "userId" : {
+                "type" : "string"
+            },
+            "organization" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "transactionCode",
+            "apiName",
+            "parameters",
+            "userId",
+            "organization"
+        ],
+        "additionalProperties" : true
+    },
+    "parameters" : {
+        "type" : "object",
+        "properties" : {
+            "id" : {
+                "type" : "string"
+            },
+            "userRole" : {
+                "type" : "string"
+            },
+            "status" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "id",
+            "userRole",
+            "status"
+        ],
+        "additionalProperties" : false
+    },
+    "apiName" : "registerAdmin",
+    "contractName" : "user-managment"
+},{
+    "_id" : ObjectId("628e07f7c402d62d4e82868d"),
+    "channel" : "mychannel",
+    "functionName" : "createUserVerification",
+    "contractName" : "hf",
+    "schema" : {
+        "type" : "object",
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            },
+            "apiName" : {
+                "type" : "string"
+            },
+            "parameters" : {
+                "type" : "object"
+            },
+            "userId" : {
+                "type" : "string"
+            },
+            "organization" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "transactionCode",
+            "apiName",
+            "parameters",
+            "userId",
+            "organization"
+        ],
+        "additionalProperties" : true
+    },
+    "parameters" : {
+        "type" : "object",
+        "properties" : {
+            "userId" : {
+                "type" : "string"
+            },
+            "fingerPrint" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "userId",
+            "fingerPrint"
+        ],
+        "additionalProperties" : false
+    },
+    "apiName" : "createUserVerification"
+},{
+    "_id" : ObjectId("640652218f6d065ddc3a4598"),
+    "channel" : "mychannel",
+    "functionName" : "VerifyUser",
+    "contractName" : "hf",
+    "schema" : {
+        "type" : "object",
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            },
+            "apiName" : {
+                "type" : "string"
+            },
+            "parameters" : {
+                "type" : "object"
+            },
+            "userId" : {
+                "type" : "string"
+            },
+            "organization" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "transactionCode",
+            "apiName",
+            "parameters",
+            "userId",
+            "organization"
+        ],
+        "additionalProperties" : true
+    },
+    "parameters" : {
+        "type" : "object",
+        "properties" : {
+            "userId" : {
+                "type" : "string"
+            },
+            "fingerPrint" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "userId",
+            "fingerPrint"
+        ],
+        "additionalProperties" : false
+    },
+    "apiName" : "VerifyUser"
+},{
+    "_id" : ObjectId("6406523c8f6d065ddc3a4599"),
+    "channel" : "mychannel",
+    "functionName" : "getUserVerificationDetails",
+    "contractName" : "hf",
+    "schema" : {
+        "type" : "object",
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            },
+            "apiName" : {
+                "type" : "string"
+            },
+            "parameters" : {
+                "type" : "object"
+            },
+            "userId" : {
+                "type" : "string"
+            },
+            "organization" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "transactionCode",
+            "apiName",
+            "parameters",
+            "userId",
+            "organization"
+        ],
+        "additionalProperties" : true
+    },
+    "parameters" : {
+        "type" : "object",
+        "properties" : {
+            "userId" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "userId"
+        ],
+        "additionalProperties" : false
+    },
+    "apiName" : "getUserVerificationDetails"
+},{
+    "_id" : ObjectId("640652a58f6d065ddc3a459a"),
+    "channel" : "mychannel",
+    "functionName" : "createVerificationRecord",
+    "contractName" : "hf",
+    "schema" : {
+        "type" : "object",
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            },
+            "apiName" : {
+                "type" : "string"
+            },
+            "parameters" : {
+                "type" : "object"
+            },
+            "userId" : {
+                "type" : "string"
+            },
+            "organization" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "transactionCode",
+            "apiName",
+            "parameters",
+            "userId",
+            "organization"
+        ],
+        "additionalProperties" : true
+    },
+    "parameters" : {
+        "type" : "object",
+        "properties" : {
+            "userId" : {
+                "type" : "string"
+            },
+            "creator" : {
+                "type" : "string"
+            },
+            "uri" : {
+                "type" : "string"
+            },
+            "fingerPrint" : {
+                "type" : "string"
+            },
+            "signature" : {
+                "type" : "string"
+            },
+            "status" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "userId",
+            "creator",
+            "uri",
+            "fingerPrint",
+            "signature",
+            "status"
+        ],
+        "additionalProperties" : false
+    },
+    "apiName" : "createVerificationRecord"
+},{
+    "_id" : ObjectId("640653648f6d065ddc3a459b"),
+    "channel" : "mychannel",
+    "functionName" : "updateStatus",
+    "contractName" : "hf",
+    "schema" : {
+        "type" : "object",
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            },
+            "apiName" : {
+                "type" : "string"
+            },
+            "parameters" : {
+                "type" : "object"
+            },
+            "userId" : {
+                "type" : "string"
+            },
+            "organization" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "transactionCode",
+            "apiName",
+            "parameters",
+            "userId",
+            "organization"
+        ],
+        "additionalProperties" : true
+    },
+    "parameters" : {
+        "type" : "object",
+        "properties" : {
+            "userId" : {
+                "type" : "string"
+            },
+            "status" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "userId",
+            "status"
+        ],
+        "additionalProperties" : false
+    },
+    "apiName" : "updateStatus"
+},{
+    "_id" : ObjectId("640653798f6d065ddc3a459c"),
+    "channel" : "mychannel",
+    "functionName" : "getVerificationDetails",
+    "contractName" : "hf",
+    "schema" : {
+        "type" : "object",
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            },
+            "apiName" : {
+                "type" : "string"
+            },
+            "parameters" : {
+                "type" : "object"
+            },
+            "userId" : {
+                "type" : "string"
+            },
+            "organization" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "transactionCode",
+            "apiName",
+            "parameters",
+            "userId",
+            "organization"
+        ],
+        "additionalProperties" : true
+    },
+    "parameters" : {
+        "type" : "object",
+        "properties" : {
+            "userId" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "userId"
+        ],
+        "additionalProperties" : false
+    },
+    "apiName" : "getVerificationDetails"
+},{
+    "_id" : ObjectId("640657b88f6d065ddc3a459e"),
+    "channel" : "mychannel",
+    "functionName" : "createDocument",
+    "contractName" : "hf",
+    "schema" : {
+        "type" : "object",
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            },
+            "apiName" : {
+                "type" : "string"
+            },
+            "parameters" : {
+                "type" : "object"
+            },
+            "userId" : {
+                "type" : "string"
+            },
+            "organization" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "transactionCode",
+            "apiName",
+            "parameters",
+            "userId",
+            "organization"
+        ],
+        "additionalProperties" : true
+    },
+    "parameters" : {
+        "type" : "object",
+        "properties" : {
+            "documentId" : {
+                "type" : "string"
+            },
+            "documentName" : {
+                "type" : "string"
+            },
+            "purpose" : {
+                "type" : "string"
+            },
+            "uri" : {
+                "type" : "string"
+            },
+            "startData" : {
+                "type" : "string"
+            },
+            "expirationDate" : {
+                "type" : "string"
+            },
+            "startBlock" : {
+                "type" : "string"
+            },
+            "endBlock" : {
+                "type" : "string"
+            },
+            "creator" : {
+                "type" : "string"
+            },
+            "ownerSignature" : {
+                "type" : "string"
+            },
+            "parties" : {
+                "type" : "array"
+            }
+        },
+        "required" : [
+            "documentId",
+            "documentName",
+            "purpose",
+            "uri",
+            "startData",
+            "expirationDate",
+            "startBlock",
+            "endBlock",
+            "creator",
+            "ownerSignature",
+            "parties"
+        ],
+        "additionalProperties" : false
+    },
+    "apiName" : "createDocument"
+},{
+    "_id" : ObjectId("640657eb8f6d065ddc3a459f"),
+    "channel" : "mychannel",
+    "functionName" : "addSignatureDocument",
+    "contractName" : "hf",
+    "schema" : {
+        "type" : "object",
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            },
+            "apiName" : {
+                "type" : "string"
+            },
+            "parameters" : {
+                "type" : "object"
+            },
+            "userId" : {
+                "type" : "string"
+            },
+            "organization" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "transactionCode",
+            "apiName",
+            "parameters",
+            "userId",
+            "organization"
+        ],
+        "additionalProperties" : true
+    },
+    "parameters" : {
+        "type" : "object",
+        "properties" : {
+            "documentId" : {
+                "type" : "string"
+            },
+            "signature" : {
+                "type" : "string"
+            },
+            "signer" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "documentId",
+            "signature",
+            "signer"
+        ],
+        "additionalProperties" : false
+    },
+    "apiName" : "addSignatureDocument"
+},{
+    "_id" : ObjectId("6406580d8f6d065ddc3a45a0"),
+    "channel" : "mychannel",
+    "functionName" : "updateStatusDocument",
+    "contractName" : "hf",
+    "schema" : {
+        "type" : "object",
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            },
+            "apiName" : {
+                "type" : "string"
+            },
+            "parameters" : {
+                "type" : "object"
+            },
+            "userId" : {
+                "type" : "string"
+            },
+            "organization" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "transactionCode",
+            "apiName",
+            "parameters",
+            "userId",
+            "organization"
+        ],
+        "additionalProperties" : true
+    },
+    "parameters" : {
+        "type" : "object",
+        "properties" : {
+            "documentId" : {
+                "type" : "string"
+            },
+            "status" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "documentId",
+            "status"
+        ],
+        "additionalProperties" : false
+    },
+    "apiName" : "updateStatusDocument"
+},{
+    "_id" : ObjectId("640658238f6d065ddc3a45a1"),
+    "channel" : "mychannel",
+    "functionName" : "getDocumentDetails",
+    "contractName" : "hf",
+    "schema" : {
+        "type" : "object",
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            },
+            "apiName" : {
+                "type" : "string"
+            },
+            "parameters" : {
+                "type" : "object"
+            },
+            "userId" : {
+                "type" : "string"
+            },
+            "organization" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "transactionCode",
+            "apiName",
+            "parameters",
+            "userId",
+            "organization"
+        ],
+        "additionalProperties" : true
+    },
+    "parameters" : {
+        "type" : "object",
+        "properties" : {
+            "documentId" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "documentId"
+        ],
+        "additionalProperties" : false
+    },
+    "apiName" : "getDocumentDetails"
+},{
+    "_id" : ObjectId("6406582f8f6d065ddc3a45a2"),
+    "channel" : "mychannel",
+    "functionName" : "existsDocument",
+    "contractName" : "hf",
+    "schema" : {
+        "type" : "object",
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            },
+            "apiName" : {
+                "type" : "string"
+            },
+            "parameters" : {
+                "type" : "object"
+            },
+            "userId" : {
+                "type" : "string"
+            },
+            "organization" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "transactionCode",
+            "apiName",
+            "parameters",
+            "userId",
+            "organization"
+        ],
+        "additionalProperties" : true
+    },
+    "parameters" : {
+        "type" : "object",
+        "properties" : {
+            "documentId" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "documentId"
+        ],
+        "additionalProperties" : false
+    },
+    "apiName" : "existsDocument"
+},{
+    "_id" : ObjectId("640658488f6d065ddc3a45a3"),
+    "channel" : "mychannel",
+    "functionName" : "getByQuery",
+    "contractName" : "hf",
+    "schema" : {
+        "type" : "object",
+        "properties" : {
+            "transactionCode" : {
+                "type" : "string"
+            },
+            "apiName" : {
+                "type" : "string"
+            },
+            "parameters" : {
+                "type" : "object"
+            },
+            "userId" : {
+                "type" : "string"
+            },
+            "organization" : {
+                "type" : "string"
+            }
+        },
+        "required" : [
+            "transactionCode",
+            "apiName",
+            "parameters",
+            "userId",
+            "organization"
+        ],
+        "additionalProperties" : true
+    },
+    "parameters" : {
+        "type" : "object",
+        "properties" : {
+            "query" : {
+                "type" : "object"
+            }
+        },
+        "required" : [
+            "query"
+        ],
+        "additionalProperties" : false
+    },
+    "apiName" : "getByQuery"
+}

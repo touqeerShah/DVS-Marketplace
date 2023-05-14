@@ -50,7 +50,7 @@ export default function CreateDocumentTable(props: any) {
           parameters: {
             query: query
           },
-          userId: "user1",
+          userId: "user2",
           organization: "org1"
         })
       })

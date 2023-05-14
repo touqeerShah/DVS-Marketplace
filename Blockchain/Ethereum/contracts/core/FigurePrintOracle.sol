@@ -58,9 +58,6 @@ contract FigurePrintOracle is
      * jobId: 0x3764383061363338366566353433613361626235323831376636373037653362
      *   _Fee 100000000000000000
      * _oP 0x04B0601D72dAEEA5D88D5d3B3495854FEe6cCf36
-     *
-     *
-     *
      */
     constructor(
         address _linkToken,
@@ -126,10 +123,10 @@ contract FigurePrintOracle is
             )
         );
         req.add("path", "verficationResponse"); //resposnse from api
-        int256 timesAmount = 10 ** 18;
+        int256 timesAmount = 10 ** 18; // time limit
         req.addInt("times", timesAmount);
 
-        // // // Sends the request
+        //  Sends the request
         bytes32 requestId = sendChainlinkRequest(req, fee);
         userVerficationRequest[requestId] = userAddress;
         userVerficationRecord[userAddress] = VerifcaitonRecord(
@@ -137,6 +134,8 @@ contract FigurePrintOracle is
             numberTries,
             VerficationStatus.PENDING
         );
+        amounts[userAddress] -= fee;
+
         emit VerifyFingerPrint(userId, requestId, userAddress);
         return requestId;
     }

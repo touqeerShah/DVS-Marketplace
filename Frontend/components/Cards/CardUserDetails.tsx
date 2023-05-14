@@ -125,7 +125,7 @@ export default function CardUserDetails({ color, collection, userRecord, web3Pro
   }, [pinHash])
 
   async function submitCreateUserNFTRequest(pin: string, userRecord: any) {
-    // console.log("submitCreateUserNFTRequest");
+    console.log("submitCreateUserNFTRequest");
 
     if (!web3ProviderState.active == null && web3ProviderState.account) {
       console.log("error");
@@ -146,7 +146,7 @@ export default function CardUserDetails({ color, collection, userRecord, web3Pro
 
         try {
           // console.log("_userId", _userId, "_fingurePrint", _fingurePrint);
-          // console.log("userIdentityNFTContract", userIdentityNFTContract);
+          console.log("userIdentityNFTContract", userIdentityNFTContract);
 
           if (userIdentityNFTContract && verificationEntity) {
             let voucher: UserIdVoucherStruct = { uri: verificationEntity.uri, userId: userRecord.userId, fingerPrint: verificationEntity.fingerPrint, signature: verificationEntity.signature }
@@ -170,12 +170,12 @@ export default function CardUserDetails({ color, collection, userRecord, web3Pro
               })
             });
           }
-          router.push("/user/verifyMyId")
+          router.reload()
 
           // (await tx).wait();
 
         } catch (error: any) {
-          console.log(error);
+          console.log("this one", error);
 
           console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
         }
@@ -201,8 +201,8 @@ export default function CardUserDetails({ color, collection, userRecord, web3Pro
     if (
       userRecord?.status == 2
     ) {
-      // console.log("setPurpose");
-      // console.log("props1 == >", props);
+      console.log("setPurpose");
+      console.log("props1 == >");
 
       setSpinnerProcess(true)
       if (localStorage.getItem("token")) {
@@ -316,7 +316,8 @@ export default function CardUserDetails({ color, collection, userRecord, web3Pro
                   (color === "light"
                     ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
                     : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
-                  Uri : {verificationEntity?.uri}
+                  Uri :
+                  {ellipseAddress(verificationEntity?.uri)}
                 </td>
 
               </tr>

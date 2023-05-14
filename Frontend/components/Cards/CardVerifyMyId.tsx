@@ -120,7 +120,7 @@ export default function CardVerifyMyId(props: any) {
           parameters: {
             userId: userRecord?.userId,
           },
-          userId: "user1",
+          userId: "user2",
           organization: "org1"
         })
       })
@@ -138,11 +138,11 @@ export default function CardVerifyMyId(props: any) {
         props.setQRCodeSvg(data?.image)
         setVerificationEntity(resp.data)
       }
-      console.log("resp", resp);
+      console.log("resp == >", resp);
 
     }
 
-    console.log("ahjbdjkasbjcbasjbjksbcjka", verificationEntity, userRecord?.status == 1, verificationEntity);
+    console.log("ahjbdjkasbjcbasjbjksbcjka", verificationEntity, userRecord?.status !== 0, verificationEntity);
 
     if (userRecord?.status !== 0 && !verificationEntity && !isSubmitted) {
       if (userRecord?.userId !== undefined) {

@@ -1,4 +1,2 @@
 Installed chaincodes on peer:
-Package ID: hf_1.0:6329533661f9d2f1659404189fdc3faf9694f0d97845f96f86b12620196a523a, Label: hf_1.0
-Package ID: hf_2.0:bddf186ca9c15248bfc201a4a54cae212f76386fea396bc19bfb81260db67749, Label: hf_2.0
-Package ID: hf_1.0:fa96ab9cd0a14bdc445e89db16515c329c84bf3c2e3d587e8b5e6e5b84447291, Label: hf_1.0
+Package ID: hf_1.0:cafaee47ebca5221a65340f1336d63b22fd13d35395de37f7c1a2cd0b4c77f4c, Label: hf_1.0

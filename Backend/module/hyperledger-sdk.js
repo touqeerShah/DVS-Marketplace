@@ -192,6 +192,8 @@ module.exports.query = async function (
     );
     return JSON.stringify(response_object); // here we send data back to api call
   } catch (error) {
+    console.log("1.error", error);
+
     var firstIndex = error.message.indexOf('{"message":');
     var endingIndex = error.message.indexOf('"}', firstIndex);
     let result = error.message.substring(firstIndex, endingIndex + 2);
@@ -208,6 +210,7 @@ module.exports.query = async function (
         response_object.data = JSON.parse(result.toString());
       }
     } catch (error) {
+      console.log("2.error", error);
       return { status: 400 };
     }
     return response_object;

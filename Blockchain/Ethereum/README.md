@@ -189,7 +189,20 @@ on-chain goerli
     "MockOracle": "0x54e21D7edc7Dc890b024E2E61EcB7513C54e2e6f",
     "PTNFT": "0x90aBdd9f7519eB46B3aCaf8FFB40d2364e67d4b2"
 }
+sepolia
 
+{
+    "TimeLock": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
+    "GovernorContract": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+    "OrcaleUrlProvider": "0x355097f3d6875036924af3a740c004289669d18d",
+    "FigurePrintOracle": "0xf9431413885d5e1f15c853c1d567996130a20074",
+    "UserIdentityNFT": "0xfc791405495d910a37b718333966675f7a028fe7",
+    "DocumentSignature": "0x40963D2F509c7dc8342F1d3DE789E1D3168818Fc",
+    "LinkToken": "0x779877A7B0D9E8603169DdbD7836e478b4624789",
+    "MockOracle": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+    "PTNFT": "0x90aBdd9f7519eB46B3aCaf8FFB40d2364e67d4b2"
+    
+}
 ```
 
 # Thank you!

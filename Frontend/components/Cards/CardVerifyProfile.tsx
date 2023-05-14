@@ -69,7 +69,7 @@ export default function CardVerifyProfile(props: any) {
                 </div>
                 <div className="lg:mr-4 p-3 text-center">
                   <span className="text-xl font-bold block uppercase tracking-wide text-blueGray-600">
-                    {props?.noDoc}
+                    {props?.noDoc ? props?.noDoc : 0}
 
                   </span>
                   <span className="text-sm text-blueGray-400">Sign Doc</span>
