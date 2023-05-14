@@ -8,13 +8,13 @@ import CryptoJS from 'crypto-js';
 import Link from "next/link";
 // components
 import { useCallback, useEffect, useState } from 'react'
+import { useWeb3React } from "@web3-react/core";
+import { connectorsByName, Metamask } from "./../../lib/connectors";
+
 import Web3Modal from 'web3modal'
-import { Web3Provider } from "@ethersproject/providers"
 import { toast } from "react-toastify";
 
 
-import { getChainData } from '../../lib/utilities'
-import { web3ModalSetup } from "../../lib/Web3ModalSetup"
 import { ellipseAddress } from '../../lib/utilities'
 
 import { StateType, PinState, PinHash } from "../../config"
@@ -28,6 +28,7 @@ import { post } from "./../../utils"
 
 import IndexDropdown from "../Dropdowns/IndexDropdown";
 import NotificationMenu from "../Notification/NotificationMenu"
+import ConnectWallet from "../Wallet/ConnectWallet"
 import SetPin from "./../Pin/SetPin"
 
 
@@ -41,6 +42,10 @@ export default function Navbar(props: any) {
   const [pin, setPin] = React.useState("");
   const [checkPin, setCheckPin] = React.useState(false);
   const [isUserExist, setIsUserExist] = React.useState(false);
+  const [walletConnect, setWalletConnect] = React.useState(false);
+
+  const { library, active, chainId, account, activate, deactivate } = useWeb3React();
+
   const [notificationMenuOpen, setNotificationMenuOpen] = React.useState(true);
   let web3Modal: Web3Modal | null;
   let chainData: any;
@@ -51,76 +56,22 @@ export default function Navbar(props: any) {
 
   const dispatch = useAppDispatch();
 
-  const connect = useCallback(async function () {
-    console.log("start");
-
-    // This is the initial `provider` that is returned when
-    // using web3Modal to connect. Can be MetaMask or WalletConnect.
-    const provider = await web3Modal?.connect()
-
-    // We plug the initial `provider` into ethers.js and get back
-    // a Web3Provider. This will add on methods from ethers.js and
-    // event listeners such as `.on()` will be different.
-    const web3Provider = new Web3Provider(provider)
-
-    const signer = web3Provider.getSigner()
-    const address = await signer.getAddress()
-
-    const network = await web3Provider.getNetwork()
-    console.log("network.chainId", network.chainId);
-    chainData = getChainData(network.chainId)
-    console.log("end");
-    // dispatch(changeAddress(address))
-    // console.log("->>", web3Provider);
-    let _state: StateType = {
-      provider,
-      web3Provider,
-      address,
-      chainId: network.chainId,
-      chainData
-    }
-    dispatch(connectState(_state))
-    setGetTokenCall(true)
-    // await get("auth/checkUserExist", { "organization": "org1" })
-    console.log("web3ProviderState", web3ProviderState);
-
-
-  }, [])
-
-  const disconnect = useCallback(
-    async function () {
-      console.log("disconnect");
-      // dispatch(disconnectState())
-      localStorage.clear();
-
-      console.log(await web3Modal?.clearCachedProvider())
-      localStorage.removeItem('token');
-
-      console.log("disconnect", await web3ProviderState.web3Provider?.detectNetwork());
-
-      if (web3ProviderState.provider.disconnect && typeof web3ProviderState.provider.disconnect === 'function') {
-        console.log("disconnect");
-
-        await web3ProviderState.provider.disconnect()
-      }
-      dispatch(disconnectState())
-      // web3ProviderState = initialState
-
-    },
-    [web3ProviderState.provider]
-  )
   const getToken = useCallback(async function (pin: string, isUserExist: boolean) {
-    console.log("pin", pin, pinState, store.getState().pinState);
+    console.log("pin", pin, pinState, store.getState().pinState, active);
 
 
-    let res = await post("auth/get-message", { address: web3ProviderState.address, chainId: web3ProviderState.chainId })
-    if (web3ProviderState.web3Provider) {
+    let res = await post("auth/get-message", { address: account, chainId: chainId })
+    if (active) {
       console.log("res===>", res);
 
-      const signer = await web3ProviderState.web3Provider.getSigner();
+      // const signer = await web3ProviderState.web3Provider.getSigner();
       if (res.message) {
         try {
-          var signature = await signer.signMessage(res.message)
+          const signature = await library.provider.request({
+            method: "personal_sign",
+            params: [res.message, account]
+          });
+          // var signature = await signer.signMessage(res.message)
           setCheckPin(false)
           setPin("")
 
@@ -128,7 +79,7 @@ export default function Navbar(props: any) {
             nonce: res.nonce,
             issuedAt: res.issuedAt,
             statement: res.statement,
-            address: web3ProviderState.address,
+            address: account,
             chainId: res.chainId,
             isUserExist: isUserExist,
             pin: pin,
@@ -151,13 +102,9 @@ export default function Navbar(props: any) {
 
       }
     }
-  }, [web3ProviderState]);
+  }, [active]);
 
 
-  useEffect(() => {
-
-    web3Modal = web3ModalSetup();
-  }, [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -183,7 +130,8 @@ export default function Navbar(props: any) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let res = await post("auth/checkUserExist", { "organization": "org1", "address": web3ProviderState.address })
+
+        let res = await post("auth/checkUserExist", { "organization": "org1", "address": account })
         if (res.status == 400) {
           toast.error(res.message);
         } else {
@@ -197,7 +145,7 @@ export default function Navbar(props: any) {
               'Authorization': "JWT " + localStorage.getItem("token")
             }
             res = await post(`auth/verify-token`, {
-              address: web3ProviderState.address,
+              address: account,
               organization: "org1",
 
             }, { headers: headers });
@@ -222,64 +170,138 @@ export default function Navbar(props: any) {
 
       }
     }
-    console.log("token- ", web3ProviderState.address, getTokenCall);
 
-    if (web3ProviderState.web3Provider && !isRequest) {
-
+    if (active && !isRequest) {
       isRequest = true;
       fetchData()
     }
-  }, [getTokenCall, pinState.status])
+  }, [getTokenCall, pinState.status, active])
+
 
 
   useEffect(() => {
-    if (web3Modal?.cachedProvider) {
-      connect()
-    }
-  }, [connect])
-  // // A `provider` should come with EIP-1193 events. We'll listen for those events
-  // // here so that when a user switches accounts or networks, we can update the
-  // // local React state with that new information.
-  useEffect(() => {
-    if (web3ProviderState.provider?.on) {
+    if (library && library.provider?.on) {
       const handleAccountsChanged = (accounts: string[]) => {
         // eslint-disable-next-line no-console
         console.log('accountsChanged', accounts)
-        localStorage.removeItem('token');
-        setGetTokenCall(false)
         dispatch(changeAddress(accounts[0]))
+        setGetTokenCall(false)
+        localStorage.removeItem('token');
+        router.reload()
         // dispatch({
         //   type: 'SET_ADDRESS',
         //   address: accounts[0],
         // })
       }
 
-      //     // https://docs.ethers.io/v5/concepts/best-practices/#best-practices--network-changes
-      const handleChainChanged = (_hexChainId: string) => {
-        window.location.reload()
-      }
 
-      const handleDisconnect = (error: { code: number; message: string }) => {
-        // eslint-disable-next-line no-console
-        console.log('disconnect', error)
-        disconnect()
-      }
 
-      web3ProviderState.provider.on('accountsChanged', handleAccountsChanged)
-      web3ProviderState.provider.on('chainChanged', handleChainChanged)
-      web3ProviderState.provider.on('disconnect', handleDisconnect)
+
+      library.provider.on('accountsChanged', handleAccountsChanged)
+
 
       // Subscription Cleanup
-      return () => {
-        if (web3ProviderState.provider.removeListener) {
-          web3ProviderState.provider.removeListener('accountsChanged', handleAccountsChanged)
-          web3ProviderState.provider.removeListener('chainChanged', handleChainChanged)
-          web3ProviderState.provider.removeListener('disconnect', handleDisconnect)
-        }
-      }
-    }
-  }, [web3ProviderState.provider, disconnect])
 
+    }
+  }, [library])
+
+
+
+  // useEffect(() => {
+  //   if (account && changeAddress(account)) {
+  //     console.log("change accoungt");
+
+  //     setGetTokenCall(false)
+  //     localStorage.removeItem('token');
+  //     // router.reload()
+  //   }
+  //   // localStorage.removeItem('token');
+  //   // setGetTokenCall(false)
+  // }, [account])
+  useEffect(() => {
+    console.log("heheheheh====>", web3ProviderState);
+    if (active && !web3ProviderState.active) {
+      let _state: StateType = {
+        library,
+        account,
+        chainId,
+        active
+      }
+      dispatch(connectState(_state))
+    }
+  }, [active])
+  // useEffect(() => {
+  //   window.location.reload()
+
+
+  const handleWalletConnect = (currentConnector: any) => {
+    console.log("currentConnector.connector", currentConnector.connector);
+
+    activate(currentConnector.connector, (error) => {
+      if (error) {
+        console.log("error", error);
+      }
+    });
+    if (currentConnector.name === "Metamask")
+      localStorage.setItem("walletConnect", "true");
+    setWalletConnect(false)
+    setGetTokenCall(true)
+
+  };
+  const handleWalletDisconnect = () => {
+    deactivate();
+    // setShowDisconnectWallet(false);
+    setGetTokenCall(false)
+    localStorage.removeItem('token');
+    // setGetTokenCall(false)
+    localStorage.removeItem("walletConnect");
+    router.push("/")
+  };
+  useEffect(() => {
+    /*
+    Reconnect to metamask wallet after refresh if aready connected
+    */
+    const walletConnectStatus: string =
+      localStorage.getItem("walletConnect") || "";
+
+    try {
+      if (walletConnectStatus === "true")
+        Metamask.isAuthorized().then((isAuthorized: boolean) => {
+          if (isAuthorized) {
+            activate(Metamask, undefined, true).catch(() => { });
+          } else {
+            deactivate();
+          }
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
+  useEffect(() => {
+    /*
+    Reconnect to metamask wallet after refresh if aready connected
+    */
+    const walletConnectStatus: string =
+      localStorage.getItem("walletConnect") || "";
+    console.log("here");
+
+    try {
+      if (walletConnectStatus === "true")
+
+        Metamask.isAuthorized().then((isAuthorized: boolean) => {
+          // console.log("here =>", library.getSigner())÷
+
+          if (isAuthorized) {
+            activate(Metamask, undefined, true).catch(() => { });
+          } else {
+            deactivate();
+          }
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  }, []); //eslint-disable-line
   return (
     <>
       {/* absolute top-0 left-0 w-full z-10 bg-transparent md:flex-row md:flex-nowrap md:justify-start flex items-center p-4 */}
@@ -345,24 +367,27 @@ export default function Navbar(props: any) {
 
                   <i className="fas fa-arrow-alt-circle-down"></i> Download
                 </button> */}
-                {web3ProviderState?.web3Provider ? (
+                {active ? (
                   <button className="bg-blueGray-700 text-white active:bg-blueGray-600 border-2 text-xs font-bold uppercase px-4 py-2 rounded shadow hover:shadow-lg outline-none focus:outline-none lg:mr-1 lg:mb-0 ml-3 mb-3 ease-linear transition-all duration-150"
-                    type="button" onClick={disconnect}>
+                    type="button" onClick={handleWalletDisconnect}>
                     Disconnect
                   </button>
                 ) : (
                   <button className="bg-blueGray-700 text-white active:bg-blueGray-600 border-2 text-xs font-bold uppercase px-4 py-2 rounded shadow hover:shadow-lg outline-none focus:outline-none lg:mr-1 lg:mb-0 ml-3 mb-3 ease-linear transition-all duration-150"
-                    type="button" onClick={connect}>
+                    type="button" onClick={() => {
+                      console.log('setWalletConnect', walletConnect);
+                      setWalletConnect(true)
+                    }}>
                     Connect
                   </button>
                 )}
-                <>  {web3ProviderState?.address && (
+                <>  {account && (
 
 
                   <button className=" text-white active:bg-blueGray-600 text-xs border-2 font-bold uppercase px-4 py-2 rounded shadow hover:shadow-lg outline-none focus:outline-none lg:mr-1 lg:mb-0 ml-3 mb-3 ease-linear transition-all duration-150" type="button" >
                     {/* Network:
             {props?.chainData?.name}  */}
-                    {ellipseAddress(web3ProviderState.address)}
+                    {ellipseAddress(account)}
 
                   </button>
                 )}</>
@@ -372,6 +397,7 @@ export default function Navbar(props: any) {
           </div>
         </div>
         <SetPin setShowModal={setShowModal} showModal={showModal} buttonLable={pinState.toSavePin || isUserExist ? "Enter Pin " : "Create Pin"} color="light" setPin={setPin} pin={pin} setCheckPin={setCheckPin} />
+        <ConnectWallet walletConnect={walletConnect} color="light" setWalletConnect={setWalletConnect} handleWalletConnect={handleWalletConnect} />
       </nav>
     </>
   );

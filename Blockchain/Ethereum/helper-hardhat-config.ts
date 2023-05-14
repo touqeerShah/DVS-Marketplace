@@ -22,6 +22,10 @@ export const networkConfig: networkConfigInfo = {
         blockConfirmations: 5,
         linkToken: "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
         oricle: "0xCC79157eb46F5624204f47AB42b3906cAA40eaB7",
+    }, sepolia: {
+        blockConfirmations: 11155111,
+        linkToken: "0x779877A7B0D9E8603169DdbD7836e478b4624789",
+        oricle: "0x6090149792dAAeE9D1D568c9f9a6F6B46AA29eFD",
     },
 }
 

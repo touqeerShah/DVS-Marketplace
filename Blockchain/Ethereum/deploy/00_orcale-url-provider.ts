@@ -33,7 +33,7 @@ const deployOrcaleUrlProvider: DeployFunction = async function (hre: HardhatRunt
     // console.log("orcaleUr", proxyBox.address);
 
     log(`OrcaleUrlProvider at ${orcaleUrlProvider.address}`)
-    if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
+    if (!developmentChains.includes(network.name) && process.env.ETHERSCANAPIKEY) {
         await verify(orcaleUrlProvider.address, [])
     }
 

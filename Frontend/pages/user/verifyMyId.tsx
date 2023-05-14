@@ -11,6 +11,8 @@ import CardVerifyProfile from "../../components/Cards/CardVerifyProfile";
 import Admin from "../../layouts/Admin";
 
 export default function VerifyId() {
+  console.log("VerifyId");
+
   let [username, setUsername] = useState("");
   let [email, setEmail] = useState("")
   let [fingerPrintHash, setFingerPrintHash] = useState("")
@@ -19,12 +21,14 @@ export default function VerifyId() {
   let [address, setAddress] = useState("")
   let [country, setCountry] = useState("")
   let [city, setCity] = useState("")
+  let [qrCodeSvg, setQRCodeSvg] = useState("")
 
   let [postalCode, setPostalCode] = useState("")
   let [aboutMe, setAboutMe] = useState("")
   let [tokenId, setTokenId] = useState("")
   let [status, setStatus] = useState("")
 
+  let [transactionHash, setTransactionHash] = useState("")
 
   return (
     <>
@@ -48,15 +52,21 @@ export default function VerifyId() {
             firstName={firstName}
             lastName={lastName}
             address={address}
+            qrCodeSvg={qrCodeSvg}
+            setQRCodeSvg={setQRCodeSvg}
             city={city}
             country={country}
             postalCode={postalCode}
-            aboutMe={aboutMe} />
+            aboutMe={aboutMe}
+            setTransactionHash={setTransactionHash}
+          />
         </div>
         <div className="w-full lg:w-4/12 px-4">
           <CardVerifyProfile
+            setQRCodeSvg={setQRCodeSvg}
             username={username}
             email={email}
+            qrCodeSvg={qrCodeSvg}
             fingerPrintHash={fingerPrintHash}
             firstName={firstName}
             lastName={lastName}
@@ -67,6 +77,7 @@ export default function VerifyId() {
             aboutMe={aboutMe}
             tokenId={tokenId}
             status={status}
+            transactionHash={transactionHash}
           />
         </div>
       </div>

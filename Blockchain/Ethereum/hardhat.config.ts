@@ -38,6 +38,8 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: true
     },
     goerli: getChainConfig("goerli"),
+
+    sepolia: getChainConfig("sepolia"),
   },
   solidity: {
     compilers: [

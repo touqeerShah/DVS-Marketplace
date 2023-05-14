@@ -4,11 +4,10 @@ import { RootState } from "./../store"
 import { IChainData } from '../../lib/types'
 
 export const initialState: StateType = {
-    provider: null,
-    web3Provider: undefined,
-    address: undefined,
+    library: undefined,
+    account: undefined,
     chainId: undefined,
-    chainData: undefined
+    active: false
 }
 
 
@@ -20,26 +19,24 @@ export const web3ProviderSlice = createSlice({
             const _state = action.payload;
             console.log("_state", _state);
 
-            state.provider = _state.provider;
-            state.web3Provider = _state.web3Provider;
-            state.address = _state.address;
+            state.library = _state.library;
+            state.account = _state.account;
             state.chainId = _state.chainId;
-            state.chainData = _state.chainData;
+            state.active = _state.active;
 
 
         },
         disconnectState: (state: StateType, action: PayloadAction) => {
 
-            state.provider = null;
-            state.web3Provider = undefined
-            state.address = undefined
-            state.chainId = undefined
-            state.chainData = undefined
+            state.library = undefined;
+            state.account = undefined;
+            state.chainId = undefined;
+            state.active = false;
         },
         changeAddress: (state: StateType, action: PayloadAction<string>) => {
             const _state = action.payload;
 
-            state.address = _state;
+            state.account = _state;
         }
         ,
         changeChain: (state: StateType, action: PayloadAction<number>) => {

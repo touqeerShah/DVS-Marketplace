@@ -39,3 +39,10 @@ export type UriData = {
     file: string,
     fileName: string,
 }
+
+export type DocumentCount = {
+    createdByMe: number;
+    forMeSignature: number;
+    signByMe: number;
+    NFTCount: number
+}

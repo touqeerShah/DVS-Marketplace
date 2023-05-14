@@ -1,6 +1,6 @@
 import WalletConnectProvider from '@walletconnect/web3-provider'
 import Head from 'next/head'
-import { useCallback, useEffect, useReducer } from 'react'
+import { useCallback, useEffect } from 'react'
 import WalletLink from 'walletlink'
 import Web3Modal from 'web3modal'
 
@@ -22,7 +22,7 @@ const providerOptions = {
     },
     options: {
       appName: 'Coinbase', // Your app name
-      networkUrl: `https://mainnet.infura.io/v3/${INFURA_ID}`,
+      networkUrl: `https://sepolia.infura.io/v3/${INFURA_ID}`,
       chainId: 1,
     },
     package: WalletLink,
@@ -43,7 +43,7 @@ export function web3ModalSetup(): Web3Modal | null {
   let web3Modal: Web3Modal
   if (typeof window !== 'undefined') {
     web3Modal = new Web3Modal({
-      network: 'mainnet', // optional
+      network: 'sepolia', // optional
       cacheProvider: true,
       providerOptions, // required
     })

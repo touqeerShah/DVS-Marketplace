@@ -1,13 +1,13 @@
 import { IChainData } from '../lib/types'
 import { Web3Provider } from "@ethersproject/providers"
+
 export { ContractAddress } from "./contractAddress"
 export { GovernorContract, TimeLock, LinkToken, OrcaleUrlProvider, FigurePrintOracle, UserIdentityNFT, DocumentSignature, MockOracleABI } from "./ContractABI"
 export type StateType = {
-    provider: any
-    web3Provider: Web3Provider | undefined
-    address?: string
+    library: Web3Provider | undefined
+    account?: string | null
     chainId?: number
-    chainData?: IChainData
+    active?: boolean | false
 }
 
 
@@ -25,20 +25,26 @@ export type PinHash = {
 export type ActionType =
     | {
         type: 'SET_WEB3_PROVIDER'
-        provider?: StateType['provider']
-        web3Provider?: StateType['web3Provider']
-        address?: StateType['address']
+        library?: StateType['library']
+        account?: StateType['account']
         chainId?: StateType['chainId']
+        active?: StateType['active']
+
     }
     | {
-        type: 'SET_ADDRESS'
-        address?: StateType['address']
+        type: 'SET_ACCOUNT'
+        account?: StateType['account']
     }
     | {
         type: 'SET_CHAIN_ID'
         chainId?: StateType['chainId']
     }
     | {
+        type: 'SET_ACTIVE'
+        active?: StateType['active']
+    }
+    | {
         type: 'RESET_WEB3_PROVIDER'
     }
+
 

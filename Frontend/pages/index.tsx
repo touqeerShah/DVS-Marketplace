@@ -19,21 +19,19 @@ export default function Home() {
           <div className="w-full md:w-8/12 lg:w-6/12 xl:w-6/12 px-4">
             <div className="pt-32 sm:pt-0">
               <h2 className="font-semibold text-4xl text-white">
-                Notus NextJS - A beautiful extension for Tailwind CSS.
+                They way to connect Private and Public Blockchain.
               </h2>
               <p className="mt-4 text-lg leading-relaxed text-white">
-                Notus NextJS is Free and Open Source. It does not change any of
-                the CSS from{" "}
+                Create and share you document on blockchain and sign them in real time with your digital identity of NFT{" "}
                 <a
                   href="https://tailwindcss.com/?ref=creativetim"
                   className="text-white"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Tailwind CSS
+                  Private Blockchain (Hyperledger Fabric) help you secure signing of Document within the Organizations
                 </a>
-                . It features multiple HTML elements and it comes with dynamic
-                components for ReactJS, Vue and Angular.
+                . Public Blockchain (Ethereum) Help you to share the sign document when it time come.
               </p>
               <div className="mt-12">
                 <a
@@ -45,7 +43,7 @@ export default function Home() {
                   Get started
                 </a>
                 <a
-                  href="https://github.com/creativetimofficial/notus-nextjs?ref=nnjs-index"
+                  href="https://github.com/touqeerShah/ENS-Marketplace"
                   className="github-star ml-1 text-white font-bold px-6 py-4 rounded outline-none focus:outline-none mr-1 mb-1 bg-blueGray-700 active:bg-blueGray-600 uppercase text-sm shadow hover:shadow-lg"
                   target="_blank"
                   rel="noreferrer"

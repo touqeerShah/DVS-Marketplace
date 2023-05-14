@@ -1,9 +1,11 @@
-import { VoidSigner, Signer } from "@ethersproject/abstract-signer";
-// import { Signer } from "ethers";
+// import { VoidSigner, JsonRpcSigner } from "@ethersproject/abstract-signer";
+import { JsonRpcSigner } from "@ethersproject/providers"
+
+
 import { IDocumentSignature } from "../class/typechain-types/contracts/core/DocumentSignature"
 
 export async function createDocument(
-  signer: Signer,
+  signer: JsonRpcSigner,
   creator: string,
   uri: string,
   documentId: number,
@@ -26,7 +28,7 @@ export async function createDocument(
       { name: "uri", type: "string" },
     ],
   };
-  const signature = await (signer as VoidSigner)._signTypedData(domain, types, voucher);
+  const signature = await (signer)._signTypedData(domain, types, voucher);
   const _voucher = {
     ...voucher,
     signature,
@@ -35,7 +37,7 @@ export async function createDocument(
 }
 
 export async function processDocumentWithSignature(
-  signer: Signer,
+  signer: JsonRpcSigner,
   creator: string,
   name: string,
   description: string,
@@ -80,7 +82,7 @@ export async function processDocumentWithSignature(
       { name: "uri", type: "string" },
     ],
   };
-  const signature = await (signer as VoidSigner)._signTypedData(domain, types, voucher);
+  const signature = await (signer)._signTypedData(domain, types, voucher);
   const _voucher = {
     ...voucher,
     signature,
@@ -89,7 +91,7 @@ export async function processDocumentWithSignature(
 }
 
 export async function createUserId(
-  signer: Signer,
+  signer: JsonRpcSigner,
   userId: string,
   uri: string,
   fingerPrint: string,
@@ -114,7 +116,7 @@ export async function createUserId(
   };
   // console.log("types", types);
 
-  const signature = await (signer as VoidSigner)._signTypedData(domain, types, voucher);
+  const signature = await (signer)._signTypedData(domain, types, voucher);
   const _voucher = {
     ...voucher,
     signature,

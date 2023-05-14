@@ -21,8 +21,8 @@ export default function CreateDocumentTable(props: any) {
   const [tokenId, setTokenId] = useState(0)
 
   let getDocumentData = async (documentRequestType: string) => {
-    if (web3ProviderState.web3Provider && web3ProviderState.address) {
-      let address: string = web3ProviderState.address
+    if (web3ProviderState.active && web3ProviderState.account) {
+      let address: string = web3ProviderState.account
       const isExist = await subgraphClient.query({
         query: REDEEM_USER_NFT,
         variables: {
@@ -50,7 +50,7 @@ export default function CreateDocumentTable(props: any) {
           parameters: {
             query: query
           },
-          userId: "user1",
+          userId: "user2",
           organization: "org1"
         })
       })

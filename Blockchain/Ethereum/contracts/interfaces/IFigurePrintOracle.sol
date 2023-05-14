@@ -9,7 +9,7 @@ interface IFigurePrintOracle {
     event VerifationResponse(
         address indexed userAddress,
         bytes32 indexed requestId,
-        string isVerfied
+        string indexed isVerfied
     );
     event ReceivedCalled(address indexed buyer, uint256 indexed amount);
     event FallbackCalled(address indexed buyer, uint256 indexed amount);

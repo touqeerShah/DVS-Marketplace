@@ -19,7 +19,7 @@ const deployFigurePrintOracle: DeployFunction = async function (hre: HardhatRunt
 
     let chainToken: DeployResult;
     let orcale: DeployResult;
-    if (network.name != "goerli") {
+    if (network.name != "goerli" && network.name != "sepolia") {
         log("Deployment on Mock Contracr... ")
 
         chainToken = await deploy("LinkToken", {

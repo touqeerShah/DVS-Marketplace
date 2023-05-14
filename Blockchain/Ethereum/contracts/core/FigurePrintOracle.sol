@@ -58,9 +58,6 @@ contract FigurePrintOracle is
      * jobId: 0x3764383061363338366566353433613361626235323831376636373037653362
      *   _Fee 100000000000000000
      * _oP 0x04B0601D72dAEEA5D88D5d3B3495854FEe6cCf36
-     *
-     *
-     *
      */
     constructor(
         address _linkToken,
@@ -88,6 +85,7 @@ contract FigurePrintOracle is
     /**
      * Create a Chainlink request to retrieve API response, find the target
      * data, then multiply by 1000000000000000000 (to remove decimal places from data).
+     * this fucntion help to request the Private Blockchain to get details
      */
     function verifyFingerPrint(
         address userAddress,
@@ -125,8 +123,10 @@ contract FigurePrintOracle is
             )
         );
         req.add("path", "verficationResponse"); //resposnse from api
+        int256 timesAmount = 10 ** 18; // time limit
+        req.addInt("times", timesAmount);
 
-        // // // Sends the request
+        //  Sends the request
         bytes32 requestId = sendChainlinkRequest(req, fee);
         userVerficationRequest[requestId] = userAddress;
         userVerficationRecord[userAddress] = VerifcaitonRecord(
@@ -134,12 +134,12 @@ contract FigurePrintOracle is
             numberTries,
             VerficationStatus.PENDING
         );
+        amounts[userAddress] -= fee;
+
         emit VerifyFingerPrint(userId, requestId, userAddress);
         return requestId;
     }
 
-    //0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
-    //0x04FE0F4C91F8e55c9E4BE7f4353C509DaD066CD5
     /**
      * @notice Fulfillment function for multiple parameters in a single request
      * @dev This is called by the oracle. recordChainlinkFulfillment must be used.
