@@ -52,27 +52,26 @@ async function main(arr) {
     // Get the contract from the network.
     const contract = network.getContract("hf");
 
-
     let result = await contract
-      .createTransaction("createDocument")
+      .createTransaction("updateDocumentCount")
       .setEndorsingPeers(myOrgPeers)
       .submit(arr);
     console.log("result", result);
-    var response_object = {};
-    var response = JSON.parse(result.toString());
-    if (response["code"]) {
-      response_object.status = response["code"];
-      response_object.message = response["message"];
-    } else {
-      response_object.status = 200;
-      response_object.message = "SUCCESS";
-      response_object.data = JSON.parse(result.toString());
-    }
-    console.log(
-      `Transaction has been evaluated, result is: ${JSON.stringify(
-        response_object
-      )}`
-    );
+    // var response_object = {};
+    // var response = JSON.parse(result.toString());
+    // if (response["code"]) {
+    //   response_object.status = response["code"];
+    //   response_object.message = response["message"];
+    // } else {
+    //   response_object.status = 200;
+    //   response_object.message = "SUCCESS";
+    //   response_object.data = JSON.parse(result.toString());
+    // }
+    // console.log(
+    //   `Transaction has been evaluated, result is: ${JSON.stringify(
+    //     response_object
+    //   )}`
+    // );
 
     console.log("Transaction has been submitted");
 
@@ -98,15 +97,15 @@ async function main(arr) {
   }
 }
 
-
-check()
+check();
 async function check() {
+  // for (let index = 40; index < 60; index++) {
+  // var arr =
+  //   '{"documentId": "documentId.toString()' +
+  //   index +
+  //   '","documentName": "documentName","purpose": "purpose","uri": "uri","startData": "1","expirationDate": "1","startBlock": "1","endBlock": "1","creator": "web3ProviderState.address","ownerSignature": "voucher","parties": [1,2]}';
 
-  for (let index = 40; index < 60; index++) {
-    var arr =
-      '{"documentId": "documentId.toString()' + index + '","documentName": "documentName","purpose": "purpose","uri": "uri","startData": "1","expirationDate": "1","startBlock": "1","endBlock": "1","creator": "web3ProviderState.address","ownerSignature": "voucher","parties": [1,2]}';
+  await main('{"documentId":"2","functionName":"createdByMe"}');
 
-    await main(arr);
-
-  }
+  // }
 }

@@ -138,16 +138,16 @@ module.exports.get = async (req, res) => {
   // here we get data from monogo about api called
 
   var collrollerObject = await init(req, res, "POST"); /// this function is connect to mongoDB,get API Defination  and Network config for that bucket
-  console.log("get ===>", collrollerObject);
+  // console.log("get ===>", collrollerObject);
   if (collrollerObject.status != 200) {
-    console.log("collrollerObject ===>", collrollerObject);
+    // console.log("collrollerObject ===>", collrollerObject);
 
     res.send(collrollerObject);
   } else {
-    console.log(
-      "collrollerObject.requestData.parameters",
-      collrollerObject.requestData.parameters
-    );
+    // console.log(
+    //   "collrollerObject.requestData.parameters",
+    //   collrollerObject.requestData.parameters
+    // );
     await query(
       // here we call query SDK of Hyperledger Fabric
       collrollerObject.requestData.userId, // the user who want to do transaction
@@ -158,7 +158,7 @@ module.exports.get = async (req, res) => {
       collrollerObject.networkConfig.data // this will contain Network config which Peer , CA and which org is doing transaction
     )
       .then((value) => {
-        console.log("value", value);
+        // console.log("value", value);
         res.send(value);
       })
       .catch((err) => {

@@ -54,6 +54,28 @@ export class HFContract extends Contract {
         return requestJson;
     }
     /**
+    * this function is get details of site
+    * siteObject = '{"siteid":"pharmaTrace_786"}'
+    * @param ctx 
+    * @param userObject  object contain site id
+    * @returns 
+    */
+    @Transaction()
+    public async updateDocumentCount(
+        ctx: Context,
+        userObject: string,
+    ): Promise<boolean | string> {
+        let requestJson = JSON.parse(userObject);
+
+        const documentProvider = new DocumentProvider(ctx); // create object provider
+        requestJson = await documentProvider.updateDocumentCount(requestJson.documentId, requestJson.functionName);
+        if (typeof requestJson === 'string') {
+            // 👇️ myVar has type string here
+            return requestJson;
+        }
+        return requestJson;
+    }
+    /**
      * this function is get details of site
      * siteObject = '{"siteid":"pharmaTrace_786"}'
      * @param ctx 

@@ -66,6 +66,17 @@ export class DocumentProvider {
 
 
     /**
+* This function is  get detials of document
+* @paramtransactionId 
+* @returns 
+*/
+    public async updateDocumentCount(documentId: string, functionName: string) {
+        let mspID = this.documentRepository.getMSPID();
+        await this.documentRepository.updateDocumentCount(documentId, functionName, "Document" + mspID);
+    }
+
+
+    /**
      * Create document first validate the object the passed it to add more attribut and store into blockchain
      * @param document 
      * @returns 

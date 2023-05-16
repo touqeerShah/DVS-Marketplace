@@ -1,4 +1,4 @@
-import { Context } from "fabric-contract-api";
+import { Context, Object } from "fabric-contract-api";
 import { ContextProvider } from "../context/context.provider";
 import { BadRequestError } from "../eror/bad-request-error";
 import { NotFoundError } from "../eror/not-found-error";
@@ -120,13 +120,13 @@ export class BaseRepository<T extends DocumentEntity> {
       */
     public async getDocumentCount(id: string, privateCollection: string): Promise<DocumentCount> {
         const bufferData = await this.contextProvider.get(id, privateCollection);
-        let documentCount: DocumentCount;
         if (bufferData.length === 0) {
-            documentCount = { createdByMe: 0, forMeSignature: 0, signByMe: 0 }
+            return { createdByMe: 0, forMeSignature: 0, signByMe: 0 }
 
-        } else {
-            documentCount = JSON.parse(bufferData.toString())
         }
+
+        const documentCount: DocumentCount =
+            bufferData.length !== 0 ? JSON.parse(bufferData.toString()) : null;
         return documentCount;
     }
     /**
@@ -134,14 +134,11 @@ export class BaseRepository<T extends DocumentEntity> {
    * transction before add into blockchain
    */
     public async updateDocumentCount(id: string, functionName: string, privateCollection: string) {
-        const bufferData = await this.contextProvider.get(id, privateCollection);
-        let documentCount: DocumentCount;
-        if (bufferData.length === 0) {
-            documentCount = { createdByMe: 0, forMeSignature: 0, signByMe: 0 }
 
-        } else {
-            documentCount = JSON.parse(bufferData.toString())
-        }
+
+        let documentCount: DocumentCount = await this.getDocumentCount(id, privateCollection);
+        console.log("documentCount", typeof documentCount);
+
         if (functionName == "createdByMe") {
             documentCount.createdByMe = documentCount.createdByMe + 1
         } else if (functionName == "forMeSignature") {
@@ -151,7 +148,7 @@ export class BaseRepository<T extends DocumentEntity> {
             documentCount.signByMe = documentCount.signByMe + 1
         }
         // const documentCount: DocumentCount = JSON.parse(bufferData.toString())
-        let buffer = Buffer.from(JSON.stringify(JSON.stringify(documentCount)));
+        let buffer = Buffer.from(JSON.stringify(documentCount));
 
         // here we call function to put data into blockchain
         await this.contextProvider.put(id, buffer, privateCollection);
