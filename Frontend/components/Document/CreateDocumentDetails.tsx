@@ -15,6 +15,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import AddParameter from "../TextField/AddSingner"
 import { TypeDocumentSignerFields } from "../../class/document"
 import { Contract } from "@ethersproject/contracts";
+import { IssueDigitalIdentity } from "./../../class/subgraphResponse";
 
 // components
 
@@ -41,10 +42,11 @@ import {
   INFURA_IPFS_PROJECJECT_ID,
   INFURA_IPFS_PROJECJECT_SECRET,
 } from "../../lib/config"
+import { REDEEM_USER_NFT } from "./../../lib/subgrapQueries";
 
 import { getLatestBlockNumber } from "./../../lib/alchemy"
 export default function CreateDocumentDetails(props: any) {
-  // console.log("props =>", props);
+  // console.log("CreateDocumentDetails =>", props);
   const router = useRouter()
 
   let web3ProviderState: StateType = useAppSelector(web3ProviderReduxState);
@@ -60,10 +62,15 @@ export default function CreateDocumentDetails(props: any) {
   const { register, handleSubmit, formState } = useForm(formOptions);
   const [url, setURL] = useState("")
   const [documentId, setDocumentId] = useState("")
-  const [documentName, setDocumentName] = useState("")
-  const [purpose, setPurpose] = useState("")
-  const [startDate, setStartDate] = useState("")
-  const [endDate, setEndDate] = useState("")
+  // const [documentName, setDocumentName] = useState("")
+  // const [purpose, setPurpose] = useState("")
+  // const [startDate, setStartDate] = useState("")
+  // const [endDate, setEndDate] = useState("")
+  // let documentName: string;
+  // let purpose: string;
+  // let startDate: string;
+  // let endDate: string;
+
   //check pin
   const [checkPin, setCheckPin] = React.useState(false);
   const [showModal, setShowModal] = React.useState(false);
@@ -71,13 +78,12 @@ export default function CreateDocumentDetails(props: any) {
   let isRequest = false;
   let [spinnerProcess, setSpinnerProcess] = useState(false);
 
-  var buffer = new ArrayBuffer(0);
   const dispatch = useAppDispatch();
+  // var buffer = new ArrayBuffer(0);
 
-  let [fileBuffer, setFileBuffer] = useState(buffer);
-  let [fileName, setFileName] = useState("");
-
-
+  // let [fileBuffer, setFileBuffer] = useState(buffer);
+  // let [fileName, setFileName] = useState("");
+  const myRef: React.LegacyRef<HTMLInputElement> = React.createRef();
 
   const [documentSignatureContract, setDocumentSignatureContract] = useState<Contract>()
   const [userIdentityNFTContract, setUserIdentityNFTContract] = useState<Contract>()
@@ -94,11 +100,10 @@ export default function CreateDocumentDetails(props: any) {
     },
   });
 
-
   // here we check token is not expired
   const getVerifyToken = useCallback(async function (pin: string,) {
     let openPinModule = false
-    console.log("getVerifyToken", pin);
+    console.log(web3ProviderState.active, "getVerifyToken", pin);
 
     // if (pinState.toSavePin) {
     //   dispatch(changeState({ status: !pinState.status, toSavePin: false }))
@@ -114,7 +119,7 @@ export default function CreateDocumentDetails(props: any) {
         pin: pin
 
       }, { headers: headers });
-      console.log("res = = = = = = >", res);
+      console.log("Token Verifcation Result = = = = = = >", res);
       if (res.status == 400) {
         setCheckPin(false)
         setPin("")
@@ -122,8 +127,9 @@ export default function CreateDocumentDetails(props: any) {
         dispatch(changeState({ status: !pinState.status, toSavePin: true }))
         toast.info("Token Expire")
       } else {
+        dispatch(changeState({ status: true, toSavePin: true }))
+        dispatch(setHash({ pinhash: pin }))
         setShowModal(openPinModule)
-        await storeDocument(pin)
       }
     }
   }, [web3ProviderState]);
@@ -154,7 +160,8 @@ export default function CreateDocumentDetails(props: any) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        await storeDocument(pinHash.pinhash)
+        dispatch(changeState({ status: false, toSavePin: true }))
+        await storeDocument(pinHash.pinhash, props)
       } catch (error: any) {
         console.log(error);
 
@@ -162,188 +169,200 @@ export default function CreateDocumentDetails(props: any) {
 
       }
     }
-    console.log("storeDocument", pinState.toSavePin, pinHash.pinhash);
+    console.log("storeDocument =>>>", pinState.toSavePin, pinHash.pinhash, props.documentName);
 
-    if (store.getState().pinState.status && store.getState().pinHash.pinhash != "") {
+    if (store.getState().pinState.status && store.getState().pinHash.pinhash != "" && props.documentName != "") {
       fetchData()
     }
-  }, [pinHash])
+  }, [pinHash, props])
 
 
-  const storeDocument = useCallback(async (pin: string) => {
+  const storeDocument = useCallback(async (pin: string, props: any) => {
     let documentSignatureContract = await getDocumentSignature(web3ProviderState.library)
     let userIdentityNFTContract = await getUserIdentityNFT(web3ProviderState.library)
+    console.log("2. storeDocument:= ", props.documentName, props.purpose, props.startDate, props.endDate);
+
 
     setDocumentSignatureContract(documentSignatureContract)
     setUserIdentityNFTContract(userIdentityNFTContract)
-    console.log("storeDocument", web3ProviderState.active, web3ProviderState.account, documentSignatureContract);
-    console.log("=-===---=-==->", documentName, purpose, startDate, endDate);
+    console.log("storeDocument", web3ProviderState.active, web3ProviderState.account, documentSignatureContract, props.fileBuffer);
+    // console.log("=-===---=-==->", documentName, purpose, startDate, endDate);
 
-    if (documentName && purpose && startDate && endDate && fileBuffer) {
-      if (!web3ProviderState.active == null && web3ProviderState.account) {
-        console.log("error");
-        setSpinnerProcess(false)
+    if (!web3ProviderState.active == null && web3ProviderState.account) {
+      console.log("error");
+      setSpinnerProcess(false)
 
-        toast.error("Please Connect to your wallet First");
-        return;
-      }
-      if (web3ProviderState.chainId != 5) {
-        setSpinnerProcess(false)
+      toast.error("Please Connect to your wallet First");
+      return;
+    }
+    if (web3ProviderState.chainId != 5) {
+      setSpinnerProcess(false)
 
-        toast.error("Please Change your network to Goerli");
-        return;
-      }
-      let voucher: string;
+      toast.error("Please Change your network to Goerli");
+      return;
+    }
+    let voucher: string;
 
-      if (web3ProviderState.active && web3ProviderState.account && documentSignatureContract) {
-        let latestBlockNumber = await getLatestBlockNumber()
-        var currentDate = new Date("2023-03-04");
-        var startDateSeconds = (new Date(startDate).getTime() - currentDate.getTime()) / 1000;
-        var endDateSeconds = (new Date(endDate).getTime() - currentDate.getTime()) / 1000;
-        var startBlock = latestBlockNumber + (startDateSeconds / AVERAGE_BLOCK_MINT_TIME)
-        var endBlock = startBlock + (endDateSeconds / AVERAGE_BLOCK_MINT_TIME)
+    if (web3ProviderState.active && web3ProviderState.account && documentSignatureContract) {
+      let latestBlockNumber = await getLatestBlockNumber()
+      var currentDate = new Date("2023-03-04");
+      var startDateSeconds = (new Date(props.startDate).getTime() - currentDate.getTime()) / 1000;
+      var endDateSeconds = (new Date(props.endDate).getTime() - currentDate.getTime()) / 1000;
+      var startBlock = latestBlockNumber + 1// latestBlockNumber + (startDateSeconds / AVERAGE_BLOCK_MINT_TIME)// this logic for production but we are doing for testing
+      var endBlock = latestBlockNumber + 30//startBlock + (endDateSeconds / AVERAGE_BLOCK_MINT_TIME)
 
-        // const signer = await web3ProviderState.active.getSigner();
-        let parties: TypeDocumentSignerFields[] = props.documentSignerFieldsState as TypeDocumentSignerFields[]
-        console.log("parties", parties);
-        let partiesId: number[] = []
-        try {
-
-
-          for (let index = 0; index < parties.length; index++) {
-            const party: TypeDocumentSignerFields = parties[index];
-            console.log(party);
-
-            if (party.userId != "" && userIdentityNFTContract) {
-              let tokenId: number = parseInt(party.userId)
-              console.log("tokenId", tokenId.toString());
-              const isExist = await subgraphClient.query({
-                query: CHECK_SIGNER_EXIST,
-                variables: {
-                  tokenId: tokenId.toString(),
-                },
-              });
-              console.log("isExist", isExist);
-              // issueDigitalIdentities
-
-              if (isExist.data?.issueDigitalIdentities.length > 0) {
-                //check from sub graph party token exist or not
-                partiesId.push(tokenId)
-              } else {
-                toast.info(`User Token ${tokenId} Not Exist`);
-                return;
-              }
-            }
-          }
-          console.log("partiesId", partiesId);
-
-        } catch (error) {
-          console.log(error);
-          setSpinnerProcess(false)
-
-          toast.info(`User Token Not Exist`);
-          return;
-        }
+      // const signer = await web3ProviderState.active.getSigner();
+      let parties: TypeDocumentSignerFields[] = props.documentSignerFieldsState as TypeDocumentSignerFields[]
+      console.log("parties", parties);
+      let partiesId: number[] = []
+      try {
 
 
-        if (userIdentityNFTContract && 0 == await userIdentityNFTContract.balanceOf(web3ProviderState.account)) {
-          console.log("await userIdentityNFTContract.balanceOf(web3ProviderState.account", web3ProviderState.account, await userIdentityNFTContract.balanceOf(web3ProviderState.account));
+        for (let index = 0; index < parties.length; index++) {
+          const party: TypeDocumentSignerFields = parties[index];
+          console.log(party);
 
-          setSpinnerProcess(false)
+          if (party.userId != "" && userIdentityNFTContract) {
+            let tokenId: number = parseInt(party.userId)
+            console.log("tokenId", tokenId.toString());
+            const isExist = await subgraphClient.query({
+              query: CHECK_SIGNER_EXIST,
+              variables: {
+                tokenId: tokenId.toString(),
+              },
+            });
+            console.log("isExist", isExist);
+            // issueDigitalIdentities
 
-          toast.error("Verify  Your Identity First");
-          return;
-        }
-
-        if (partiesId.length > 0) {
-          const type = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length)
-          console.log("type", type);
-
-          const base64data = Buffer.from(fileBuffer).toString('base64')
-          const file: string = `data:${type};base64,` + base64data
-          let _documentId: any = 0;
-          // console.log(file);
-
-          if (documentId == "") {
-            console.log("documentIddocumentIddocumentId", documentId);
-
-            try {
-              const _documentName = getStringToBytes(documentName)
-              const _purpose = getStringToBytes(purpose)
-
-              _documentId = await documentSignatureContract.getDocumentId(web3ProviderState.account, _documentName, _purpose, partiesId)
-              console.log("documentId", _documentId);
-
-              setDocumentId(_documentId.toString())
-            } catch (error: any) {
-              console.log("getDocumentId error ", error);
-              toast.error(error.message.substring(0, error.message.indexOf("(")))
+            if (isExist.data?.issueDigitalIdentities.length > 0) {
+              //check from sub graph party token exist or not
+              partiesId.push(tokenId)
+            } else {
+              toast.info(`User Token ${tokenId} Not Exist`);
               return;
             }
-          } else {
-            _documentId = (documentId)
           }
+        }
+        console.log("partiesId", partiesId);
 
-          let imageObject = JSON.stringify({
-            documentId: _documentId.toString(),
-            documentName,
-            purpose,
-            file: file,
-            fileName,
-            startBlock,
-            endBlock,
-            creator: web3ProviderState.account,
-            signer: partiesId,
-          })
-          console.log("imageObject", imageObject);
+      } catch (error) {
+        console.log(error);
+        setSpinnerProcess(false)
 
-          let uri: string = ""
+        toast.info(`User Token Not Exist`);
+        return;
+      }
+
+
+      if (userIdentityNFTContract && 0 == await userIdentityNFTContract.balanceOf(web3ProviderState.account)) {
+        setSpinnerProcess(false)
+        toast.error("Verify  Your Identity First");
+        return;
+      }
+
+      if (partiesId.length > 0) {
+        const type = props.fileName.substring(props.fileName.lastIndexOf(".") + 1, props.fileName.length)
+        console.log("type", type);
+
+        const base64data = Buffer.from(props.fileBuffer).toString('base64')
+        const file: string = `data:${type};base64,` + base64data
+        let _documentId: any = 0;
+        // console.log(file);
+
+        if (documentId == "") {
+          console.log("documentIddocumentIddocumentId", documentId);
+
           try {
-            const added = await client.add(imageObject);
+            const _documentName = getStringToBytes(props.documentName)
+            const _purpose = getStringToBytes(props.purpose)
 
-            uri = `https://ipfs.io/ipfs/${added.path}`
-            console.log("uri", uri);
+            _documentId = await documentSignatureContract.getDocumentId(web3ProviderState.account, _documentName, _purpose, partiesId)
+            console.log("documentId", _documentId);
 
-            setURL(uri)
-          } catch (error) {
-            toast.error("something is wrong with IPFS")
-            return "";
+            setDocumentId(_documentId.toString())
+          } catch (error: any) {
+            console.log("getDocumentId error ", error);
+            toast.error(error.message.substring(0, error.message.indexOf("(")))
+            return;
           }
-          let signer = web3ProviderState.library?.getSigner()
+        } else {
+          _documentId = (documentId)
+        }
+        let documentName = props.documentName
+        let fileName = props.fileName
+        let purpose = props.purpose
+        let imageObject = JSON.stringify({
+          documentId: _documentId.toString(),
+          documentName,
+          purpose,
+          file: file,
+          fileName,
+          startBlock,
+          endBlock,
+          creator: web3ProviderState.account,
+          signer: partiesId,
+        })
+        console.log("imageObject", imageObject);
 
-          if (signer) {
-            try {
+        let uri: string = ""
+        try {
+          const added = await client.add(imageObject);
 
-              voucher = (await createDocument(
-                signer,
-                web3ProviderState.account,
-                uri,
-                _documentId,
-                DS_SIGNING_DOMAIN_NAME,
-                DS_SIGNING_DOMAIN_VERSION,
-                web3ProviderState.chainId.toString(),
-                ContractAddress.UserIdentityNFT
-              )) as string;
+          uri = `https://ai-nft.infura-ipfs.io/ipfs/${added.path}`
+          console.log("uri", uri);
 
-              console.log("url", url);
+          setURL(uri)
+        } catch (error) {
+          toast.error("something is wrong with IPFS")
+          return "";
+        }
+        let signer = web3ProviderState.library?.getSigner()
 
-              console.log("voucher", voucher);
+        if (signer) {
+          try {
+
+            voucher = (await createDocument(
+              signer,
+              web3ProviderState.account,
+              uri,
+              _documentId,
+              DS_SIGNING_DOMAIN_NAME,
+              DS_SIGNING_DOMAIN_VERSION,
+              web3ProviderState.chainId.toString(),
+              ContractAddress.UserIdentityNFT
+            )) as string;
+
+            console.log("url", url);
+
+            console.log("voucher", voucher);
+            const issueDigitalIdentity = await subgraphClient.query({
+              query: REDEEM_USER_NFT,
+              variables: {
+                userAddress: web3ProviderState.account,
+              },
+            });
+            let tem: any;
+            if (issueDigitalIdentity.data?.issueDigitalIdentities.length > 0) {
+              tem = issueDigitalIdentity.data?.issueDigitalIdentities[0] as IssueDigitalIdentity
+            }
+            if (tem) {
               let res = await post("api/addQueue", {
                 data: JSON.stringify({
                   transactionCode: "002",
                   apiName: "createDocument",
                   parameters: {
                     documentId: _documentId.toString(),
-                    documentName: documentName,
-                    purpose: purpose,
+                    documentName: props.documentName,
+                    purpose: props.purpose,
                     uri: uri,
-                    startData: startDate,
-                    expirationDate: endDate,
+                    startData: props.startDate,
+                    expirationDate: props.endDate,
                     startBlock: startBlock.toString(),
                     endBlock: endBlock.toString(),
                     creator: web3ProviderState.account,
                     ownerSignature: voucher,
-                    parties: partiesId
+                    parties: partiesId,
+                    creatorTokenId: tem?.tokenId
                   },
                   pinHash: pin,
                   userId: web3ProviderState.account,
@@ -352,37 +371,41 @@ export default function CreateDocumentDetails(props: any) {
               });
               console.log("res", res);
 
-              toast.success("Successfully Created Document " + _documentId.toString())
-              setSpinnerProcess(false)
-              router.push("/user/listDocument")
-
-
-            } catch (error: any) {
-              setSpinnerProcess(false)
-
-              console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
-              toast.error(error.message.substring(0, error.message.indexOf("(")))
             }
-          } else {
-            toast.error("Signer Account Not Found")
+
+            toast.success("Successfully Created Document " + _documentId.toString())
+            setSpinnerProcess(false)
+            router.push("/user/listDocument")
+
+
+          } catch (error: any) {
+            setSpinnerProcess(false)
+
+            console.log(error.message.substring(0, error.message.indexOf("("))); // "Hello"
+            toast.error(error.message.substring(0, error.message.indexOf("(")))
           }
-
         } else {
-          setSpinnerProcess(false)
-
-          toast.error("Atleast One Signer");
-
+          toast.error("Signer Account Not Found")
         }
 
+      } else {
+        setSpinnerProcess(false)
+
+        toast.error("Atleast One Signer");
 
       }
+
+
     }
-  }, [web3ProviderState, documentName, purpose, startDate, endDate]);
+
+  }, [web3ProviderState]);
 
 
-  let signDocument = useCallback(() => {
-    console.log("setPurpose");
+  let signDocument = useCallback((event: any) => {
+
+    console.log("signDocument", props.documentName, props.purpose, props.startDate, props.endDate);
     setSpinnerProcess(true)
+
     if (localStorage.getItem("token")) {
       setShowModal(true)
     } else {
@@ -390,8 +413,7 @@ export default function CreateDocumentDetails(props: any) {
       dispatch(changeState({ status: !pinState.status, toSavePin: true }))
     }
 
-  }, [documentName, purpose, startDate, endDate])
-  const myRef: React.LegacyRef<HTMLInputElement> = React.createRef();
+  }, [])
   return (
     <>
       <div className="relative border-2 flex flex-col min-w-0 break-words w-full mt-6 shadow-lg rounded-lg bg-blueGray-100 border-0">
@@ -441,8 +463,10 @@ export default function CreateDocumentDetails(props: any) {
                       type="text"
                       className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                       defaultValue=""
+                      id="DocumentName"
                       onChange={(e: React.FormEvent<HTMLInputElement>) => {
-                        setDocumentName(e.currentTarget.value)
+                        props.setDocumentName(e.currentTarget.value)
+                        // documentName = e.currentTarget.value
                       }}
                     />
                   </div>
@@ -459,7 +483,9 @@ export default function CreateDocumentDetails(props: any) {
                     <textarea className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                       id="w3review" name="w3review" rows={4} cols={50}
                       onChange={(e: any) => {
-                        setPurpose(e.currentTarget.value)
+                        props.setPurpose(e.currentTarget.value)
+                        // purpose = e.currentTarget.value
+
                       }}
                     ></textarea>
                   </div>
@@ -495,7 +521,7 @@ export default function CreateDocumentDetails(props: any) {
                       className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                       defaultValue=""
                       onChange={(e: React.FormEvent<HTMLInputElement>) => {
-                        setStartDate(e.currentTarget.value)
+                        props.setStartDate(e.currentTarget.value)
                       }}
                     />
                   </div>
@@ -513,7 +539,7 @@ export default function CreateDocumentDetails(props: any) {
                       className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                       defaultValue=""
                       onChange={(e: React.FormEvent<HTMLInputElement>) => {
-                        setEndDate(e.currentTarget.value)
+                        props.setEndDate(e.currentTarget.value)
                       }}
                     />
                   </div>
@@ -532,7 +558,7 @@ export default function CreateDocumentDetails(props: any) {
                       type="text"
                       ref={myRef}
                       className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                      defaultValue={fileName}
+                      defaultValue={props.fileName}
                       readOnly
                     />
                     {/* <a download="Book1.xlsx" href={fileName}>Download</a> */}
@@ -553,11 +579,11 @@ export default function CreateDocumentDetails(props: any) {
                         let file = myRef.current?.files?.[0]
                         if (_fileBuffer) {
                           console.log("2");
-                          setFileBuffer(_fileBuffer)
+                          props.setFileBuffer(_fileBuffer)
                         }
 
                         if (file) {
-                          setFileName(file?.name)
+                          props.setFileName(file?.name)
 
 
                           console.log(URL.createObjectURL(file));

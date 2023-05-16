@@ -326,26 +326,50 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
 
 
   }
-
   useEffect(() => {
     const fetchData = async () => {
+      console.log("documentDetails && showModal", documentDetails && showModal);
+
       if (documentDetails && showModal) {
         try {
           const { data } = await axios.get(`${documentDetails.uri}`);
-          console.log("data", data);
+          console.log("setUriData ===>", data);
 
           setUriData(data)
         } catch (error) {
 
         }
       }
+
+    }
+
+    if (!isSigner && documentDetails.singers) {
+
+      fetchData()
+    }
+  }, [documentDetails, showModal])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // console.log("documentDetails && showModal", documentDetails && showModal);
+
+      // if (documentDetails && showModal) {
+      //   try {
+      //     const { data } = await axios.get(`${documentDetails.uri}`);
+      //     console.log("setUriData ===>", data);
+
+      //     setUriData(data)
+      //   } catch (error) {
+
+      //   }
+      // }
       if (web3ProviderState.active) {
         let documentStatus = await getStatusSignDocument()
         if (documentStatus) {
           setDocumentStatus(documentStatus)
           setIsDocumentOwner(web3ProviderState.account.toLowerCase() == documentDetails.creator.toLowerCase())
           let blockDifference: number = documentDetails.endBlock - await getLatestBlockNumber();
-          console.log(documentDetails.documentName, "blockDifference", blockDifference);
+          // console.log(documentDetails.documentName, "blockDifference", blockDifference);
 
           if (blockDifference > 0) {
             let result = secondsConverter(blockDifference)
@@ -354,10 +378,10 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
           let count = 0
           for (let index = 0; index < documentDetails.singers.length; index++) {
             const element: Signer = documentDetails.singers[index];
-            console.log("here ", element);
+            // console.log("here ", element);
 
             let owner = await getNftMetadataForExplorer(ContractAddress.UserIdentityNFT, element.tokenId)
-            console.log("owner", owner.owners[0], web3ProviderState.account);
+            // console.log("owner", owner.owners[0], web3ProviderState.account);
             if (element.signature != "") {
               count++;
             }
@@ -575,7 +599,7 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
 
                             Document Status :  {documentStatus == 0 ? <FontAwesomeIcon icon={faClockRotateLeft} className="text-lg text-yellow-500 font-bold" />
                               :
-                              <FontAwesomeIcon icon={faCheckCircle} className="text-lg  text-green-500  font-bold" />}{documentStatus}
+                              <FontAwesomeIcon icon={faCheckCircle} className="text-lg  text-green-500  font-bold" />}
                           </td>
                           <td className={
                             "px-6 align-middle border border-solid py-3 text-xs border-l-0 border-r-0 whitespace-nowrap  text-left   font-bold " +

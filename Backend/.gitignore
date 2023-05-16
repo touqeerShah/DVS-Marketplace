@@ -3,7 +3,7 @@
 # dependencies
 /node_modules
 node_modules
-
+./node_modules
 /.pnp
 .pnp.js
 
@@ -21,8 +21,10 @@ node_modules
 /artifacts/channel/crypto-config
 /mongo-compose
 /pg-compose/db
-/pg-rabbitMQ/db/*
+/pg-rabbitMQ/db
+pg-rabbitMQ/db/
 /wallet
+/mongo-compose/data
 
 # misc
 .DS_Store

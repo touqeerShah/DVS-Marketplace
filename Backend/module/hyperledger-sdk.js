@@ -173,7 +173,7 @@ module.exports.query = async function (
 
     // Disconnect from the gateway.
     await gateway.disconnect();
-    await wallet.remove(userid);
+    // await wallet.remove(userid);
 
     var response_object = {};
     var response = JSON.parse(result.toString());
@@ -583,7 +583,7 @@ blockchainevent = async function (
         { filtered: false, startBlock: parseInt(nextBlock, 10) }
       );
     }
-    await wallet.remove(userid);
+    // await wallet.remove(userid);
     if (fs.existsSync(configPath)) {
       nextBlock = await fs.readFileSync(configPath, "utf8");
       // console.log("nextBlock", nextBlock.toString());

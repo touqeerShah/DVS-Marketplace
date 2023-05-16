@@ -1,2 +1,12 @@
 Installed chaincodes on peer:
+Package ID: hf_3.0:43696641ae33476e2a4a4c5f7e0cdf6819bb0212de31a7f251780aed33db040c, Label: hf_3.0
+Package ID: hf_4.0:f0e5ca09f78adcc30e881c458d243e1186ea44947eefe00350516e956183e316, Label: hf_4.0
+Package ID: hf_5.0:a06ed3f0b1a0fc7b8f64c52cc6cf4e102719d7fe6234d21aca45426297ccc9da, Label: hf_5.0
+Package ID: hf_10.0:65f8fc724369b58de01d768834d7605b03eaf000e392b192cb32fd175e839e7d, Label: hf_10.0
 Package ID: hf_1.0:cafaee47ebca5221a65340f1336d63b22fd13d35395de37f7c1a2cd0b4c77f4c, Label: hf_1.0
+Package ID: hf_2.0:e31697ad5d47bb6286d647e61844c59abcc55e4f443a3d4ee3f9050c9d4abb11, Label: hf_2.0
+Package ID: hf_8.0:59ffe5b7bfd96f0068da76ff6363783da3ed984d74aa420385e0a5412959353d, Label: hf_8.0
+Package ID: hf_9.0:4d83792a4d922fbd76f7ecbbd8c6f56b2be558ebc59d1e99475aa64163fd4b0a, Label: hf_9.0
+Package ID: hf_11.0:65dc624e06d855c705a1e9c14af750e83888aadb627c6d57eca3c4052a92b25b, Label: hf_11.0
+Package ID: hf_6.0:efd7cd884bf8f378d69d006d4f6462bef7fc9e639f27b48261113ab85c3b312a, Label: hf_6.0
+Package ID: hf_7.0:a6dd14d031e5356eebd34951189d4fd38d366c0a3e62ddf4fb48fdde68168f60, Label: hf_7.0

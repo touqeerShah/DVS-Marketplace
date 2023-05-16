@@ -164,7 +164,6 @@ export default function CardVerifyMyId(props: any) {
 
     }
 
-    console.log("ahjbdjkasbjcbasjbjksbcjka");
     if (!figurePrintOracleContract && web3ProviderState.chainId) {
       // console.log("figurePrintOracleContract", figurePrintOracleContract);
       fetchData();

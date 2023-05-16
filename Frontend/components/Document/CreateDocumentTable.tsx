@@ -35,11 +35,10 @@ export default function CreateDocumentTable(props: any) {
       if (documentRequestType == "Owner") {
         query = { "selector": { "creator": address } }
       } else if (documentRequestType == "ForSignature") {
-        console.log("hereemksdmkaldmnkaldklaskd");
 
         query = { "selector": { "singers": { "$elemMatch": { "tokenId": parseInt(tokenId.toString()), "signature": "" } } } }
       } else {
-        query = { "selector": { "singers": { "$elemMatch": { "tokenId": parseInt(tokenId.toString()), "signature": { "$gt": null } } } } }
+        query = { "selector": { "singers": { "$elemMatch": { "tokenId": parseInt(tokenId.toString()), "signature": { "$gt": "" } } } } }
       }
       console.log(documentRequestType, "query", query);
 

@@ -1,21 +1,32 @@
 import React, { useState, useEffect } from "react";
-import { faClockRotateLeft, faFileDownload, faCheckCircle, faGavel } from "@fortawesome/free-solid-svg-icons";
+import {
+  faClockRotateLeft,
+  faFileDownload,
+  faCheckCircle,
+  faGavel,
+} from "@fortawesome/free-solid-svg-icons";
 // components
 import { useApolloClient } from "@apollo/client";
-import { StateType } from "../../config"
+import { StateType } from "../../config";
 import { REDEEM_USER_NFT } from "./../../lib/subgrapQueries";
 import { IssueDigitalIdentity } from "./../../class/subgraphResponse";
 
 import CardStats from "../../components/Cards/CardStats";
-import { useAppSelector, useAppDispatch } from "./../../redux/hooks"
+import { useAppSelector, useAppDispatch } from "./../../redux/hooks";
 import { web3ProviderReduxState } from "./../../redux/reduces/web3ProviderRedux";
-import { DocumentCount } from "../../class/document"
+import { DocumentCount } from "../../class/document";
 import { post } from "../../utils/";
 
 export default function HeaderStats() {
   const subgraphClient = useApolloClient();
   let web3ProviderState: StateType = useAppSelector(web3ProviderReduxState);
-  const [count, setCount] = useState<DocumentCount>();
+  let [count, setCount] = useState<DocumentCount>({
+    createdByMe: 0,
+    forMeSignature: 0,
+    signByMe: 0,
+    NFTCount: 0,
+  });
+  let isRequested = false
   const [token, setTokenId] = useState("");
 
   useEffect(() => {
@@ -25,8 +36,6 @@ export default function HeaderStats() {
       console.log("01.getDocumentCount", web3ProviderState);
 
       if (web3ProviderState.active) {
-
-
         try {
           const issueDigitalIdentity = await subgraphClient.query({
             query: REDEEM_USER_NFT,
@@ -37,9 +46,10 @@ export default function HeaderStats() {
           // console.log("issueDigitalIdentity.data?.", issueDigitalIdentity.data);
 
           if (issueDigitalIdentity.data?.issueDigitalIdentities.length > 0) {
-            console.log("data = = = ", issueDigitalIdentity.data?.issueDigitalIdentities[0] as IssueDigitalIdentity);
-            let tem: IssueDigitalIdentity = issueDigitalIdentity.data?.issueDigitalIdentities[0] as IssueDigitalIdentity
-            setTokenId(tem.tokenId)
+            // console.log("data = = = ", issueDigitalIdentity.data?.issueDigitalIdentities[0] as IssueDigitalIdentity);
+            let tem: IssueDigitalIdentity = issueDigitalIdentity.data
+              ?.issueDigitalIdentities[0] as IssueDigitalIdentity;
+            setTokenId(tem.tokenId);
             let resp = await post("api/get", {
               data: JSON.stringify({
                 transactionCode: "002",
@@ -48,34 +58,32 @@ export default function HeaderStats() {
                   documentId: tem.tokenId,
                 },
                 userId: "user2",
-                organization: "org1"
-              })
-            })
-            console.log("1.getDocumentCount== >", resp);
+                organization: "org1",
+              }),
+            });
+            console.log("1.getDocumentCount== >/", resp);
 
             if (resp.status == 200) {
               console.log("getDocumentCount== >", resp);
-              let temCount = resp as DocumentCount
+              let temCount = resp.data as DocumentCount;
+              console.log("temCount== >", temCount);
+
               setCount({
                 createdByMe: temCount.createdByMe,
                 forMeSignature: temCount.forMeSignature,
                 signByMe: temCount.signByMe,
-                NFTCount: 1
-              })
-
+                NFTCount: 1,
+              });
             }
           }
-
         } catch (error) {
           console.log("error", error);
-
         }
-
-
       }
     };
 
-    if (!count && web3ProviderState.chainId) {
+    if (!isRequested && web3ProviderState.chainId) {
+      isRequested = true
       fetchData();
     }
   }, [web3ProviderState.chainId]);
@@ -91,7 +99,9 @@ export default function HeaderStats() {
               <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
                 <CardStats
                   statSubtitle="Owner Document"
-                  statTitle={count?.createdByMe ? count?.createdByMe?.toString() : "0"}
+                  statTitle={
+                    count?.createdByMe?.toString()
+                  }
                   statArrow="up"
                   statPercent=""
                   statPercentColor="text-emerald-500"
@@ -103,7 +113,9 @@ export default function HeaderStats() {
               <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
                 <CardStats
                   statSubtitle="NEW Document"
-                  statTitle={count?.forMeSignature ? count?.forMeSignature?.toString() : "0"}
+                  statTitle={
+                    count?.forMeSignature?.toString()
+                  }
                   statArrow="down"
                   statPercent=""
                   statPercentColor="text-red-500"
@@ -115,7 +127,9 @@ export default function HeaderStats() {
               <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
                 <CardStats
                   statSubtitle="Total Document Sign"
-                  statTitle={count?.signByMe ? count?.signByMe?.toString() : "0"}
+                  statTitle={
+                    count?.signByMe?.toString()
+                  }
                   statArrow="down"
                   statPercent=""
                   statPercentColor="text-orange-500"
@@ -127,7 +141,9 @@ export default function HeaderStats() {
               <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
                 <CardStats
                   statSubtitle="NFT"
-                  statTitle={count?.NFTCount ? count?.NFTCount?.toString() : "0"}
+                  statTitle={
+                    count?.NFTCount?.toString()
+                  }
                   statArrow="up"
                   statPercent=""
                   statPercentColor="text-emerald-500"

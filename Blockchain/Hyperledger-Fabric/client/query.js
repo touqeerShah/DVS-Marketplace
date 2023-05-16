@@ -25,10 +25,10 @@ async function main() {
     console.log(`Wallet path: ${walletPath}`);
 
     // Check to see if we've already enrolled the user.
-    const identity = await wallet.get("system1");
+    const identity = await wallet.get("system2");
     if (!identity) {
       console.log(
-        'An identity for the user "system1" does not exist in the wallet'
+        'An identity for the user "system2" does not exist in the wallet'
       );
       console.log("Run the registerUser.js application before retrying");
       return;
@@ -38,7 +38,7 @@ async function main() {
     const gateway = new Gateway();
     await gateway.connect(ccp, {
       wallet,
-      identity: "system1",
+      identity: "system2",
       discovery: { enabled: true, asLocalhost: true },
     });
 
@@ -47,7 +47,7 @@ async function main() {
 
     // Get the contract from the network.
     // const contract = network.getContract("company-registration");
-    const contract = network.getContract("company-registration");
+    const contract = network.getContract("hf");
 
     // Evaluate the specified transaction.
     // var arr = '{"id":"system2","userRole":"cmo","status":"pending"}'
@@ -57,8 +57,7 @@ async function main() {
 
     // var arr = '{"query":{"lotId": {"_id": {"$regex": "lot4"} }}}';
     //based on Item
-    var arr =
-      '{"query":{"selector": {"lotId": "pharmaTrace1-lot4"}},"isLotcount":true}';
+    var arr = '{"documentId":"2"}';
     //based on lot status
     //{"selector": { "_id": { "$regex": "-" }, "status": "activated"}}
     // based on lot shipment location
@@ -77,9 +76,9 @@ async function main() {
     console.log(arr);
     // var arr =
     //   '{"companyid":"pharmaTrace1","companyName":"evonik","address":"786","status":"activated"}';
-    // var arr = '{"userid":"system1","userRole":"wearhouse","status":"pending"}';
+    // var arr = '{"userid":"system2","userRole":"wearhouse","status":"pending"}';
 
-    const result = await contract.evaluateTransaction("getByQuery", arr);
+    const result = await contract.evaluateTransaction("getDocumentCount", arr);
     // var arr = '{"transactionId":"1234567222"}'
     // const result = await contract.evaluateTransaction('getTransaction',arr);
 
@@ -103,7 +102,7 @@ async function main() {
     // const result = await contract.evaluateTransaction('clientNFTBalance');
 
     //balanceOf
-    // var arr = '{"owner":"system1"}'
+    // var arr = '{"owner":"system2"}'
     // const result = await contract.evaluateTransaction('balanceOf',arr);
     // //ownerOf
     // var arr = '{"tokenId":"1234567222"}'

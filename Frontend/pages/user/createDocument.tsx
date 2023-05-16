@@ -9,10 +9,16 @@ import { TypeDocumentSignerFields } from "./../../class/document"
 
 import Admin from "../../layouts/Admin";
 
-export default function VerifyId() {
+export default function CreateDocument() {
   let [documentSignerFieldsState, setDocumentSignerFieldsState] = useState<TypeDocumentSignerFields[]>([]);
   let [documentSignerDivCountState, setDocumentSignerDivCountState] = useState(0);
-
+  let [documentName, setDocumentName] = useState("")
+  let [purpose, setPurpose] = useState("")
+  let [startDate, setStartDate] = useState("")
+  let [endDate, setEndDate] = useState("")
+  var buffer = new ArrayBuffer(0);
+  let [fileBuffer, setFileBuffer] = useState(buffer);
+  let [fileName, setFileName] = useState("");
   let addParameterFields = () => {
     // setParameterDivCountState(parameterDivCountState + 1);
 
@@ -43,6 +49,19 @@ export default function VerifyId() {
             documentSignerFieldsState={documentSignerFieldsState}
             setDocumentSignerFieldsState={setDocumentSignerFieldsState}
             id={documentSignerDivCountState}
+            setDocumentName={setDocumentName}
+            setPurpose={setPurpose}
+            setStartDate={setStartDate}
+            setEndDate={setEndDate}
+            setFileBuffer={setFileBuffer}
+            setFileName={setFileName}
+            documentName={documentName}
+            purpose={purpose}
+            startDate={startDate}
+            endDate={endDate}
+            fileBuffer={fileBuffer}
+            fileName={fileName}
+
           />
         </div>
         <div className="w-full lg:w-4/12 px-4">
@@ -54,7 +73,7 @@ export default function VerifyId() {
 }
 
 // Settings.layout = Admin;
-VerifyId.getLayout = function getLayout(page: any) {
+CreateDocument.getLayout = function getLayout(page: any) {
   return (
     <Admin>{page}</Admin>
   )
