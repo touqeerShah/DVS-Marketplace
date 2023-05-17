@@ -14,6 +14,7 @@ import ViewDocumentDetails from "./ViewDocumentDetails";
 // components
 
 export default function AddRow({
+    index,
     documentId,
     documentName,
     creatorAddress,
@@ -23,8 +24,11 @@ export default function AddRow({
     web3ProviderState,
     setMyDocuments,
     documentRequestType,
-    tokenId
+    tokenId,
+    myDocuments
+
 }: any) {
+    const [docIndex, setDocIndex] = React.useState(-1);
 
     const [showModal, setShowModal] = React.useState(false);
     return (
@@ -61,6 +65,7 @@ export default function AddRow({
                 </td>
             </tr>
             <ViewDocumentDetails
+                index={index}
                 showModal={showModal}
                 setShowModal={setShowModal}
                 color={"light"}
@@ -69,6 +74,10 @@ export default function AddRow({
                 setMyDocuments={setMyDocuments}
                 documentRequestType={documentRequestType}
                 tokenId={tokenId}
+                setDocIndex={setDocIndex}
+                docIndex={docIndex}
+                myDocuments={myDocuments}
+
             />
         </>
     );

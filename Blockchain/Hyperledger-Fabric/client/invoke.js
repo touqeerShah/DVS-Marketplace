@@ -105,7 +105,7 @@ async function check() {
   //   index +
   //   '","documentName": "documentName","purpose": "purpose","uri": "uri","startData": "1","expirationDate": "1","startBlock": "1","endBlock": "1","creator": "web3ProviderState.address","ownerSignature": "voucher","parties": [1,2]}';
 
-  await main('{"documentId":"2","functionName":"createdByMe"}');
+  await main('{"documentId":"2","functionName":"forMeSignature"}');
 
   // }
 }

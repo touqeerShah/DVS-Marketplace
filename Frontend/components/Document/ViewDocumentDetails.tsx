@@ -5,6 +5,8 @@ import { toast } from "react-toastify";
 import { StateType, PinState, PinHash } from "../../config"
 import SetPin from "./../Pin/SetPin"
 import { Contract } from "@ethersproject/contracts";
+import { DocumentEntity } from "./../../class/document";
+import CryptoJS from 'crypto-js';
 
 import { faClockRotateLeft, faCheckCircle, faDownload, faSignature, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -22,6 +24,8 @@ import { useAppSelector, useAppDispatch } from "./../../redux/hooks"
 import { pinStateReducerState, changeState } from "./../../redux/reduces/pinRedux"
 import { pinHashReducerState, setHash } from "./../../redux/reduces/pinhashRedux"
 import { store } from "./../../redux/store"
+import { useRouter } from 'next/router'
+
 import {
   DS_SIGNING_DOMAIN_NAME,
   DS_SIGNING_DOMAIN_VERSION,
@@ -33,7 +37,10 @@ import {
 import { log } from "console";
 
 
-export default function ViewDocumentDetails({ showModal, color, setShowModal, documentDetails, web3ProviderState, setMyDocuments, documentRequestType, tokenId }: any) {
+export default function ViewDocumentDetails(props: any) {
+  const router = useRouter()
+
+  let { showModal, color, setShowModal, documentDetails, web3ProviderState, setMyDocuments, documentRequestType, tokenId, myDocuments, setDocIndex, docIndex } = props
   let pinState: PinState = useAppSelector(pinStateReducerState);
   let pinHash: PinHash = useAppSelector(pinHashReducerState);
   const dispatch = useAppDispatch();
@@ -91,12 +98,14 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
         dispatch(changeState({ status: !pinState.status, toSavePin: true }))
         toast.info("Token Expire")
       } else {
+        dispatch(changeState({ status: true, toSavePin: true }))
+        dispatch(setHash({ pinhash: pin }))
         setPinShowModal(openPinModule)
-        if (submitFrom == "submitProcessDocument") {
-          await submitProcessDocument(pin)
-        } else if (submitFrom == "submitSignDocument") {
-          await submitSignDocument(pin)
-        }
+        // if (submitFrom == "submitProcessDocument") {
+        //   await submitProcessDocument(pin)
+        // } else if (submitFrom == "submitSignDocument") {
+        //   await submitSignDocument(pin)
+        // }
       }
     }
   }, [web3ProviderState]);
@@ -127,10 +136,12 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
   useEffect(() => {
     const fetchData = async () => {
       try {
+        dispatch(changeState({ status: false, toSavePin: true }))
+
         if (submitFrom == "submitProcessDocument") {
-          await submitProcessDocument(pin)
+          await submitProcessDocument(pinHash.pinhash, myDocuments[docIndex])
         } else {
-          await submitSignDocument(pin)
+          await submitSignDocument(pinHash.pinhash, myDocuments[docIndex])
         }
       } catch (error: any) {
         console.log(error);
@@ -139,19 +150,22 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
 
       }
     }
-    console.log("storeDocument", pinState.toSavePin, pinHash.pinhash);
+    // console.log("storeDocument", pinState.toSavePin, pinHash.pinhash);
+    let { documentDetails, myDocuments, docIndex } = props
+    console.log(docIndex, "before sign ", myDocuments[docIndex]);
 
-    if (store.getState().pinState.status && store.getState().pinHash.pinhash != "") {
+    if (store.getState().pinState.status && store.getState().pinHash.pinhash != "" && docIndex > -1) {
+
       fetchData()
     }
-  }, [pinHash])
+  }, [pinHash, props])
 
-  const submitProcessDocument = useCallback(async function (pin: string,) {
+  const submitProcessDocument = useCallback(async function (pin: string, documentDetails: DocumentEntity) {
 
 
     let documentContract: Contract | undefined = await getDocumentSignature(web3ProviderState.library);
 
-    // console.log(Number(await documentContract.getStatusSignDocument(0, documentDetails.startBlock, documentDetails.endBlock)));
+    // console.log("documentDetails = >", documentDetails);
     if (documentContract) {
       let DocumentStatus: number = Number(await documentContract.getStatusSignDocument(0, documentDetails.startBlock, documentDetails.endBlock))
       if (DocumentStatus == 5) {
@@ -161,7 +175,7 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
             const element: Signer = documentDetails.singers[index];
             let owner = await getNftMetadataForExplorer(ContractAddress.UserIdentityNFT, element.tokenId)
             console.log("owner", owner.owners[0], web3ProviderState.account);
-            let _signer = await documentContract.verifification(web3ProviderState.account, documentDetails.documentId, documentDetails.uri, element.signature)
+            let _signer = await documentContract.verifification(owner.owners[0], documentDetails.documentId, documentDetails.uri, element.signature)
             console.log("_signer", _signer);
 
             if (owner.owners[0] != _signer.toLowerCase()) {
@@ -186,9 +200,11 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
             uri: documentDetails.uri
           }
 
-          await documentContract.processDocumentWithSignature(documentDetialsWithSigatureStruct);
+          let tx = await documentContract.processDocumentWithSignature(documentDetialsWithSigatureStruct);
+          let recepite = await tx.wait()
+
           setSpinnerProcess(false)
-          setMyDocuments([])
+          // setMyDocuments([])
           await post("addQueue", {
             data: JSON.stringify({
               transactionCode: "002",
@@ -203,7 +219,7 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
             })
           });
           toast.success("Successfully Process Document " + ellipseAddress(documentDetails.documentId))
-
+          router.reload()
         } catch (error: any) {
           setSpinnerProcess(false)
           console.log("error", error);
@@ -220,8 +236,13 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
     }
 
   }, []);
-  const submitSignDocument = useCallback(async function (pin: string,) {
+  /**
+   * In this function signer do digital signature with this wallet and stor sign into Private Blockchain
+   * which later used to process transaction
+   */
+  const submitSignDocument = useCallback(async function (pin: string, documentDetails: DocumentEntity) {
     let voucher: string = "";
+    console.log("documentDetails", documentDetails.documentId);
 
     if (tokenId) {
 
@@ -233,7 +254,7 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
               signer,
               web3ProviderState.account,
               documentDetails.uri,
-              documentDetails.documentId,
+              BigInt(documentDetails.documentId),
               DS_SIGNING_DOMAIN_NAME,
               DS_SIGNING_DOMAIN_VERSION,
               web3ProviderState.chainId.toString(),
@@ -247,8 +268,14 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
           }
 
           try {
+            console.log("documentDetails.documentId.toString()", documentDetails.documentId.toString());
+            let documentContract: Contract | undefined = await getDocumentSignature(web3ProviderState.library);
+            if (documentContract) {
+              let _signer = await documentContract.verifification(web3ProviderState.account, documentDetails.documentId, documentDetails.uri, voucher)
+              console.log("verifification _signer --> ", _signer);
 
-            await post("api/addQueue", {
+            }
+            let respose = await post("api/addQueue", {
               data: JSON.stringify({
                 transactionCode: "002",
                 apiName: "addSignatureDocument",
@@ -263,9 +290,14 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
               })
             });
             setShowModal(false)
-            setMyDocuments([])
-            toast.success("Successfully Sign Document " + ellipseAddress(documentDetails.documentId))
+            // setMyDocuments([])
+            if (respose.status) {
+              toast.success("Successfully Sign Document " + ellipseAddress(documentDetails.documentId))
 
+              router.reload()
+            } else {
+              toast.error(respose.message)
+            }
           } catch (error) {
             console.log("error", error);
             toast.error("Hyperledger Node Have Issues")
@@ -281,9 +313,17 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
       return
     }
   }, []);
-  const ProcessDocument = async () => {
+
+  /**
+   * here we open pop-up to verify the pin of user before perform any action
+   * @param caller which action was call process doc or sign
+   * @returns 
+   */
+  const submit = async (caller: string, index: number) => {
+    console.log("submit", index);
+    setDocIndex(index)
     setSpinnerProcess(true)
-    setSubmitFrom("submitProcessDocument")
+    setSubmitFrom(caller)
     if (!web3ProviderState.active == null && web3ProviderState.account) {
       console.log("error");
 
@@ -296,39 +336,19 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
     }
     setSpinnerProcess(true)
     if (localStorage.getItem("token")) {
-      setShowModal(true)
+
+      setPinShowModal(true)
     } else {
       console.log("pinState.status", pinState.status);
       dispatch(changeState({ status: !pinState.status, toSavePin: true }))
     }
 
   }
-  const SignDocument = async () => {
-    setSubmitFrom("submitSignDocument")
-    setSpinnerProcess(true)
-
-    if (!web3ProviderState.active == null && web3ProviderState.account) {
-      console.log("error");
-
-      toast.error("Please Connect to your wallet First");
-      return;
-    }
-    if (web3ProviderState.chainId != 5) {
-      toast.error("Please Change your network to Goerli");
-      return;
-    }
-    if (localStorage.getItem("token")) {
-      setShowModal(true)
-    } else {
-      console.log("pinState.status", pinState.status);
-      dispatch(changeState({ status: !pinState.status, toSavePin: true }))
-    }
-
-
-  }
+  // this will set document which is share to sign and download it from IPFS
   useEffect(() => {
+    // console.log("documentDetails && showModal", documentDetails, showModal, isSigner);
+
     const fetchData = async () => {
-      console.log("documentDetails && showModal", documentDetails && showModal);
 
       if (documentDetails && showModal) {
         try {
@@ -340,29 +360,19 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
 
         }
       }
-
     }
 
-    if (!isSigner && documentDetails.singers) {
+    if (showModal && documentDetails.singers) {
 
       fetchData()
     }
-  }, [documentDetails, showModal])
-
+  }, [documentDetails, showModal, isSigner])
+  /**
+   * Here we set basic details of like document status ,owner sign status...
+   */
   useEffect(() => {
     const fetchData = async () => {
-      // console.log("documentDetails && showModal", documentDetails && showModal);
 
-      // if (documentDetails && showModal) {
-      //   try {
-      //     const { data } = await axios.get(`${documentDetails.uri}`);
-      //     console.log("setUriData ===>", data);
-
-      //     setUriData(data)
-      //   } catch (error) {
-
-      //   }
-      // }
       if (web3ProviderState.active) {
         let documentStatus = await getStatusSignDocument()
         if (documentStatus) {
@@ -632,18 +642,26 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
                   >
                     Close
                   </button>
-                  {documentRequestType == "ForSignature" && isSigner && !signatureDone && <button
+                  {documentStatus == 1 && documentRequestType == "ForSignature" && isSigner && !signatureDone && <button
                     className="py-2.5  my-2 placeholder-blueGray-300 mx-4  text-blueGray-600 bg-white rounded border-2 text-sm shadow focus:outline-none focus:ring w-1/5 ease-linear transition-all duration-150"
                     type="button"
-                    onClick={() => SignDocument()}
+                    onClick={() => submit("signDocument", props.index)}
                   >
                     {spinnerProcess && <FontAwesomeIcon icon={faSpinner} className="animate-spin" />}
                     Sign Document
                   </button>}
+                  {documentStatus == 5 && isSigner &&
+                    <button
+                      className="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                      type="button"
+                      disabled
+                    >
+                      Time Over
+                    </button>}
                   {documentRequestType == "Owner" && isDocumentOwner && signatureDone && <button
                     className="py-2.5  my-2 placeholder-blueGray-300 mx-4  text-blueGray-600 bg-white rounded border-2 text-sm shadow focus:outline-none focus:ring w-1/5 ease-linear transition-all duration-150"
                     type="button"
-                    onClick={() => ProcessDocument()}
+                    onClick={() => submit("submitProcessDocument", props.index)}
                   >
                     {spinnerProcess && <FontAwesomeIcon icon={faSpinner} className="animate-spin" />}
 
@@ -663,20 +681,3 @@ export default function ViewDocumentDetails({ showModal, color, setShowModal, do
   );
 }
 
-// ViewDocumentDetails.defaultProps = {
-//   color: "light",
-//   documentId: "",
-//   Name: "",
-//   creatorAddress: "",
-//   creactionTime: "",
-//   transactionSignature: "",
-//   collectionAddress: "",
-//   signerList: [],
-//   setShowModal: function
-//   status: "",
-
-// };
-
-// ViewDocumentDetails.propTypes = {
-//   props.color: PropTypes.oneOf(["light", "dark"]),
-// };
