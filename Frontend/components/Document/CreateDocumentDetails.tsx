@@ -209,7 +209,7 @@ export default function CreateDocumentDetails(props: any) {
       var startDateSeconds = (new Date(props.startDate).getTime() - currentDate.getTime()) / 1000;
       var endDateSeconds = (new Date(props.endDate).getTime() - currentDate.getTime()) / 1000;
       var startBlock = latestBlockNumber + 1// latestBlockNumber + (startDateSeconds / AVERAGE_BLOCK_MINT_TIME)// this logic for production but we are doing for testing
-      var endBlock = latestBlockNumber + 30//startBlock + (endDateSeconds / AVERAGE_BLOCK_MINT_TIME)
+      var endBlock = latestBlockNumber + 200//startBlock + (endDateSeconds / AVERAGE_BLOCK_MINT_TIME)
 
       // const signer = await web3ProviderState.active.getSigner();
       let parties: TypeDocumentSignerFields[] = props.documentSignerFieldsState as TypeDocumentSignerFields[]

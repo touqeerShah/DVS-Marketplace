@@ -144,7 +144,8 @@ export class BaseRepository<T extends DocumentEntity> {
         } else if (functionName == "forMeSignature") {
             documentCount.forMeSignature = documentCount.forMeSignature + 1
         } else if (functionName == "signByMe") {
-            documentCount.forMeSignature = documentCount.forMeSignature - 1
+            if (documentCount.forMeSignature > 0)
+                documentCount.forMeSignature = documentCount.forMeSignature - 1
             documentCount.signByMe = documentCount.signByMe + 1
         }
         // const documentCount: DocumentCount = JSON.parse(bufferData.toString())

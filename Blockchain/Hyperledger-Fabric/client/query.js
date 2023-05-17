@@ -47,7 +47,7 @@ async function main() {
 
     // Get the contract from the network.
     // const contract = network.getContract("company-registration");
-    const contract = network.getContract("hf");
+    const contract = network.getContract("company-registration");
 
     // Evaluate the specified transaction.
     // var arr = '{"id":"system2","userRole":"cmo","status":"pending"}'
@@ -57,7 +57,7 @@ async function main() {
 
     // var arr = '{"query":{"lotId": {"_id": {"$regex": "lot4"} }}}';
     //based on Item
-    var arr = '{"documentId":"2"}';
+    var arr = '{"productId":"2"}';
     //based on lot status
     //{"selector": { "_id": { "$regex": "-" }, "status": "activated"}}
     // based on lot shipment location
@@ -78,7 +78,10 @@ async function main() {
     //   '{"companyid":"pharmaTrace1","companyName":"evonik","address":"786","status":"activated"}';
     // var arr = '{"userid":"system2","userRole":"wearhouse","status":"pending"}';
 
-    const result = await contract.evaluateTransaction("getDocumentCount", arr);
+    const result = await contract.evaluateTransaction(
+      "getSerialRequestDetails",
+      arr
+    );
     // var arr = '{"transactionId":"1234567222"}'
     // const result = await contract.evaluateTransaction('getTransaction',arr);
 

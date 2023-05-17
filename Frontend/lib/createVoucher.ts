@@ -8,7 +8,7 @@ export async function createDocument(
   signer: JsonRpcSigner,
   creator: string,
   uri: string,
-  documentId: number,
+  documentId: BigInt,
   signingDomain: string,
   signatureVersion: string,
   chainId: string,

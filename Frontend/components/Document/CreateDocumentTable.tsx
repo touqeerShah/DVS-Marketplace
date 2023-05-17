@@ -181,6 +181,7 @@ export default function CreateDocumentTable(props: any) {
                 myDocuments.map((item: DocumentEntity, i) => (
                   <AddRow
                     key={i}
+                    index={i}
                     documentId={item.documentId}
                     documentName={item.documentName}
                     creatorAddress={item.creator}
@@ -190,6 +191,7 @@ export default function CreateDocumentTable(props: any) {
                     setMyDocuments={setMyDocuments}
                     documentRequestType={documentRequestType}
                     tokenId={tokenId}
+                    myDocuments={myDocuments}
                     color={""} />
                 ))
               }

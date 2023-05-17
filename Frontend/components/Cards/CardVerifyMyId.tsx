@@ -421,7 +421,7 @@ export default function CardVerifyMyId(props: any) {
               // })
               // console.log("recepite 1", typeof tx, tx);,
 
-              let recepite = await tx.wait(1)
+              let recepite = await tx.wait()
               console.log("recepite", tx);
               if (figurePrintOracleContract) {
                 let balance = await figurePrintOracleContract.getLinkBalance()
@@ -438,7 +438,7 @@ export default function CardVerifyMyId(props: any) {
               _userId,
               _fingurePrint
             );
-            let recepite = await tx.wait(1)
+            let recepite = await tx.wait()
             await post("api/addQueue", {
               data: JSON.stringify({
                 transactionCode: "002",
