@@ -17,3 +17,10 @@ export type IssueDigitalIdentity = {
     blockTimestamp: string
     blockNumber: string
 }
+export type DocumentProcessWithSignature = {
+    documentId: string
+    transactionHash: string
+    id: string
+    blockTimestamp: string
+    blockNumber: string
+}

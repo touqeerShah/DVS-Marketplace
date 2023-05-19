@@ -73,7 +73,6 @@ export default function CardVerifyMyId(props: any) {
   const [pin, setPin] = React.useState("");
   let isRequest = false;
   let isInit = false;
-  const useridRef: React.LegacyRef<HTMLInputElement> = React.createRef();
 
   let [spinnerProcess, setSpinnerProcess] = useState(false);
   let [isSubmitted, setIsSubmitted] = useState(false);
