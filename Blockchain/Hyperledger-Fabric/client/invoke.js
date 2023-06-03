@@ -50,28 +50,28 @@ async function main(arr) {
     const myOrgPeers = network.getChannel().getEndorsers(mspId);
     // console.log(myOrgPeers);
     // Get the contract from the network.
-    const contract = network.getContract("hf");
+    const contract = network.getContract("company-registration");
 
     let result = await contract
-      .createTransaction("updateDocumentCount")
+      .createTransaction("updateDeliveryOrReceiptStatus")
       .setEndorsingPeers(myOrgPeers)
       .submit(arr);
     console.log("result", result);
-    // var response_object = {};
-    // var response = JSON.parse(result.toString());
-    // if (response["code"]) {
-    //   response_object.status = response["code"];
-    //   response_object.message = response["message"];
-    // } else {
-    //   response_object.status = 200;
-    //   response_object.message = "SUCCESS";
-    //   response_object.data = JSON.parse(result.toString());
-    // }
-    // console.log(
-    //   `Transaction has been evaluated, result is: ${JSON.stringify(
-    //     response_object
-    //   )}`
-    // );
+    var response_object = {};
+    var response = JSON.parse(result.toString());
+    if (response["code"]) {
+      response_object.status = response["code"];
+      response_object.message = response["message"];
+    } else {
+      response_object.status = 200;
+      response_object.message = "SUCCESS";
+      response_object.data = JSON.parse(result.toString());
+    }
+    console.log(
+      `Transaction has been evaluated, result is: ${JSON.stringify(
+        response_object
+      )}`
+    );
 
     console.log("Transaction has been submitted");
 
@@ -104,8 +104,14 @@ async function check() {
   //   '{"documentId": "documentId.toString()' +
   //   index +
   //   '","documentName": "documentName","purpose": "purpose","uri": "uri","startData": "1","expirationDate": "1","startBlock": "1","endBlock": "1","creator": "web3ProviderState.address","ownerSignature": "voucher","parties": [1,2]}';
+  //Create Lot ==> '{"lotId":"pharmaTrace1-lot200001","productId":"786","drugId":"test","lotNumber": "pharmatrace","batchLotData":"[]","expirationDate": "expirationDate","manufacturingDate": "manufacturingDate","manufacturingSite": "manufacturingSite","lotType":"Lot"}'
+  //{"lotId":"pharmaTrace1-lot9","itemsId":"item6"}
+  //mergeLotsItemObject => {"lotIdFrom":"pharmaTrace1-lot200001","lotIdTo":"pharmaTrace1-lot200002"}
+  // createDeliveryOrReceipt '{"lotId":["pharmaTrace1-lot200002"],"deliveryId":"delivery1","from":"GLN1","to":"GLN2","items":["item200002"],"type":"delivery","status":"activated"}'
 
-  await main('{"documentId":"2","functionName":"forMeSignature"}');
+  await main(
+    '{"deliveryId":"delivery1","items":["item200002"],"status":"deactivated"}'
+  );
 
   // }
 }

@@ -25,6 +25,9 @@ import { pinStateReducerState, changeState } from "./../../redux/reduces/pinRedu
 import { pinHashReducerState, setHash } from "./../../redux/reduces/pinhashRedux"
 import { store } from "./../../redux/store"
 import { useRouter } from 'next/router'
+import { useApolloClient } from "@apollo/client";
+import { DocumentProcessWithSignature, IssueDigitalIdentity } from "./../../class/subgraphResponse";
+import { DOCUMENT_PROCESS_WITH_SIGNATURE } from "./../../lib/subgrapQueries";
 
 import {
   DS_SIGNING_DOMAIN_NAME,
@@ -39,7 +42,9 @@ import { log } from "console";
 
 export default function ViewDocumentDetails(props: any) {
   const router = useRouter()
-
+  const subgraphClient = useApolloClient();
+  const [documentProcessWithSignature, setDocumentProcessWithSignature] =
+    useState<DocumentProcessWithSignature>();
   let { showModal, color, setShowModal, documentDetails, web3ProviderState, setMyDocuments, documentRequestType, tokenId, myDocuments, setDocIndex, docIndex } = props
   let pinState: PinState = useAppSelector(pinStateReducerState);
   let pinHash: PinHash = useAppSelector(pinHashReducerState);
@@ -55,6 +60,7 @@ export default function ViewDocumentDetails(props: any) {
   const [checkPin, setCheckPin] = React.useState(false);
   const [showPinModal, setPinShowModal] = React.useState(false);
   const [submitFrom, setSubmitFrom] = React.useState("");
+  const [verificationTimestamp, setVerificationTimestamp] = useState("")
 
   const [pin, setPin] = React.useState("");
   let isRequest = false;
@@ -174,8 +180,10 @@ export default function ViewDocumentDetails(props: any) {
           for (let index = 0; index < documentDetails.singers.length; index++) {
             const element: Signer = documentDetails.singers[index];
             let owner = await getNftMetadataForExplorer(ContractAddress.UserIdentityNFT, element.tokenId)
-            console.log("owner", owner.owners[0], web3ProviderState.account);
-            let _signer = await documentContract.verifification(owner.owners[0], documentDetails.documentId, documentDetails.uri, element.signature)
+            console.log("<<<<<owner>>>>>", owner.owners[0], web3ProviderState.account);
+            console.log(owner.owners[0], "\n", documentDetails.documentId, "\n", documentDetails.uri, "\n", element.signature);
+
+            let _signer = await documentContract.verifification(documentDetails.creator, documentDetails.documentId, documentDetails.uri, element.signature)
             console.log("_signer", _signer);
 
             if (owner.owners[0] != _signer.toLowerCase()) {
@@ -208,7 +216,7 @@ export default function ViewDocumentDetails(props: any) {
           await post("addQueue", {
             data: JSON.stringify({
               transactionCode: "002",
-              apiName: "api/updateStatusDocument",
+              apiName: "updateStatusDocument",
               parameters: {
                 documentId: documentDetails.documentId.toString(),
                 status: "4"
@@ -252,7 +260,7 @@ export default function ViewDocumentDetails(props: any) {
           try {
             voucher = (await createDocument(
               signer,
-              web3ProviderState.account,
+              documentDetails.creator,
               documentDetails.uri,
               BigInt(documentDetails.documentId),
               DS_SIGNING_DOMAIN_NAME,
@@ -354,7 +362,27 @@ export default function ViewDocumentDetails(props: any) {
         try {
           const { data } = await axios.get(`${documentDetails.uri}`);
           console.log("setUriData ===>", data);
+          try {
+            const documentProcessWithSignature = await subgraphClient.query({
+              query: DOCUMENT_PROCESS_WITH_SIGNATURE,
+              variables: {
+                documentId: documentDetails.documentId,
+              },
+            });
+            console.log("documentProcessWithSignature.data", documentProcessWithSignature.data);
 
+            if (documentProcessWithSignature.data?.documentProcessWithSignatures.length > 0) {
+              setDocumentProcessWithSignature(
+                documentProcessWithSignature.data?.documentProcessWithSignatures[0]
+              );
+              setVerificationTimestamp(new Date(documentProcessWithSignature.data?.documentProcessWithSignatures[0].blockTimestamp * 1000).toDateString())
+
+            }
+
+
+          } catch (error) {
+
+          }
           setUriData(data)
         } catch (error) {
 
@@ -627,8 +655,46 @@ export default function ViewDocumentDetails(props: any) {
                               </button></a>}
                           </td>
                         </tr>
+                        {documentProcessWithSignature && <tr>
+
+                          <td className={
+                            "px-6 align-middle border border-solid py-3 text-xs border-l-0 border-r-0 whitespace-nowrap  text-left font-bold " +
+                            (color === "light"
+                              ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
+                              : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
+                            Block  number : &nbsp;{(documentProcessWithSignature.blockNumber)}
+                          </td>
+                          <td className={
+                            "px-6 align-middle border border-solid py-3 text-xs  border-l-0 border-r-0 whitespace-nowrap  text-left font-bold " +
+                            (color === "light"
+                              ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
+                              : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
+                            Block Timestamp  : {(verificationTimestamp)}
+                          </td>
+
+                        </tr>}
+
+                        {documentProcessWithSignature && <tr>
+
+                          <td className={
+                            "px-6 align-middle border border-solid py-3 text-xs border-l-0 border-r-0 whitespace-nowrap  text-left font-bold " +
+                            (color === "light"
+                              ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
+                              : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
+                            Token ID  : {ellipseAddress(documentProcessWithSignature?.documentId)}
+                          </td>
+                          <td className={
+                            "px-6 align-middle border border-solid py-3 text-xs  border-l-0 border-r-0 whitespace-nowrap  text-left font-bold " +
+                            (color === "light"
+                              ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100"
+                              : "bg-blueGray-600 text-blueGray-200 border-blueGray-500")}>
+                            Transaction hash : {ellipseAddress(documentProcessWithSignature.transactionHash)}
+                          </td>
+
+                        </tr>}
 
                       </tbody>
+
                     </table>
 
                   </div>
@@ -658,7 +724,7 @@ export default function ViewDocumentDetails(props: any) {
                     >
                       Time Over
                     </button>}
-                  {documentRequestType == "Owner" && isDocumentOwner && signatureDone && <button
+                  {!documentProcessWithSignature && documentRequestType == "Owner" && isDocumentOwner && signatureDone && <button
                     className="py-2.5  my-2 placeholder-blueGray-300 mx-4  text-blueGray-600 bg-white rounded border-2 text-sm shadow focus:outline-none focus:ring w-1/5 ease-linear transition-all duration-150"
                     type="button"
                     onClick={() => submit("submitProcessDocument", props.index)}

@@ -57,7 +57,7 @@ async function main() {
 
     // var arr = '{"query":{"lotId": {"_id": {"$regex": "lot4"} }}}';
     //based on Item
-    var arr = '{"productId":"2"}';
+    var arr = '{"query":{"selector": { "_id": { "$regex": "" }}}}';
     //based on lot status
     //{"selector": { "_id": { "$regex": "-" }, "status": "activated"}}
     // based on lot shipment location
@@ -79,7 +79,7 @@ async function main() {
     // var arr = '{"userid":"system2","userRole":"wearhouse","status":"pending"}';
 
     const result = await contract.evaluateTransaction(
-      "getSerialRequestDetails",
+      "getByQueryDeliveryOrReceiptStatus",
       arr
     );
     // var arr = '{"transactionId":"1234567222"}'

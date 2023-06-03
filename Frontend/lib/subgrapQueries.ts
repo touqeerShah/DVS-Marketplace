@@ -14,24 +14,38 @@ export const GET_MY_VERIFICATION_REQUEST_DATA = gql`
 `;
 export const REDEEM_USER_NFT = gql`
   query RedeemUserNFT($userAddress: String) {
-    issueDigitalIdentities(where: {userAddres: $userAddress}) {
-    userId
-    userAddres
-    transactionHash
-    tokenId
-    id
-    blockTimestamp
-    blockNumber
-  }}
+    issueDigitalIdentities(where: { userAddres: $userAddress }) {
+      userId
+      userAddres
+      transactionHash
+      tokenId
+      id
+      blockTimestamp
+      blockNumber
+    }
+  }
 `;
 
+export const DOCUMENT_PROCESS_WITH_SIGNATURE = gql`
+  query DocumentProcessWithSignature($documentId: String) {
+    documentProcessWithSignatures(where: { documentId: $documentId }) {
+      transactionHash
+      status
+      id
+      blockTimestamp
+      documentId
+      blockNumber
+    }
+  }
+`;
 
 export const CHECK_SIGNER_EXIST = gql`
   query CheckSignerExist($tokenId: String) {
-    issueDigitalIdentities(where: {tokenId: $tokenId}) {
-    userId
-    blockNumber
-  }}
+    issueDigitalIdentities(where: { tokenId: $tokenId }) {
+      userId
+      blockNumber
+    }
+  }
 `;
 
 export const GET_OFFER_WITH_LIMITS = gql`

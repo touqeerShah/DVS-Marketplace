@@ -29,34 +29,39 @@ export default function CreateDocumentTable(props: any) {
           userAddress: address.toString(),
         },
       });
-      let tokenId: number = isExist.data?.issueDigitalIdentities[0].tokenId
-      setTokenId(tokenId)
-      let query = {}
-      if (documentRequestType == "Owner") {
-        query = { "selector": { "creator": address } }
-      } else if (documentRequestType == "ForSignature") {
+      if (isExist.data?.issueDigitalIdentities.length > 0) {
+        let tokenId: number = isExist.data?.issueDigitalIdentities[0].tokenId
+        setTokenId(tokenId)
+        let query = {}
+        if (documentRequestType == "Owner") {
+          query = { "selector": { "creator": address } }
+        } else if (documentRequestType == "ForSignature") {
 
-        query = { "selector": { "singers": { "$elemMatch": { "tokenId": parseInt(tokenId.toString()), "signature": "" } } } }
-      } else {
-        query = { "selector": { "singers": { "$elemMatch": { "tokenId": parseInt(tokenId.toString()), "signature": { "$gt": "" } } } } }
-      }
-      console.log(documentRequestType, "query", query);
+          query = { "selector": { "singers": { "$elemMatch": { "tokenId": parseInt(tokenId.toString()), "signature": "" } } } }
+        } else {
+          query = { "selector": { "singers": { "$elemMatch": { "tokenId": parseInt(tokenId.toString()), "signature": { "$gt": "" } } } } }
+        }
+        console.log(documentRequestType, "query", query);
 
-      let response = await post("api/get", {
-        data: JSON.stringify({
-          transactionCode: "002",
-          apiName: "getByQuery",
-          parameters: {
-            query: query
-          },
-          userId: "user2",
-          organization: "org1"
+        let response = await post("api/get", {
+          data: JSON.stringify({
+            transactionCode: "002",
+            apiName: "getByQuery",
+            parameters: {
+              query: query
+            },
+            userId: "user2",
+            organization: "org1"
+          })
         })
-      })
-      if (response.status == 200) {
-        console.log("response", response.data.slice(0, response.data.length - 1));
+        if (response.status == 200) {
+          console.log("response", response.data.slice(0, response.data.length - 1));
 
-        setMyDocuments(response.data.slice(0, response.data.length - 1))
+          setMyDocuments(response.data.slice(0, response.data.length - 1))
+        }
+      } else {
+        console.log("load user token data from off-chain", isExist.data?.issueDigitalIdentities);
+
       }
 
     }
