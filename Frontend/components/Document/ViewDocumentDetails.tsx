@@ -724,7 +724,7 @@ export default function ViewDocumentDetails(props: any) {
                     >
                       Time Over
                     </button>}
-                  {documentStatus != 4 && documentRequestType == "Owner" && isDocumentOwner && signatureDone && <button
+                  {!documentProcessWithSignature && documentRequestType == "Owner" && isDocumentOwner && signatureDone && <button
                     className="py-2.5  my-2 placeholder-blueGray-300 mx-4  text-blueGray-600 bg-white rounded border-2 text-sm shadow focus:outline-none focus:ring w-1/5 ease-linear transition-all duration-150"
                     type="button"
                     onClick={() => submit("submitProcessDocument", props.index)}
